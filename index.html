@@ -8,14 +8,22 @@
     (function () {
       var MOBILE_URL = 'https://m.plantmatter.kr';
       var LIVE_HOSTS = ['plantmatter.kr', 'www.plantmatter.kr'];
-      var keepPc = false;
+      var LANGS = ['ko', 'en', 'ja'];
+      var q = new URLSearchParams(location.search);
+      var keepPc = false, saved = q.get('lang');
       try {
-        if (new URLSearchParams(location.search).get('view') === 'pc') localStorage.setItem('pm-view', 'pc');
+        if (q.get('view') === 'pc') localStorage.setItem('pm-view', 'pc');
+        if (LANGS.indexOf(q.get('lang')) > -1) localStorage.setItem('pm-lang', q.get('lang'));
         keepPc = localStorage.getItem('pm-view') === 'pc';
+        saved = localStorage.getItem('pm-lang');
       } catch (e) {}
+      /* 언어: 직접 고른 언어 → 브라우저 언어(한국어·일본어) → 영어 */
+      var nav = (navigator.language || '').toLowerCase();
+      var hasSaved = LANGS.indexOf(saved) > -1;
+      document.documentElement.lang = hasSaved ? saved : nav.indexOf('ko') === 0 ? 'ko' : nav.indexOf('ja') === 0 ? 'ja' : 'en';
       var phone = /iPhone|iPod|Android.+Mobile|Windows Phone|Mobile.+Firefox|Opera Mini/i.test(navigator.userAgent);
       if (phone && !keepPc && LIVE_HOSTS.indexOf(location.hostname) > -1) {
-        location.replace(MOBILE_URL + location.pathname + location.hash);
+        location.replace(MOBILE_URL + location.pathname + (hasSaved ? '?lang=' + saved : '') + location.hash);
       } else if (phone) {
         /* 휴대폰에서 PC 버전을 보는 경우: PC 화면 폭으로 축소해서 표시 */
         document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=1280');
@@ -38,6 +46,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
@@ -46,31 +56,31 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&display=swap">
-  <link rel="stylesheet" href="assets/css/style.css?v=20261117a">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261117b">
 </head>
 <body>
   <!-- ───────── 상단 바 ───────── -->
   <header class="gnb">
-    <a class="gnb__logo" href="/" aria-label="PLANT MATTER 홈">
+    <a class="gnb__logo" href="/" aria-label="PLANT MATTER 홈" data-i18n-attr="aria-label: home">
       <img src="assets/img/wordmark.png" alt="PLANT MATTER" width="2084" height="164">
     </a>
 
     <!-- 페이지가 생기면 href를 바꾸고 data-soon을 지우면 됩니다 -->
-    <nav class="gnb__menu" aria-label="주요 메뉴">
+    <nav class="gnb__menu" aria-label="주요 메뉴" data-i18n-attr="aria-label: menu">
       <a href="#" data-soon="PLANT">PLANT</a>
       <a href="#" data-soon="MATTER">MATTER</a>
       <a href="#" data-soon="CONTACT">CONTACT</a>
     </nav>
 
     <div class="gnb__util">
-      <button class="icon-btn" type="button" data-search-open aria-label="검색" aria-controls="search" aria-expanded="false">
+      <button class="icon-btn" type="button" data-search-open aria-label="검색" data-i18n-attr="aria-label: search" aria-controls="search" aria-expanded="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
       </button>
-      <a class="icon-btn" href="#" data-soon="내 정보" aria-label="내 정보">
+      <a class="icon-btn" href="#" data-soon="account" aria-label="내 정보" data-i18n-attr="aria-label: account">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-7 8-7s8 2 8 7"/></svg>
       </a>
-      <a class="icon-btn" href="#" data-soon="장바구니" aria-label="장바구니">
+      <a class="icon-btn" href="#" data-soon="cart" aria-label="장바구니" data-i18n-attr="aria-label: cart">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>
       </a>
     </div>
@@ -78,21 +88,27 @@
 
   <!-- ───────── 홈 ───────── -->
   <main class="hero">
-    <h1 class="sr-only">PLANT MATTER 플랜트매터</h1>
+    <h1 class="sr-only" data-i18n="title">PLANT MATTER 플랜트매터</h1>
     <picture class="hero__media">
       <source srcset="assets/img/specimen-ficus-murung-raya.webp" type="image/webp">
-      <img src="assets/img/specimen-ficus-murung-raya.jpg" alt="흰 배경 위에 놓인 피커스 sp. '무룽 라야'의 줄기와 잎" width="1017" height="1100" fetchpriority="high">
+      <img src="assets/img/specimen-ficus-murung-raya.jpg" alt="흰 배경 위에 놓인 피커스 sp. ‘무룽 라야’의 줄기와 잎" data-i18n-attr="alt: heroAlt" width="1017" height="1100" fetchpriority="high">
     </picture>
   </main>
 
+  <!-- ───────── 하단 ───────── -->
+  <footer class="foot">
+    <span class="foot__copy">© <span id="year">2026</span> PLANT MATTER</span>
+    <button class="foot__lang" type="button" data-lang-open aria-controls="lang-drawer" aria-expanded="false"><span data-i18n="footLang">VIEW IN KOREAN</span><svg viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg></button>
+  </footer>
+
   <!-- ───────── 검색 ───────── -->
   <div class="search" id="search" aria-hidden="true">
-    <div class="search__panel" role="dialog" aria-modal="true" aria-label="검색">
+    <div class="search__panel" role="dialog" aria-modal="true" aria-label="검색" data-i18n-attr="aria-label: search">
       <img class="search__logo" src="assets/img/wordmark.png" alt="" width="2084" height="164">
       <form class="search__form" role="search">
-        <label class="sr-only" for="search-input">검색어</label>
-        <input id="search-input" type="search" name="q" placeholder="식물 이름, 학명으로 검색" autocomplete="off">
-        <button class="icon-btn" type="submit" aria-label="검색하기">
+        <label class="sr-only" for="search-input" data-i18n="searchLabel">검색어</label>
+        <input id="search-input" type="search" name="q" placeholder="식물 이름, 학명으로 검색" data-i18n-attr="placeholder: searchPlaceholder" autocomplete="off">
+        <button class="icon-btn" type="submit" aria-label="검색하기" data-i18n-attr="aria-label: searchSubmit">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
         </button>
       </form>
@@ -102,11 +118,37 @@
     <div class="search__dim" data-search-close></div>
   </div>
 
+  <!-- ───────── 언어 설정 (오른쪽에서 열리는 창) ───────── -->
+  <div class="drawer" id="lang-drawer" aria-hidden="true">
+    <div class="drawer__dim" data-drawer-close></div>
+    <section class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="lang-title">
+      <header class="drawer__head">
+        <h2 id="lang-title" data-i18n="langTitle">언어 설정</h2>
+        <button class="icon-btn drawer__close" type="button" data-drawer-close aria-label="닫기" data-i18n-attr="aria-label: close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        </button>
+      </header>
+      <form class="drawer__body" id="lang-form">
+        <label class="drawer__label" for="lang-select" data-i18n="language">언어 선택</label>
+        <div class="select">
+          <select id="lang-select" name="lang">
+            <option value="ko" lang="ko">한국어</option>
+            <option value="en" lang="en">English</option>
+            <option value="ja" lang="ja">日本語</option>
+          </select>
+          <svg class="select__chev" viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6"/></svg>
+        </div>
+        <button class="btn-solid" type="submit" data-i18n="langApply">적용하기</button>
+      </form>
+    </section>
+  </div>
+
   <div class="toast" role="status" aria-live="polite"></div>
 
   <!-- 휴대폰에서 'PC 버전'을 고른 경우에만 보입니다 -->
-  <a class="to-mobile" href="https://m.plantmatter.kr/?view=m" hidden>모바일 버전으로 보기</a>
+  <a class="to-mobile" href="https://m.plantmatter.kr/?view=m" data-i18n="mobileVersion" hidden>모바일 버전으로 보기</a>
 
-  <script src="assets/js/main.js?v=20261117a" defer></script>
+  <script src="assets/js/i18n.js?v=20261117b" defer></script>
+  <script src="assets/js/main.js?v=20261117b" defer></script>
 </body>
 </html>

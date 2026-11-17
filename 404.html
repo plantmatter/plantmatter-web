@@ -8,12 +8,13 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;700;800&family=Noto+Sans+KR:wght@300;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;700;800&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; gap: 24px;
       padding: 0 clamp(16px, 6vw, 96px); background: #fff; color: #171717;
       font-family: "Figtree", "Noto Sans KR", system-ui, sans-serif; font-weight: 300; -webkit-font-smoothing: antialiased; }
+    :lang(ja) body { font-family: "Figtree", "Noto Sans JP", system-ui, sans-serif; }
     img { display: block; width: 168px; height: auto; }
     .code { margin: 0; font-weight: 800; font-size: clamp(96px, 20vw, 200px); line-height: .85; letter-spacing: -.06em; }
     p { margin: 0; color: #555; }
@@ -24,7 +25,24 @@
 <body>
   <a href="/"><img src="/assets/img/wordmark.png" alt="PLANT MATTER" width="2084" height="164"></a>
   <p class="code">404</p>
-  <p>찾으시는 페이지가 없거나 주소가 바뀌었습니다.</p>
-  <p><a class="btn" href="/">홈으로 돌아가기</a></p>
+  <p data-t="msg">찾으시는 페이지가 없거나 주소가 바뀌었습니다.</p>
+  <p><a class="btn" href="/" data-t="home">홈으로 돌아가기</a></p>
+  <script>
+    /* 사이트에서 고른 언어(없으면 브라우저 언어)로 표시 */
+    (function () {
+      var T = {
+        ko: { title: '페이지를 찾을 수 없습니다 — PLANT MATTER', msg: '찾으시는 페이지가 없거나 주소가 바뀌었습니다.', home: '홈으로 돌아가기' },
+        en: { title: 'Page not found — PLANT MATTER', msg: 'The page you are looking for does not exist or has moved.', home: 'Back to home' },
+        ja: { title: 'ページが見つかりません — PLANT MATTER', msg: 'お探しのページは存在しないか、移動した可能性があります。', home: 'ホームに戻る' }
+      };
+      var l = null;
+      try { l = localStorage.getItem('pm-lang'); } catch (e) {}
+      if (!T[l]) { var n = (navigator.language || '').toLowerCase(); l = n.indexOf('ko') === 0 ? 'ko' : n.indexOf('ja') === 0 ? 'ja' : 'en'; }
+      document.documentElement.lang = l;
+      document.title = T[l].title;
+      var els = document.querySelectorAll('[data-t]');
+      for (var i = 0; i < els.length; i++) els[i].textContent = T[l][els[i].getAttribute('data-t')];
+    })();
+  </script>
 </body>
 </html>
