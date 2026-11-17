@@ -37,7 +37,7 @@ button, input { font: inherit; color: inherit; }
 
 /* ---------- 상단 바 ---------- */
 .gnb {
-  --logo-w: 200px;   /* 워드마크 너비 — 탭 글자 크기가 이 값에 맞춰 같이 바뀜 */
+  --logo-w: 200px;   /* 워드마크 너비 */
   position: fixed; inset: 0 0 auto 0; z-index: 20;
   height: var(--gnb-h); padding: 0 var(--side);
   display: flex; align-items: center;
@@ -46,8 +46,8 @@ button, input { font: inherit; color: inherit; }
 .gnb__menu { display: flex; gap: 48px; margin-left: 80px; }
 .gnb__menu a {
   position: relative; padding: 8px 0; line-height: 1;
-  /* 워드마크와 같은 글자 높이·자간 (Figtree 대문자 높이 = 0.7em) */
-  font-size: calc(var(--logo-w) * .1125); font-weight: 300; letter-spacing: .185em;
+  /* PC·모바일 같은 크기, 자간은 워드마크와 같은 비율 */
+  font-size: 14px; font-weight: 300; letter-spacing: .185em;
 }
 .gnb__menu a::after {
   content: ""; position: absolute; left: 0; right: .185em; bottom: 0; height: 1px;
