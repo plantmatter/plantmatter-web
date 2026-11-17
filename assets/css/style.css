@@ -168,14 +168,6 @@ button, input, select { font: inherit; color: inherit; }
 }
 .toast.is-show { opacity: 1; transform: translate(-50%, 0); }
 
-.to-mobile {
-  position: fixed; right: 16px; bottom: 16px; z-index: 30;
-  padding: 10px 14px; background: #fff; border: 1px solid #bcbcbc;
-  font-size: 13px; font-weight: 300; letter-spacing: .04em;
-}
-.to-mobile[hidden] { display: none; }
-/* 휴대폰에서는 화면이 약 1/3로 축소되므로 버튼을 크게 */
-.pc-on-phone .to-mobile { right: 32px; bottom: 32px; padding: 26px 40px; border-width: 2px; font-size: 40px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }

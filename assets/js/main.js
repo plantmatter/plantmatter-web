@@ -1,6 +1,5 @@
 /* PLANT MATTER — PC (plantmatter.kr) */
 (() => {
-  const MOBILE_URL = 'https://m.plantmatter.kr';
   const LANGS = ['ko', 'en', 'ja'];
   const DICT = window.PM_I18N || {};
   const root = document.documentElement;
@@ -16,7 +15,6 @@
   const searchOpen = document.querySelector('[data-search-open]');
   const input = document.getElementById('search-input');
   const msg = search.querySelector('.search__msg');
-  const toMobile = document.querySelector('.to-mobile');
 
   /* ---------- 언어 ---------- */
   const applyLang = (next, save) => {
@@ -32,12 +30,11 @@
         if (attr && key) el.setAttribute(attr, t(key));
       });
     });
-    if (toMobile) toMobile.href = `${MOBILE_URL}/?view=m&lang=${lang}`;
     msg.textContent = '';
   };
   applyLang(lang, false);
 
-  /* 주소의 ?lang=, ?view= 는 적용 후 지워서 주소를 깔끔하게 */
+  /* 주소의 ?lang= 은 적용 후 지워서 주소를 깔끔하게 */
   if (/[?&](lang|view)=/.test(location.search)) history.replaceState(null, '', location.pathname + location.hash);
 
   /* ---------- 아직 없는 페이지·기능: '준비 중' 안내 ---------- */
@@ -96,13 +93,5 @@
     else if (search.classList.contains('is-open')) setSearch(false);
   });
 
-  /* ---------- 휴대폰에서 PC 버전을 고른 경우: 모바일로 돌아가는 버튼 ---------- */
-  const phone = /iPhone|iPod|Android.+Mobile|Windows Phone|Mobile.+Firefox|Opera Mini/i.test(navigator.userAgent);
-  if (phone && toMobile) {
-    toMobile.hidden = false;
-    toMobile.addEventListener('click', () => {
-      try { localStorage.removeItem('pm-view'); } catch (e) {}
-    });
-  }
 
 })();
