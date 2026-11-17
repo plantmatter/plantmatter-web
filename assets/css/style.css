@@ -102,7 +102,6 @@ button, input, select { font: inherit; color: inherit; }
 .search__form input::placeholder { color: #bbb; }
 .search__form input::-webkit-search-cancel-button { display: none; }
 .search__msg { max-width: 760px; margin: 18px auto 0; min-height: 1.6em; font-size: 14px; color: var(--muted); }
-.search__logo { position: absolute; top: 40px; left: var(--side); width: 200px; height: auto; }
 .search__close {
   position: absolute; top: 34px; right: var(--side);
   padding: 8px 0; border: 0; background: none; cursor: pointer;
