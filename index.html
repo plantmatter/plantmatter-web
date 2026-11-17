@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    /* 휴대폰으로 접속하면 모바일 사이트로 이동 (실제 도메인에서만 동작) */
+    (function () {
+      var MOBILE_URL = 'https://m.plantmatter.kr';
+      var LIVE_HOSTS = ['plantmatter.kr', 'www.plantmatter.kr'];
+      var keepPc = false;
+      try {
+        if (new URLSearchParams(location.search).get('view') === 'pc') localStorage.setItem('pm-view', 'pc');
+        keepPc = localStorage.getItem('pm-view') === 'pc';
+      } catch (e) {}
+      var phone = /iPhone|iPod|Android.+Mobile|Windows Phone|Mobile.+Firefox|Opera Mini/i.test(navigator.userAgent);
+      if (phone && !keepPc && LIVE_HOSTS.indexOf(location.hostname) > -1) {
+        location.replace(MOBILE_URL + location.pathname + location.hash);
+      } else if (phone) {
+        /* 휴대폰에서 PC 버전을 보는 경우: PC 화면 폭으로 축소해서 표시 */
+        document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=1280');
+        document.documentElement.classList.add('pc-on-phone');
+      }
+    })();
+  </script>
+  <title>PLANT MATTER 플랜트매터</title>
+  <meta name="description" content="PLANT MATTER 플랜트매터 — 세계의 야생 식물과 자생 환경을 관찰하고 기록합니다.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="canonical" href="https://plantmatter.kr/">
+  <link rel="alternate" media="only screen and (max-width: 640px)" href="https://m.plantmatter.kr/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PLANT MATTER">
+  <meta property="og:title" content="PLANT MATTER 플랜트매터">
+  <meta property="og:description" content="세계의 야생 식물과 자생 환경을 관찰하고 기록합니다.">
+  <meta property="og:url" content="https://plantmatter.kr/">
+  <meta property="og:image" content="https://plantmatter.kr/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/img/favicon-48.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <!-- ───────── 상단 바 ───────── -->
+  <header class="gnb">
+    <a class="gnb__logo" href="/" aria-label="PLANT MATTER 홈">
+      <img src="assets/img/wordmark.png" alt="PLANT MATTER" width="2084" height="164">
+    </a>
+
+    <!-- 페이지가 생기면 href를 바꾸고 data-soon을 지우면 됩니다 -->
+    <nav class="gnb__menu" aria-label="주요 메뉴">
+      <a href="#" data-soon="PLANT">PLANT</a>
+      <a href="#" data-soon="MATTER">MATTER</a>
+      <a href="#" data-soon="CONTACT">CONTACT</a>
+    </nav>
+
+    <div class="gnb__util">
+      <button class="icon-btn" type="button" data-search-open aria-label="검색" aria-controls="search" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+      </button>
+      <a class="icon-btn" href="#" data-soon="내 정보" aria-label="내 정보">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-7 8-7s8 2 8 7"/></svg>
+      </a>
+      <a class="icon-btn" href="#" data-soon="장바구니" aria-label="장바구니">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ───────── 홈 ───────── -->
+  <main class="hero">
+    <h1 class="sr-only">PLANT MATTER 플랜트매터</h1>
+    <picture class="hero__media">
+      <source srcset="assets/img/specimen-ficus-murung-raya.webp" type="image/webp">
+      <img src="assets/img/specimen-ficus-murung-raya.jpg" alt="흰 배경 위에 놓인 피커스 sp. '무룽 라야'의 줄기와 잎" width="1017" height="1100" fetchpriority="high">
+    </picture>
+  </main>
+
+  <!-- ───────── 검색 ───────── -->
+  <div class="search" id="search" aria-hidden="true">
+    <div class="search__panel" role="dialog" aria-modal="true" aria-label="검색">
+      <img class="search__logo" src="assets/img/wordmark.png" alt="" width="2084" height="164">
+      <form class="search__form" role="search">
+        <label class="sr-only" for="search-input">검색어</label>
+        <input id="search-input" type="search" name="q" placeholder="식물 이름, 학명으로 검색" autocomplete="off">
+        <button class="icon-btn" type="submit" aria-label="검색하기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+        </button>
+      </form>
+      <p class="search__msg" aria-live="polite"></p>
+      <button class="search__close" type="button" data-search-close>CLOSE</button>
+    </div>
+    <div class="search__dim" data-search-close></div>
+  </div>
+
+  <div class="toast" role="status" aria-live="polite"></div>
+
+  <!-- 휴대폰에서 'PC 버전'을 고른 경우에만 보입니다 -->
+  <a class="to-mobile" href="https://m.plantmatter.kr/?view=m" hidden>모바일 버전으로 보기</a>
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
