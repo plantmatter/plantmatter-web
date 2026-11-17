@@ -45,10 +45,10 @@ button, input { font: inherit; color: inherit; }
 .gnb__menu { display: flex; gap: 48px; margin-left: 80px; }
 .gnb__menu a {
   position: relative; padding: 8px 0;
-  font-size: 14px; font-weight: 700; letter-spacing: .16em;
+  font-size: 14px; font-weight: 300; letter-spacing: .22em;
 }
 .gnb__menu a::after {
-  content: ""; position: absolute; left: 0; right: .16em; bottom: 2px; height: 1px;
+  content: ""; position: absolute; left: 0; right: .22em; bottom: 2px; height: 1px;
   background: currentColor; transform: scaleX(0); transform-origin: left;
   transition: transform .35s var(--ease);
 }
@@ -102,7 +102,7 @@ button, input { font: inherit; color: inherit; }
 .search__close {
   position: absolute; top: 34px; right: var(--side);
   padding: 8px 0; border: 0; background: none; cursor: pointer;
-  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  font-size: 12px; font-weight: 300; letter-spacing: .22em;
 }
 .search__dim { position: absolute; inset: 0; background: rgba(23, 23, 23, .18); opacity: 0; transition: opacity .45s var(--ease); }
 .search.is-open .search__dim { opacity: 1; }
@@ -120,7 +120,7 @@ button, input { font: inherit; color: inherit; }
 .to-mobile {
   position: fixed; right: 16px; bottom: 16px; z-index: 30;
   padding: 10px 14px; background: #fff; border: 1px solid #bcbcbc;
-  font-size: 13px; font-weight: 700;
+  font-size: 13px; font-weight: 300; letter-spacing: .04em;
 }
 .to-mobile[hidden] { display: none; }
 /* 휴대폰에서는 화면이 약 1/3로 축소되므로 버튼을 크게 */
