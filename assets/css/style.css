@@ -114,15 +114,15 @@ button, input, select { font: inherit; color: inherit; }
 /* ---------- 하단 ---------- */
 .foot {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 26px var(--side); border-top: 1px solid var(--line);
-  font-size: 13px; letter-spacing: .12em;
+  padding: 22px var(--side); border-top: 1px solid var(--line);
+  font-size: 11px; letter-spacing: .14em;
 }
 .foot__lang {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 6px 0; border: 0; background: none; cursor: pointer;
-  font-size: 13px; font-weight: 300; letter-spacing: .185em;
+  font-size: 11px; font-weight: 300; letter-spacing: .185em;
 }
-.foot__lang svg { width: 7px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.2; transition: transform .2s var(--ease); }
+.foot__lang svg { width: 6px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.2; transition: transform .2s var(--ease); }
 .foot__lang:hover svg { transform: translateX(3px); }
 
 /* ---------- 언어 설정 창 ---------- */
