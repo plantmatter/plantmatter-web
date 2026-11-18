@@ -20,5 +20,14 @@ window.PM_PRODUCTS = [
     status: 'available',
     image: '/assets/img/products/ficus-murung-raya.jpg',
     shade: false                   /* 사진에 이미 아래쪽 그늘이 있음 */
+  },
+  {
+    id: 'ficus-punctata',
+    category: 'tropical',
+    name: { ko: '피커스 푼타타', en: 'Ficus punctata', ja: 'フィカス・プンクタタ' },
+    sci: ['Ficus punctata', ''],
+    price: 60000,
+    status: 'available',
+    image: '/assets/img/products/ficus-punctata.jpg'
   }
 ];
