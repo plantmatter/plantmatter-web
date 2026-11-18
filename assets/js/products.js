@@ -27,6 +27,6 @@ window.PM_PRODUCTS = [
     sci: ['Ficus punctata', ''],
     price: 60000,
     status: 'available',
-    image: '/assets/img/products/ficus-punctata.jpg?v=2'
+    image: '/assets/img/products/ficus-punctata.jpg?v=3'   /* 사진 도구: --zoom 1.25 --fx 0.478 --fy 0.522 */
   }
 ];

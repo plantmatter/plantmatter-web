@@ -8,6 +8,9 @@
 사용법:
     python3 tools/prepare_product_photo.py 원본.jpg assets/img/products/식물이름.jpg
     (선택) --fx 0.45  : 가로 위치를 직접 지정 (0=왼쪽 … 1=오른쪽, 기본은 식물 위치 자동)
+    (선택) --zoom 1.25: 식물을 더 크게 (1보다 크면 식물 무게중심을 가운데 두고 확대, 가장자리는 잘릴 수 있음)
+    (선택) --fy 0.52  : 확대할 때 세로 위치를 직접 지정 (0=위 … 1=아래)
+    예) 피커스 푼타타: --zoom 1.25 --fx 0.478 --fy 0.522  (왼쪽 뿌리 쪽은 잘리고 오른쪽 잎은 온전히)
 
 필요한 것: Python 3, Pillow, NumPy  (pip install pillow numpy)
 """
@@ -76,10 +79,19 @@ def flatten_background(img):
     return Image.fromarray(out.astype(np.uint8))
 
 
-def crop_3x4(img, fx=None):
+def crop_3x4(img, fx=None, zoom=1.0, fy=None):
     W, H = img.size
     a = np.asarray(img.convert('L'))
     ys, xs = np.where(a < 200)
+    if zoom > 1 and len(xs):
+        # 식물 무게중심을 가운데 두고 확대해서 자름
+        cw = int(min(W, H * 0.75) / zoom)
+        ch = int(cw / 0.75)
+        cx = xs.mean() if fx is None else fx * W
+        cy = ys.mean() if fy is None else fy * H
+        x0 = int(min(max(cx - cw / 2, 0), W - cw))
+        y0 = int(min(max(cy - ch / 2, 0), H - ch))
+        return img.crop((x0, y0, x0 + cw, y0 + ch)).resize((OUT_W, OUT_H), Image.LANCZOS)
     if fx is None:
         if len(xs):
             x1, x2 = np.percentile(xs, [0.5, 99.5])           # 작은 티끌은 무시
@@ -104,9 +116,11 @@ def main():
     ap.add_argument('src')
     ap.add_argument('dst')
     ap.add_argument('--fx', type=float, default=None)
+    ap.add_argument('--zoom', type=float, default=1.0)
+    ap.add_argument('--fy', type=float, default=None)
     args = ap.parse_args()
     img = Image.open(args.src).convert('RGB')
-    out = crop_3x4(flatten_background(img), args.fx)
+    out = crop_3x4(flatten_background(img), args.fx, args.zoom, args.fy)
     out.save(args.dst, quality=84, optimize=True, progressive=True)
     print(f'saved {args.dst} ({out.size[0]}x{out.size[1]})')
 
