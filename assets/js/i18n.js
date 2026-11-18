@@ -158,6 +158,8 @@ window.PM_I18N = {
     errCodeFormat: '메일로 받은 숫자 코드를 입력해 주세요.',
     pwShow: '비밀번호 보기',
     pwHide: '비밀번호 숨기기',
+    exactShip: '동일 상품 배송',
+    exactShipText: '사진 속 바로 그 식물을 보내 드립니다.',
     close: '닫기'
   },
   en: {
@@ -315,6 +317,8 @@ window.PM_I18N = {
     errCodeFormat: 'Please enter the number code from the email.',
     pwShow: 'Show password',
     pwHide: 'Hide password',
+    exactShip: 'Ships as pictured',
+    exactShipText: 'You receive the exact plant shown in the photo.',
     close: 'Close'
   },
   ja: {
@@ -472,6 +476,8 @@ window.PM_I18N = {
     errCodeFormat: 'メールに届いた数字のコードを入力してください。',
     pwShow: 'パスワードを表示',
     pwHide: 'パスワードを隠す',
+    exactShip: '写真の株をお届け',
+    exactShipText: '写真に写っている株そのものをお届けします。',
     close: '閉じる'
   }
 };

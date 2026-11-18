@@ -150,6 +150,7 @@ button, input, select { font: inherit; color: inherit; }
 .card__sci { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
 .card__sci i { font-style: italic; }
 .card__price { display: block; margin-top: 10px; font-size: 14px; letter-spacing: .02em; }
+.card__note { display: block; margin-top: 4px; font-size: 12px; letter-spacing: .02em; color: var(--muted); }
 .card__badge { position: absolute; top: 14px; left: 14px; padding: 4px 8px; background: #fff; font-size: 10px; letter-spacing: .16em; }
 .card.is-soldout .card__img img { opacity: .55; }
 .card__cart {
@@ -195,6 +196,8 @@ button, input, select { font: inherit; color: inherit; }
 .pd__sci { margin-top: 4px; font-size: 14px; color: var(--muted); }
 .pd__sci i, .acc__body i, .co-item__sci i { font-style: italic; }
 .pd__price { margin-top: 20px; font-size: 22px; letter-spacing: .01em; }
+.pd__exact { margin-top: 16px; font-size: 13px; line-height: 1.7; color: var(--mid); }
+.pd__exact span { display: inline-block; margin-right: 10px; padding: 3px 9px; border: 1px solid var(--text); font-size: 11px; letter-spacing: .06em; color: var(--text); }
 .pd__desc { margin-top: 28px; font-size: 14px; line-height: 1.9; color: var(--mid); white-space: pre-line; }
 .pd__ship { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; margin: 28px 0 0; font-size: 13px; }
 .pd__ship dt { color: var(--muted); }
@@ -210,6 +213,7 @@ button, input, select { font: inherit; color: inherit; }
 .pd__total strong { font-size: 20px; font-weight: 300; letter-spacing: .01em; }
 .pd__total small { font-size: 13px; color: var(--muted); }
 .pd__cta { margin-top: 0; }
+.pd__price + .pd__cta, .pd__exact + .pd__cta, .pd__desc + .pd__cta, .pd__ship + .pd__cta { margin-top: 32px; }   /* 수량·총 금액 줄이 없을 때(가격 문의·품절) */
 .acc { margin-top: 36px; }
 .acc__item summary {
   display: flex; align-items: center; justify-content: space-between; padding: 18px 0; cursor: pointer;

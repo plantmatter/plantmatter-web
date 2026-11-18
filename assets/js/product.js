@@ -26,8 +26,10 @@
     main.querySelector('[data-qty]').textContent = qty;
     main.querySelector('[data-total]').textContent = won(p.price * qty);
     main.querySelector('[data-pcs]').textContent = pcs(qty);
-    main.querySelector('[data-step="-1"]').disabled = qty <= 1;
-    main.querySelector('[data-step="1"]').disabled = qty >= max;
+    const down = main.querySelector('[data-step="-1"]');
+    const up = main.querySelector('[data-step="1"]');
+    if (down) down.disabled = qty <= 1;   // 한 개체뿐인 식물은 +/− 버튼 없이 수량 1
+    if (up) up.disabled = qty >= max;
     main.querySelector('[data-buy]').href = buyHref();
   };
 
@@ -57,15 +59,16 @@
         <h1 class="pd__name">${esc(name)}</h1>
         <p class="pd__sci">${S.sciHtml(p)}</p>
         <p class="pd__price">${esc(p.price == null ? t('priceAsk') : won(p.price))}</p>
+        ${p.exact ? `<p class="pd__exact"><span>${esc(t('exactShip'))}</span>${esc(t('exactShipText'))}</p>` : ''}
         ${desc ? `<p class="pd__desc">${esc(desc)}</p>` : ''}
         ${fee > 0 ? `<dl class="pd__ship"><dt>${esc(t('shipFee'))}</dt><dd>${esc(won(fee))}${over != null ? ` (${esc(t('freeOver', { amount: won(over) }))})` : ''}</dd></dl>` : ''}
         ${canBuy ? `
         <div class="pd__opt">
           <span class="pd__opt-label">${esc(t('qty'))}</span>
           <div class="qty" role="group" aria-label="${esc(t('qty'))}">
-            <button class="qty__btn" type="button" data-step="-1" aria-label="${esc(t('qtyDown'))}">${MINUS}</button>
+            ${max > 1 ? `<button class="qty__btn" type="button" data-step="-1" aria-label="${esc(t('qtyDown'))}">${MINUS}</button>` : ''}
             <output class="qty__val" data-qty aria-live="polite">${qty}</output>
-            <button class="qty__btn" type="button" data-step="1" aria-label="${esc(t('qtyUp'))}">${PLUS}</button>
+            ${max > 1 ? `<button class="qty__btn" type="button" data-step="1" aria-label="${esc(t('qtyUp'))}">${PLUS}</button>` : ''}
           </div>
         </div>
         <div class="pd__total"><span>${esc(t('total'))}</span><span><strong data-total>${esc(won(p.price * qty))}</strong> <small data-pcs>${esc(pcs(qty))}</small></span></div>

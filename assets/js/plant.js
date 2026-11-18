@@ -43,6 +43,7 @@
           <span class="card__name">${esc(name)}</span>
           <span class="card__sci"><i>${esc(italic)}</i> ${esc(rest)}</span>
           <span class="card__price">${esc(price(p.price))}</span>
+          ${p.exact ? `<span class="card__note">${esc(t('exactShip'))}</span>` : ''}
         </span>
       </a>
       <button class="card__cart" type="button" data-soon="cart" aria-label="${esc(t('addToCart'))}">${BAG}</button>
