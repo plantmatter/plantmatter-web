@@ -87,22 +87,30 @@ button, input, select { font: inherit; color: inherit; }
 .mega__name { display: block; margin-top: 12px; font-size: 14px; font-weight: 300; letter-spacing: .04em; }
 .mega__item:hover .mega__name { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 
-/* ---------- 홈 (한 화면 가득) ---------- */
-.hero {
-  position: relative;
-  height: 100vh; min-height: 680px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: var(--gnb-h) var(--side) 48px;
-  overflow: hidden;
+/* ---------- 홈: 자동으로 넘어가는 사진 슬라이드 ---------- */
+.hero { position: relative; height: 100vh; min-height: 680px; overflow: hidden; }
+.slides { position: absolute; inset: 0; overflow: hidden; animation: hero-in 1.4s var(--ease) both; }
+.slides__track {
+  display: flex; height: 100%;
+  transition: transform 1.1s cubic-bezier(.65, 0, .35, 1);   /* 천천히 출발 → 천천히 멈춤 */
+  will-change: transform;
 }
-.hero__media { display: flex; justify-content: center; }
-.hero__media img {
-  width: auto; height: auto; max-width: 100%;
-  /* 화면 높이 - 상단 바 - 아래 여백 */
-  max-height: min(calc(max(100vh, 680px) - var(--gnb-h) - 72px), 1100px);
-  animation: hero-in 1.8s var(--ease) both;
-}
-@keyframes hero-in { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+.slide { flex: 0 0 100%; height: 100%; margin: 0; }
+.slide picture, .slide img { display: block; width: 100%; height: 100%; }
+.slide img { object-fit: cover; object-position: var(--fx, 50%) 50%; }
+@keyframes hero-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* 아래쪽 가는 막대: 지금 사진이 머무는 시간만큼 채워짐 · 누르면 그 사진으로
+   (difference: 밝은 배경에선 어둡게, 흙·잎처럼 어두운 배경에선 밝게 보임) */
+.slides__nav { position: absolute; left: 50%; bottom: 36px; z-index: 2; display: flex; gap: 8px; transform: translateX(-50%); mix-blend-mode: difference; }
+.bar { position: relative; width: 56px; height: 24px; padding: 0; border: 0; background: none; cursor: pointer; }
+.bar::before, .bar__fill { content: ""; position: absolute; left: 0; top: 50%; height: 1px; margin-top: -.5px; }
+.bar::before { right: 0; background: rgba(255, 255, 255, .3); }
+.bar__fill { width: 0; background: #fff; }
+.bar.is-active .bar__fill { animation: bar-fill var(--interval, 5s) linear forwards; }
+@keyframes bar-fill { to { width: 100%; } }
+.hero.is-paused .bar.is-active .bar__fill { animation-play-state: paused; }
+
 
 
 /* ---------- 검색 ---------- */
@@ -190,5 +198,6 @@ button, input, select { font: inherit; color: inherit; }
 
 
 @media (prefers-reduced-motion: reduce) {
+  .bar.is-active .bar__fill { width: 100%; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
 }

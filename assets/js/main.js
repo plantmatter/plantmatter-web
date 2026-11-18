@@ -143,5 +143,80 @@
     else if (search.classList.contains('is-open')) setSearch(false);
   });
 
+  /* ---------- 홈 사진 슬라이드 (자동으로 넘어감) ---------- */
+  const SLIDE_INTERVAL = 5000;   /* 한 장이 머무는 시간 (밀리초) */
+  const hero = document.querySelector('.hero');
+  const track = hero && hero.querySelector('.slides__track');
+  if (track) {
+    const bars = [...hero.querySelectorAll('.bar')];
+    const count = bars.length;
+    /* 마지막 → 첫 장으로 이어지게 첫 장 복사본을 맨 뒤에 붙임 */
+    const clone = track.children[0].cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelector('img')?.removeAttribute('fetchpriority');
+    track.appendChild(clone);
+    hero.style.setProperty('--interval', `${SLIDE_INTERVAL}ms`);
 
+    let index = 0;
+    let busy = false;
+    let busyTimer;
+    const setPos = (i, animate) => {
+      track.style.transition = animate ? '' : 'none';
+      track.style.transform = `translateX(${-i * 100}%)`;
+      if (!animate) void track.offsetWidth;   /* 즉시 적용 */
+    };
+    const activate = (k) => {
+      bars.forEach((b) => { b.classList.remove('is-active'); b.setAttribute('aria-current', 'false'); });
+      void bars[k].offsetWidth;               /* 막대 채우기 처음부터 다시 */
+      bars[k].classList.add('is-active');
+      bars[k].setAttribute('aria-current', 'true');
+      [...track.children].forEach((s, j) => { if (j < count) s.setAttribute('aria-hidden', String(j !== k)); });
+    };
+    const goTo = (target) => {
+      if (busy || target === index) return;
+      busy = true;
+      clearTimeout(busyTimer);
+      busyTimer = setTimeout(() => { busy = false; }, 1400);
+      if (target < 0) { setPos(count, false); target = count - 1; }   /* 첫 장에서 뒤로: 복사본 위치로 옮긴 뒤 이동 */
+      index = target;
+      setPos(index, true);
+      activate(index % count);
+    };
+    const next = () => goTo(index + 1);
+    const prev = () => goTo(index - 1);
+    track.addEventListener('transitionend', (e) => {
+      if (e.target !== track) return;
+      busy = false;
+      if (index === count) { index = 0; setPos(0, false); }   /* 복사본에 도착하면 진짜 첫 장으로 조용히 교체 */
+    });
+
+    bars.forEach((b, k) => {
+      /* 막대가 다 차면 다음 사진으로 */
+      b.querySelector('.bar__fill').addEventListener('animationend', () => { if (b.classList.contains('is-active')) next(); });
+      b.addEventListener('click', () => {
+        const cur = index % count;
+        if (k === cur) return;
+        goTo(k === 0 && cur === count - 1 ? count : k);
+      });
+    });
+
+    /* 손가락으로 밀어 넘기기 */
+    let sx = null;
+    let sy = null;
+    const area = hero.querySelector('.slides');
+    area.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    area.addEventListener('touchend', (e) => {
+      if (sx === null) return;
+      const dx = e.changedTouches[0].clientX - sx;
+      const dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
+      sx = null;
+    }, { passive: true });
+
+    /* 다른 탭을 보고 있을 때는 멈춤 */
+    document.addEventListener('visibilitychange', () => hero.classList.toggle('is-paused', document.hidden));
+
+    setPos(0, false);
+    activate(0);
+  }
 })();
