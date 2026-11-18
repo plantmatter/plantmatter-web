@@ -2,7 +2,7 @@
 """PLANT MATTER — 상품 사진 준비 도구
 
 사진마다 다른 흰 배경의 밝기·색감(구석 그늘, 위아래 그늘, 누런/푸른 기)을
-같은 순백(#ffffff)으로 고르게 맞추고, 모든 식물이 화면에서 같은 비율로 보이도록
+같은 순백(#ffffff)으로 고르게 맞추고 (식물·화분·그림자의 밝기와 결은 그대로 — 흰 화분도 날아가지 않음), 모든 식물이 화면에서 같은 비율로 보이도록
 흰 여백을 늘리거나 줄여 세로 3:4(750×1000) JPG로 저장합니다. 아래쪽 그라데이션은 사이트(CSS)가 모든 사진에 똑같이 넣습니다.
 
 사용법:
@@ -19,7 +19,7 @@
 import argparse
 import warnings
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 GRID = 32          # 배경 밝기를 재는 칸 수 (세로 기준)
 KNEE = (238, 248)  # 이 사이 밝기는 순백 쪽으로 부드럽게 올림, 248 이상은 순백 (식물 색인 238 미만은 그대로)
@@ -56,12 +56,36 @@ def _blur(grid, passes=3):
     return g
 
 
-def flatten_background(img):
-    a = np.asarray(img).astype(np.float32)
+def _subject_box(lum, chroma, W, H):
+    """식물·화분·그림자가 있는 범위(약간 여유) — 이 안은 배경 밝기를 재지 않음."""
+    obj = (lum < 215) | (chroma > 28)
+    ys, xs = np.where(obj)
+    box = np.zeros((H, W), bool)
+    if len(xs):
+        x1, x2 = np.percentile(xs, [0.5, 99.5])
+        y1, y2 = np.percentile(ys, [0.5, 99.5])
+        px, py = 0.04 * W, 0.04 * H
+        box[int(max(0, y1 - py)):int(min(H, y2 + py)), int(max(0, x1 - px)):int(min(W, x2 + px))] = True
+    return box
+
+
+def _surface(points, values, W, H):
+    """칸마다 잰 배경 밝기를 매끄러운 3차 곡면으로 이어 붙임 (튀는 칸은 빼고 다시 맞춤)."""
+    def design(x, y):
+        return np.stack([np.ones_like(x), x, y, x * x, x * y, y * y, x ** 3, y ** 3, x * x * y, x * y * y], axis=-1)
+    A = design(points[:, 0], points[:, 1])
+    keep = np.ones(len(points), bool)
+    for _ in range(3):
+        coef, *_ = np.linalg.lstsq(A[keep], values[keep], rcond=None)
+        err = np.abs(A @ coef - values).max(axis=1)
+        keep = err < max(3.0, np.percentile(err[keep], 90))
+    yy, xx = np.mgrid[0:H, 0:W]
+    return design((xx + .5) / W, (yy + .5) / H) @ coef
+
+
+def _grid_field(a, bg):
+    """예전 방식: 칸마다 배경 밝기 → 빈 칸 채우기 → 흐리게 (피사체가 화면을 거의 채운 사진용)."""
     H, W, _ = a.shape
-    lum = a.mean(axis=2)
-    chroma = a.max(axis=2) - a.min(axis=2)
-    bg = (lum > 185) & (chroma < 28)                     # 밝고 색이 거의 없는 곳 = 배경
     gh = GRID
     gw = max(1, round(GRID * W / H))
     grid = np.full((gh, gw, 3), np.nan, np.float32)
@@ -73,16 +97,55 @@ def flatten_background(img):
             if m.mean() > 0.3:
                 grid[i, j] = np.percentile(a[ys, xs][m], 85, axis=0)
     if np.isnan(grid).all():
-        return img
+        return None
     grid = _blur(_fill_missing(grid), passes=2)
-    field = np.stack([np.asarray(Image.fromarray(grid[..., c]).resize((W, H), Image.BILINEAR))
-                      for c in range(3)], axis=2)
+    return np.stack([np.asarray(Image.fromarray(grid[..., c]).resize((W, H), Image.BILINEAR))
+                     for c in range(3)], axis=2)
+
+
+def flatten_background(img):
+    """흰 배경의 밝기·색감을 순백으로 고름. 식물·화분·그림자의 밝기와 결은 그대로 둠.
+    1) 배경 밝기는 식물·화분에서 떨어진 바깥 배경에서만 재고, 그 사이(화분 뒤 등)는 매끄러운 곡면으로 추정
+       → 반투명한 흰 화분이 '배경'으로 오해받아 하얗게 날아가지 않음
+    2) 남은 얼룩을 순백으로 정리하는 단계(KNEE)는 식물·화분·그림자 주변을 피해서만 적용"""
+    a = np.asarray(img).astype(np.float32)
+    H, W, _ = a.shape
+    lum = a.mean(axis=2)
+    chroma = a.max(axis=2) - a.min(axis=2)
+    bg = (lum > 185) & (chroma < 28)                     # 밝고 색이 거의 없는 곳 = 배경 후보
+    outside = bg & ~_subject_box(lum, chroma, W, H)
+    gh = GRID
+    gw = max(1, round(GRID * W / H))
+    pts, vals = [], []
+    for i in range(gh):
+        for j in range(gw):
+            ys = slice(i * H // gh, (i + 1) * H // gh)
+            xs = slice(j * W // gw, (j + 1) * W // gw)
+            m = outside[ys, xs]
+            if m.mean() > 0.6:
+                pts.append(((j + .5) / gw, (i + .5) / gh))
+                vals.append(np.percentile(a[ys, xs][m], 85, axis=0))
+    if len(pts) >= 20:
+        field = _surface(np.array(pts), np.array(vals), W, H)
+    else:                                                 # 피사체가 화면을 거의 채운 경우
+        field = _grid_field(a, bg)
+        if field is None:
+            return img
     gain = np.clip(255.0 / np.maximum(field, 1), 1.0, 1.6)   # 어둡게는 하지 않음
     out = np.clip(a * gain, 0, 255)
+    # 식물·화분·그림자와 그 주변은 순백 정리에서 제외 (부드럽게 경계)
+    o_lum = out.mean(axis=2)
+    o_chroma = out.max(axis=2) - out.min(axis=2)
+    near = ((o_lum < 232) | (o_chroma > 16)).astype(np.uint8) * 255
+    m = Image.fromarray(near).resize((max(1, W // 4), max(1, H // 4)), Image.BILINEAR)
+    m = m.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.GaussianBlur(4)).resize((W, H), Image.BILINEAR)
+    protect = np.asarray(m).astype(np.float32)[..., None] / 255.0
     lo, hi = KNEE                                         # 남은 얼룩·질감을 순백으로 정리
-    knee = (out > lo) & (out < 255)
-    out[knee] = np.minimum(255, lo + (out[knee] - lo) * (255 - lo) / (hi - lo))
-    return Image.fromarray(out.astype(np.uint8))
+    kneed = out.copy()
+    k = (kneed > lo) & (kneed < 255)
+    kneed[k] = np.minimum(255, lo + (kneed[k] - lo) * (255 - lo) / (hi - lo))
+    res = kneed * (1 - protect) + out * protect
+    return Image.fromarray(np.clip(res, 0, 255).astype(np.uint8))
 
 
 def fit_3x4(img, size=1.0):

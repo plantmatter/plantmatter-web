@@ -54,7 +54,7 @@ window.PM_PRODUCTS = [
     status: 'available',
     stock: 1,
     exact: true,
-    image: '/assets/img/products/specklinia-grobyi-1.jpg?v=1'
+    image: '/assets/img/products/specklinia-grobyi-1.jpg?v=2'
   },
   {
     id: 'specklinia-grobyi-2',
@@ -65,6 +65,6 @@ window.PM_PRODUCTS = [
     status: 'available',
     stock: 1,
     exact: true,
-    image: '/assets/img/products/specklinia-grobyi-2.jpg?v=1'
+    image: '/assets/img/products/specklinia-grobyi-2.jpg?v=2'
   }
 ];
