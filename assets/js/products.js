@@ -19,7 +19,7 @@ window.PM_PRODUCTS = [
     sci: ['Ficus', 'sp. ‘Murung Raya’'],
     price: 22000,
     status: 'available',
-    image: '/assets/img/products/ficus-murung-raya.jpg?v=2'
+    image: '/assets/img/products/ficus-murung-raya.jpg?v=3'
   },
   {
     id: 'ficus-punctata',
@@ -28,6 +28,15 @@ window.PM_PRODUCTS = [
     sci: ['Ficus punctata', ''],
     price: 60000,
     status: 'available',
-    image: '/assets/img/products/ficus-punctata.jpg?v=5'
+    image: '/assets/img/products/ficus-punctata.jpg?v=6'
+  },
+  {
+    id: 'ficus-tropicarpa',
+    category: 'tropical',
+    name: { ko: '피커스 트로피카르파', en: 'Ficus tropicarpa', ja: 'フィカス・トロピカルパ' },
+    sci: ['Ficus tropicarpa', ''],
+    price: 120000,
+    status: 'available',
+    image: '/assets/img/products/ficus-tropicarpa.jpg?v=1'
   }
 ];
