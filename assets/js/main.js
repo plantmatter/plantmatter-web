@@ -116,7 +116,7 @@
     search.classList.toggle('is-open', open);
     search.setAttribute('aria-hidden', String(!open));
     searchOpen.setAttribute('aria-expanded', String(open));
-    if (open) setTimeout(() => input.focus(), 200);
+    if (open) setTimeout(() => input.focus({ preventScroll: true }), 320);   // 판이 거의 내려온 뒤 커서 (화면 흔들림 없이)
     else { input.value = ''; showResults(''); searchOpen.focus(); }
   };
   searchOpen.addEventListener('click', () => { setMenu(null); setSearch(true); });
