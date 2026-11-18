@@ -2,8 +2,8 @@
 """PLANT MATTER — 상품 사진 준비 도구
 
 사진마다 다른 흰 배경의 밝기·색감(구석 그늘, 위아래 그늘, 누런/푸른 기)을
-같은 순백(#ffffff)으로 고르게 맞춘 뒤, 식물이 가운데 오도록 세로 3:4로 잘라
-750×1000 JPG로 저장합니다. 아래쪽 그라데이션은 사이트(CSS)가 모든 사진에 똑같이 넣습니다.
+같은 순백(#ffffff)으로 고르게 맞추고, 모든 식물이 화면에서 같은 비율로 보이도록
+흰 여백을 늘리거나 줄여 세로 3:4(750×1000) JPG로 저장합니다. 아래쪽 그라데이션은 사이트(CSS)가 모든 사진에 똑같이 넣습니다.
 
 사용법:
     python3 tools/prepare_product_photo.py 원본.jpg assets/img/products/식물이름.jpg
@@ -11,7 +11,7 @@
     (선택) --zoom 1.25: 식물을 더 크게 (1보다 크면 확대, 가장자리는 잘릴 수 있음)
                       --zoom 0.7 처럼 1보다 작으면 축소하고 순백 여백을 더함
     (선택) --fy 0.52  : 확대할 때 세로 위치를 직접 지정 (0=위 … 1=아래)
-    예) 피커스 푼타타: --fx 0.5  (원본 가운데 기준 — 왼쪽 뿌리 쪽은 살짝 잘리고 위·오른쪽에 여백)
+    옵션 없이 실행하면 자동으로 크기·위치를 맞춥니다 (권장). 옵션을 주면 그 값대로 직접 자릅니다.
 
 필요한 것: Python 3, Pillow, NumPy  (pip install pillow numpy)
 """
@@ -23,6 +23,10 @@ from PIL import Image
 GRID = 32          # 배경 밝기를 재는 칸 수 (세로 기준)
 KNEE = (238, 248)  # 이 사이 밝기는 순백 쪽으로 부드럽게 올림, 248 이상은 순백 (식물 색인 238 미만은 그대로)
 OUT_W, OUT_H = 750, 1000
+# 기본 모드: 모든 식물이 '피커스 sp. 무룽 라야' 사진과 같은 비율로 보이도록 크기를 맞춤
+#   → 식물(잎·줄기)이 화면에서 차지하는 면적을 무룽 라야와 같게 하고, 같은 자리에 둠
+FIT_COVER = 0.104           # 무룽 라야: 식물이 화면의 10.4%를 차지
+FIT_CX, FIT_CY = 0.50, 0.51 # 무룽 라야: 식물 중심이 가로 50%, 세로 51% 지점
 
 
 def _fill_missing(grid):
@@ -80,6 +84,24 @@ def flatten_background(img):
     return Image.fromarray(out.astype(np.uint8))
 
 
+def fit_3x4(img):
+    """식물이 차지하는 면적을 무룽 라야와 같게 키우거나 줄이고, 남는 곳은 순백 여백으로 채움."""
+    W, H = img.size
+    a = np.asarray(img.convert('L'))
+    ys, xs = np.where(a < 200)
+    if not len(xs):
+        return crop_3x4(img)
+    x1, x2 = np.percentile(xs, [0.5, 99.5])                 # 작은 티끌은 무시
+    y1, y2 = np.percentile(ys, [0.5, 99.5])
+    fw = (0.75 * len(xs) / FIT_COVER) ** 0.5                # 식물 면적 ÷ 화면 면적 = FIT_COVER 가 되는 화면 폭
+    fh = fw / 0.75
+    x0 = int(round((x1 + x2) / 2 - fw * FIT_CX))
+    y0 = int(round((y1 + y2) / 2 - fh * FIT_CY))
+    canvas = Image.new('RGB', (int(fw), int(fh)), (255, 255, 255))
+    canvas.paste(img, (-x0, -y0))
+    return canvas.resize((OUT_W, OUT_H), Image.LANCZOS)
+
+
 def crop_3x4(img, fx=None, zoom=1.0, fy=None):
     W, H = img.size
     a = np.asarray(img.convert('L'))
@@ -133,7 +155,9 @@ def main():
     ap.add_argument('--fy', type=float, default=None)
     args = ap.parse_args()
     img = Image.open(args.src).convert('RGB')
-    out = crop_3x4(flatten_background(img), args.fx, args.zoom, args.fy)
+    flat = flatten_background(img)
+    manual = args.fx is not None or args.fy is not None or args.zoom != 1.0
+    out = crop_3x4(flat, args.fx, args.zoom, args.fy) if manual else fit_3x4(flat)
     out.save(args.dst, quality=84, optimize=True, progressive=True)
     print(f'saved {args.dst} ({out.size[0]}x{out.size[1]})')
 

@@ -8,7 +8,8 @@
    price    : 원 단위 숫자 (예: 32000). 아직 정하지 않았으면 null → '가격 문의'로 표시
    status   : 'available'(판매 중) | 'soldout'(품절)
    image    : 세로 3:4 사진 — PC 저장소의 tools/prepare_product_photo.py 로 만든 파일
-              (흰 배경을 같은 순백으로 고르고 3:4로 자름. 아래쪽 그라데이션은 사이트가 똑같이 넣음)
+              (흰 배경을 같은 순백으로 고르고, 식물 크기를 '무룽 라야' 사진과 같은 비율로 맞춤.
+               아래쪽 그라데이션은 사이트가 모든 사진에 똑같이 넣음)
  */
 window.PM_PRODUCTS = [
   {
@@ -27,6 +28,6 @@ window.PM_PRODUCTS = [
     sci: ['Ficus punctata', ''],
     price: 60000,
     status: 'available',
-    image: '/assets/img/products/ficus-punctata.jpg?v=4'   /* 사진 도구: --fx 0.5 (왼쪽 뿌리 쪽은 살짝 잘리고 위·오른쪽에 여백) */
+    image: '/assets/img/products/ficus-punctata.jpg?v=5'
   }
 ];
