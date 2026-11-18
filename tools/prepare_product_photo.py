@@ -11,6 +11,7 @@
     (선택) --zoom 1.25: 식물을 더 크게 (1보다 크면 확대, 가장자리는 잘릴 수 있음)
                       --zoom 0.7 처럼 1보다 작으면 축소하고 순백 여백을 더함
     (선택) --fy 0.52  : 확대할 때 세로 위치를 직접 지정 (0=위 … 1=아래)
+    (선택) --size 1.15: 자동 맞춤은 그대로 두고 이 식물만 조금 크게(1.15 = 가로·세로 15%) / 작게(0.9)
     옵션 없이 실행하면 자동으로 크기·위치를 맞춥니다 (권장). 옵션을 주면 그 값대로 직접 자릅니다.
 
 필요한 것: Python 3, Pillow, NumPy  (pip install pillow numpy)
@@ -84,7 +85,7 @@ def flatten_background(img):
     return Image.fromarray(out.astype(np.uint8))
 
 
-def fit_3x4(img):
+def fit_3x4(img, size=1.0):
     """식물이 차지하는 면적을 무룽 라야와 같게 키우거나 줄이고, 남는 곳은 순백 여백으로 채움."""
     W, H = img.size
     a = np.asarray(img.convert('L'))
@@ -93,7 +94,7 @@ def fit_3x4(img):
         return crop_3x4(img)
     x1, x2 = np.percentile(xs, [0.5, 99.5])                 # 작은 티끌은 무시
     y1, y2 = np.percentile(ys, [0.5, 99.5])
-    fw = (0.75 * len(xs) / FIT_COVER) ** 0.5                # 식물 면적 ÷ 화면 면적 = FIT_COVER 가 되는 화면 폭
+    fw = (0.75 * len(xs) / FIT_COVER) ** 0.5 / size         # 식물 면적 ÷ 화면 면적 = FIT_COVER 가 되는 화면 폭 (size 로 개별 조정)
     fh = fw / 0.75
     x0 = int(round((x1 + x2) / 2 - fw * FIT_CX))
     y0 = int(round((y1 + y2) / 2 - fh * FIT_CY))
@@ -153,11 +154,12 @@ def main():
     ap.add_argument('--fx', type=float, default=None)
     ap.add_argument('--zoom', type=float, default=1.0)
     ap.add_argument('--fy', type=float, default=None)
+    ap.add_argument('--size', type=float, default=1.0)
     args = ap.parse_args()
     img = Image.open(args.src).convert('RGB')
     flat = flatten_background(img)
     manual = args.fx is not None or args.fy is not None or args.zoom != 1.0
-    out = crop_3x4(flat, args.fx, args.zoom, args.fy) if manual else fit_3x4(flat)
+    out = crop_3x4(flat, args.fx, args.zoom, args.fy) if manual else fit_3x4(flat, args.size)
     out.save(args.dst, quality=84, optimize=True, progressive=True)
     print(f'saved {args.dst} ({out.size[0]}x{out.size[1]})')
 

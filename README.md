@@ -51,6 +51,7 @@
    python3 tools/prepare_product_photo.py 원본사진.jpg assets/img/products/new-plant.jpg
    ```
    (Python과 `pip install pillow numpy` 필요. 아래쪽 그라데이션은 사이트가 모든 사진에 똑같이 넣으므로 사진에는 넣지 않습니다.)
+   특정 식물만 조금 크게/작게 보이게 하려면 끝에 `--size 1.15`(15% 크게) 또는 `--size 0.9`(10% 작게)를 붙입니다. 트리코카르파는 `--size 1.15`로 만들었습니다.
 2. `assets/js/products.js`에 한 묶음을 추가합니다 — 분류, 이름(한·영·일), 학명, 가격(원, 미정이면 `null` → "가격 문의"), 판매 상태(`available` / `soldout`), 사진 경로.
 3. PC·모바일 두 저장소에 똑같이 올립니다.
 - 지금 등록된 식물: 피커스 sp. ‘무룽 라야’ (₩22,000), 피커스 푼타타 Ficus punctata (₩60,000), 피커스 트리코카르파 Ficus trichocarpa (₩120,000)

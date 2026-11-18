@@ -37,6 +37,6 @@ window.PM_PRODUCTS = [
     sci: ['Ficus trichocarpa', ''],
     price: 120000,
     status: 'available',
-    image: '/assets/img/products/ficus-trichocarpa.jpg?v=2'
+    image: '/assets/img/products/ficus-trichocarpa.jpg?v=3'
   }
 ];
