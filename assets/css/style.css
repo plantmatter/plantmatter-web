@@ -96,8 +96,8 @@ button, input, select { font: inherit; color: inherit; }
 .search.is-open .search__panel { transform: none; }
 .search__form { display: flex; align-items: center; max-width: 760px; margin: 0 auto; border-bottom: 1px solid var(--text); }
 .search__form input {
-  flex: 1; min-width: 0; height: 64px; padding: 0; border: 0; background: none; outline: none;
-  font-size: 26px; font-weight: 300; letter-spacing: -.02em;
+  flex: 1; min-width: 0; height: 56px; padding: 0; border: 0; background: none; outline: none;
+  font-size: 18px; font-weight: 300; letter-spacing: -.01em;
 }
 .search__form input::placeholder { color: #bbb; }
 .search__form input::-webkit-search-cancel-button { display: none; }
