@@ -47,6 +47,14 @@
     return user;
   })();
 
+  const cleanAddress = (a) => ({
+    label: String(a.label || '').trim().slice(0, 20),
+    name: String(a.name || '').trim().slice(0, 40),
+    phone: String(a.phone || '').replace(/\D/g, '').slice(0, 15),
+    zip: String(a.zip || '').replace(/\D/g, '').slice(0, 5),
+    addr: String(a.addr || '').trim().slice(0, 120),
+    addr2: String(a.addr2 || '').trim().slice(0, 80),
+  });
   const need = () => { if (!client) throw Object.assign(new Error('network'), { code: 'network' }); return client; };
 
   const api = {
@@ -122,6 +130,26 @@
       if (error) throw error;
     },
 
+    /* 추가 배송지 (기본 배송지 외에 2곳까지 — supabase/web03) */
+    async listAddresses() {
+      if (!user) return [];
+      const { data, error } = await need().from('shop_addresses').select('*').order('created_at', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    async addAddress(a) {
+      const { error } = await need().from('shop_addresses').insert({ user_id: user.id, ...cleanAddress(a) });
+      if (error) throw error;
+    },
+    async updateAddress(id, a) {
+      const { error } = await need().from('shop_addresses').update(cleanAddress(a)).eq('id', id);
+      if (error) throw error;
+    },
+    async deleteAddress(id) {
+      const { error } = await need().from('shop_addresses').delete().eq('id', id);
+      if (error) throw error;
+    },
+
     /* 오류 → 화면 문구 키 (assets/js/i18n.js) */
     errorKey(err) {
       const code = String((err && (err.code || err.error_code)) || '');
@@ -135,7 +163,8 @@
       if (/rate_limit|over_.*limit/.test(code) || /rate limit|security purposes/i.test(msg)) return 'errRate';
       if (/consent required/i.test(msg)) return 'errAgree';
       if (/name_locked/.test(msg)) return 'errNameLocked';
-      if (code === '42P01' || code === 'PGRST202' || code === 'PGRST205' || /shop_customers|save_shop_customer|schema cache/i.test(msg)) return 'errSetup';
+      if (/address_limit/.test(msg)) return 'addrLimit';
+      if (code === '42P01' || code === 'PGRST202' || code === 'PGRST205' || /shop_customers|shop_addresses|save_shop_customer|schema cache/i.test(msg)) return 'errSetup';
       if (code === 'network' || /failed to fetch|network|load failed/i.test(msg)) return 'errNetwork';
       return '';
     },

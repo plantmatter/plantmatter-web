@@ -43,6 +43,7 @@
     return n && /^\/(?!\/)/.test(n) ? n : null;   // 이 사이트 안의 주소만
   };
   const val = (form, name) => (form.elements[name] ? form.elements[name].value.trim() : '');
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   /* '코드 다시 받기': 너무 자주 보내지 않도록 60초 동안 잠금 */
   const resendButton = (btn, send) => btn.addEventListener('click', async () => {
     btn.disabled = true;
@@ -157,6 +158,117 @@
       box.hidden = !text;
     };
 
+    /* ---------- 마이페이지 칸: 제목을 눌러 접기·펼치기 (닫힌 칸 안은 Tab 으로도 들어가지 않음) ---------- */
+    const secs = [...root.querySelectorAll('[data-view="my"] .my__sec')];
+    const setOpen = (sec, open) => {
+      sec.classList.toggle('is-open', open);
+      sec.querySelector('.my__toggle').setAttribute('aria-expanded', String(open));
+      const inner = sec.querySelector('.my__inner');
+      if (open) inner.removeAttribute('inert'); else inner.setAttribute('inert', '');
+    };
+    secs.forEach((sec) => sec.querySelector('.my__toggle').addEventListener('click', () => setOpen(sec, !sec.classList.contains('is-open'))));
+
+    /* ---------- 추가 배송지 (기본 배송지 외에 2곳까지, 서버에서도 2곳 제한 — supabase/web03) ---------- */
+    const ADDR_MAX = 2;
+    const book = root.querySelector('[data-addr-book]');
+    const listEl = book.querySelector('[data-addr-list]');
+    const addBtn = book.querySelector('[data-addr-add]');
+    const addrForm = book.querySelector('[data-addr-form]');
+    const addrCheck = FORM.bind(addrForm);
+    let addresses = [];
+    let editing = null;          // null · 'new' · 배송지 id
+    let bookError = '';
+    const renderBook = () => {
+      if (bookError) {
+        listEl.innerHTML = `<li class="addr-empty">${esc(t(bookError))}</li>`;
+        addBtn.hidden = true;
+        return;
+      }
+      listEl.innerHTML = addresses.length ? addresses.map((a, i) => `<li class="addr-item" data-id="${esc(a.id)}">
+          <div class="addr-item__text">
+            <span class="addr-item__label">${esc(a.label || t('addrNoLabel', { n: i + 1 }))}</span>
+            <span>${esc(a.name)} · ${esc(a.phone)}</span>
+            <span>(${esc(a.zip)}) ${esc(a.addr)} ${esc(a.addr2 || '')}</span>
+          </div>
+          <div class="addr-item__act">
+            <button class="link-btn" type="button" data-addr-edit>${esc(t('addrEdit'))}</button>
+            <button class="link-btn" type="button" data-addr-del>${esc(t('addrDelete'))}</button>
+          </div>
+        </li>`).join('') : `<li class="addr-empty">${esc(t('addrEmpty'))}</li>`;
+      addBtn.hidden = addresses.length >= ADDR_MAX || editing !== null;
+    };
+    const loadBook = async () => {
+      bookError = '';
+      try { addresses = await A.listAddresses(); } catch (err) { addresses = []; bookError = A.errorKey(err) || 'errNetwork'; }
+      renderBook();
+    };
+    const closeAddrForm = () => {
+      editing = null;
+      addrForm.reset();
+      addrCheck.clear();
+      showErr(addrForm, null);
+      addrForm.hidden = true;
+      renderBook();
+    };
+    const openAddrForm = (a) => {
+      editing = a ? a.id : 'new';
+      addrForm.reset();
+      addrCheck.clear();
+      showErr(addrForm, null);
+      const F = addrForm.elements;
+      if (a) ['label', 'name', 'phone', 'zip', 'addr', 'addr2'].forEach((k) => { F[k].value = a[k] || ''; });
+      addrForm.hidden = false;
+      renderBook();
+      F.label.focus();
+    };
+    addBtn.addEventListener('click', () => openAddrForm(null));
+    addrForm.querySelector('[data-addr-cancel]').addEventListener('click', closeAddrForm);
+    listEl.addEventListener('click', async (e) => {
+      const item = e.target.closest('.addr-item');
+      if (!item) return;
+      const a = addresses.find((x) => String(x.id) === item.dataset.id);
+      if (!a) return;
+      if (e.target.closest('[data-addr-edit]')) { openAddrForm(a); return; }
+      const del = e.target.closest('[data-addr-del]');
+      if (!del) return;
+      if (!del.dataset.armed) {   // 한 번 더 눌러야 삭제
+        del.dataset.armed = '1';
+        del.textContent = t('addrDeleteConfirm');
+        del.classList.add('is-armed');
+        setTimeout(() => { if (del.isConnected) { delete del.dataset.armed; del.textContent = t('addrDelete'); del.classList.remove('is-armed'); } }, 3500);
+        return;
+      }
+      del.disabled = true;
+      try {
+        await A.deleteAddress(a.id);
+        if (editing === a.id) closeAddrForm();
+        await loadBook();
+        PM.toast(t('addrDeleted'));
+      } catch (err) {
+        PM.toast(t(A.errorKey(err) || 'errNetwork'));
+        del.disabled = false;
+      }
+    });
+    addrForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showErr(addrForm, null);
+      if (!addrCheck.validate()) return;
+      const F = addrForm.elements;
+      const data = { label: F.label.value, name: F.name.value, phone: F.phone.value, zip: F.zip.value, addr: F.addr.value, addr2: F.addr2.value };
+      busy(addrForm, true);
+      try {
+        if (editing === 'new') await A.addAddress(data); else await A.updateAddress(editing, data);
+        closeAddrForm();
+        await loadBook();
+        PM.toast(t('addrSaved'));
+      } catch (err) {
+        showErr(addrForm, err);
+      } finally {
+        busy(addrForm, false);
+      }
+    });
+    PM.onLang(renderBook);
+
     const setHello = () => {
       const n = customer && customer.name;
       helloEl.textContent = n ? t('hello', { name: n }) : t('helloNoName');
@@ -172,6 +284,7 @@
       showErr(infoForm, null);
       try { customer = await A.getCustomer(); } catch (err) { customer = null; showErr(infoForm, err); }
       firstBox.hidden = Boolean(customer);
+      if (!customer) setOpen(infoForm, true);   // 웹을 처음 쓰는 회원: 정보·동의 입력이 필요하니 펼쳐 둠
       if (customer) {
         ['name', 'phone', 'zip', 'addr', 'addr2'].forEach((k) => { F[k].value = customer[k] || ''; });
         F.marketing.checked = Boolean(customer.marketing_consent);
@@ -181,6 +294,8 @@
       }
       updateNameHint();
       setHello();
+      closeAddrForm();
+      loadBook();
     };
     const openLogin = () => { show('login'); showErr(loginForm, null); };
     const goNext = () => { const n = nextUrl(); if (n) { location.href = n; return true; } return false; };
@@ -269,6 +384,9 @@
         await A.signOut();
         customer = null;
         infoForm.reset();
+        addresses = [];
+        closeAddrForm();
+        secs.forEach((sec) => setOpen(sec, false));
         PM.toast(t('loggedOut'));
         window.scrollTo(0, 0);
       } catch (err) {

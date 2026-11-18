@@ -79,6 +79,44 @@
   }
   syncSame();
 
+  /* 회원 배송지 고르기: [기본 배송지] [추가 배송지들] [새로 입력] — 추가 배송지가 있을 때만 보임 */
+  const pickEl = document.querySelector('[data-addr-pick]');
+  let pickOpts = [];
+  let picked = '';
+  const renderPick = () => {
+    pickEl.innerHTML = pickOpts.map((o) => `<button class="pill${o.key === picked ? ' is-active' : ''}" type="button" data-pick="${esc(o.key)}" aria-pressed="${o.key === picked}">${esc(o.label())}</button>`).join('');
+  };
+  const applyPick = (key) => {
+    const o = pickOpts.find((x) => x.key === key);
+    if (!o) return;
+    const v = o.fill();
+    sameBox.checked = v.same;
+    syncSame();
+    ['recvName', 'recvPhone', 'zip', 'addr', 'addr2'].forEach((k) => { if (k in v) { F[k].value = v[k] || ''; check.setErr(F[k], null); } });
+    picked = key;
+    renderPick();
+    if (key === 'new') F.zip.focus();
+  };
+  pickEl.addEventListener('click', (e) => { const b = e.target.closest('[data-pick]'); if (b) applyPick(b.dataset.pick); });
+  PM.onLang(renderPick);
+  const setupPick = (c, extras) => {
+    if (!extras.length) return;
+    pickOpts = [];
+    if (c && c.addr) {
+      pickOpts.push({ key: 'default', label: () => t('addrDefault'), fill: () => ({ same: true, recvName: '', recvPhone: '', zip: c.zip, addr: c.addr, addr2: c.addr2 }) });
+    }
+    extras.forEach((a, i) => pickOpts.push({
+      key: String(a.id), label: () => a.label || t('addrNoLabel', { n: i + 1 }),
+      fill: () => ({ same: false, recvName: a.name, recvPhone: a.phone, zip: a.zip, addr: a.addr, addr2: a.addr2 }),
+    }));
+    pickOpts.push({ key: 'new', label: () => t('addrNew'), fill: () => ({ same: true, recvName: '', recvPhone: '', zip: '', addr: '', addr2: '' }) });
+    /* 지금 칸에 들어 있는 주소와 같은 배송지를 선택 상태로 */
+    const match = pickOpts.find((o) => o.key !== 'new' && o.fill().zip === F.zip.value && o.fill().addr === F.addr.value.trim());
+    picked = match ? match.key : '';
+    renderPick();
+    pickEl.hidden = false;
+  };
+
   /* 회원: 저장된 정보로 채움 · 비회원: 로그인 안내 */
   const A = window.PM_AUTH;
   if (A && A.available()) {
@@ -88,8 +126,9 @@
         memberNote.hidden = false;
         return;
       }
-      const c = await A.getCustomer().catch(() => null);
+      const [c, extras] = await Promise.all([A.getCustomer().catch(() => null), A.listAddresses().catch(() => [])]);
       fillEmpty({ buyerEmail: u.email, buyerName: c && c.name, buyerPhone: c && c.phone, zip: c && c.zip, addr: c && c.addr, addr2: c && c.addr2 });
+      setupPick(c, extras);
     });
   }
 
