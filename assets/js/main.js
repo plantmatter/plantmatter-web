@@ -9,6 +9,7 @@
     const s = (DICT[lang] && DICT[lang][key]) ?? (DICT.ko && DICT.ko[key]) ?? key;
     return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
   };
+  const langListeners = [];
 
   const toast = document.querySelector('.toast');
   const search = document.getElementById('search');
@@ -31,11 +32,18 @@
       });
     });
     msg.textContent = '';
+    langListeners.forEach((fn) => fn(lang));
   };
   applyLang(lang, false);
 
-  /* 주소의 ?lang= 은 적용 후 지워서 주소를 깔끔하게 */
-  if (/[?&](lang|view)=/.test(location.search)) history.replaceState(null, '', location.pathname + location.hash);
+  /* 주소의 ?lang= 은 적용 후 지워서 주소를 깔끔하게 (?c= 같은 다른 값은 유지) */
+  const params = new URLSearchParams(location.search);
+  if (params.has('lang') || params.has('view')) {
+    params.delete('lang');
+    params.delete('view');
+    const qs = params.toString();
+    history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash);
+  }
 
   /* ---------- 탭 아래로 내려오는 메뉴 (PLANT) ---------- */
   /* 마우스를 올리면 열리고(PC), 눌러도 열립니다. 바깥·어두운 부분·Esc로 닫힘 */
@@ -59,9 +67,11 @@
     if (id && id !== openMenu) openedAt = Date.now();
     openMenu = id || null;
   };
+  const canHover = window.matchMedia('(hover: hover)').matches;
   menuTabs.forEach((tab) => {
     tab.addEventListener('click', (e) => {
-      e.preventDefault();
+      if (canHover) return;   /* 마우스: 메뉴는 올리면 열리고, 누르면 PLANT 전체 목록으로 이동 */
+      e.preventDefault();     /* 터치(아이패드 등): 누르면 메뉴 열기/닫기 */
       const id = tab.dataset.menu;
       /* 마우스를 올려 막 열린 직후의 클릭은 닫지 않음 */
       if (openMenu === id && Date.now() - openedAt > 600) setMenu(null);
@@ -69,7 +79,7 @@
     });
   });
   document.querySelectorAll('[data-menu-close]').forEach((el) => el.addEventListener('click', () => setMenu(null)));
-  if (window.matchMedia('(hover: hover)').matches) {
+  if (canHover) {
     const stay = () => clearTimeout(hoverTimer);
     const leave = () => { clearTimeout(hoverTimer); hoverTimer = setTimeout(() => setMenu(null), 220); };
     menuTabs.forEach((tab) => tab.addEventListener('mouseenter', () => {
@@ -93,12 +103,12 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('is-show'), 2200);
   };
-  document.querySelectorAll('[data-soon]').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (!el.closest('.mega')) setMenu(null);
-      showToast(t('soon', { name: t(el.dataset.soon) }));
-    });
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-soon]');
+    if (!el) return;
+    e.preventDefault();
+    if (!el.closest('.mega')) setMenu(null);
+    showToast(t('soon', { name: t(el.dataset.soon) }));
   });
 
   /* ---------- 검색 ---------- */
@@ -142,6 +152,15 @@
     else if (drawer.classList.contains('is-open')) setDrawer(false);
     else if (search.classList.contains('is-open')) setSearch(false);
   });
+
+  /* 다른 페이지 스크립트(PLANT 목록 등)와 공유 */
+  window.PM = {
+    t,
+    getLang: () => lang,
+    onLang: (fn) => langListeners.push(fn),
+    closeMenu: () => setMenu(null),
+    toast: showToast,
+  };
 
   /* ---------- 홈 사진 슬라이드 (자동으로 넘어감) ---------- */
   const SLIDE_INTERVAL = 8000;   /* 한 장이 머무는 시간 (밀리초) */

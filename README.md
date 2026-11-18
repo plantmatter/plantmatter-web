@@ -33,11 +33,23 @@
 
 `href`에 실제 주소를 넣고 `data-soon="…"`을 지우면 됩니다.
 
-## PLANT 메뉴 (Tropical Plant · Orchid · Fern · Caudex)
+## 공통 틀 (모든 페이지)
 
-- PC: PLANT에 마우스를 올리거나 누르면 아래로 펼쳐집니다. 모바일: 누르면 펼쳐지고 한 번 더 누르면 닫힙니다.
-- 사진: `assets/img/menu/`에 세로 3:4 사진을 `orchid.jpg`, `fern.jpg`, `caudex.jpg`로 올리고, `index.html`의 해당 `<span class="mega__img"></span>` 안에 `<img src="assets/img/menu/파일명.jpg" alt="">`를 넣으면 됩니다. (PC·모바일 두 저장소 모두)
-- 각 항목 페이지가 생기면 `href="#"`를 실제 주소로 바꾸고 `data-soon="…"`을 지우면 됩니다.
+- 상단 바 · PLANT 메뉴 · 하단 · 검색창 · 언어 창은 `assets/js/layout.js` 한 파일에 있습니다. 여기만 고치면 모든 페이지에 반영됩니다.
+- PLANT 하위 분류(이름 · 순서 · 메뉴 썸네일)는 `layout.js` 맨 위의 `CATEGORIES`에서 바꿉니다. 썸네일은 세로 3:4, `assets/img/menu/`에 올립니다.
+
+## PLANT 목록 페이지 (/plant/)
+
+- 주소: `/plant/` (전체), `/plant/?c=tropical` · `?c=orchid` · `?c=fern` · `?c=caudex`
+- PC: PLANT에 마우스를 올리면 메뉴가 펼쳐지고, PLANT를 누르면 전체 목록으로 갑니다. 모바일: PLANT를 누르면 메뉴가 펼쳐지고, 맨 아래 VIEW ALL로 전체 목록에 갑니다.
+- 분류 탭을 누르면 새로고침 없이 목록이 바뀌고 주소도 같이 바뀝니다(뒤로 가기 가능).
+
+### 식물 등록하기
+
+1. 세로 3:4 사진을 `assets/img/products/`에 올립니다 (예: `new-plant.jpg`, 가로 750px 이상 권장).
+2. `assets/js/products.js`에 한 묶음을 추가합니다 — 분류, 이름(한·영·일), 학명, 가격(원, 미정이면 `null` → "가격 문의"), 판매 상태(`available` / `soldout`), 사진 경로.
+3. PC·모바일 두 저장소에 똑같이 올립니다.
+- 지금 등록된 4개 중 비오피툼 · 소네릴라 · 난초는 사진만 보고 붙인 **임시 이름**입니다. 실제 학명과 가격으로 바꿔 주세요.
 
 ## 언어 (한국어 · English · 日本語)
 
