@@ -30,6 +30,12 @@
 
 `href`에 실제 주소를 넣고 `data-soon="…"`을 지우면 됩니다.
 
+## PLANT 메뉴 (Tropical Plant · Orchid · Fern · Caudex)
+
+- PC: PLANT에 마우스를 올리거나 누르면 아래로 펼쳐집니다. 모바일: 누르면 펼쳐지고 한 번 더 누르면 닫힙니다.
+- 사진: `assets/img/menu/`에 세로 4:5 사진을 `orchid.jpg`, `fern.jpg`, `caudex.jpg`로 올리고, `index.html`의 해당 `<span class="mega__img"></span>` 안에 `<img src="assets/img/menu/파일명.jpg" alt="">`를 넣으면 됩니다. (PC·모바일 두 저장소 모두)
+- 각 항목 페이지가 생기면 `href="#"`를 실제 주소로 바꾸고 `data-soon="…"`을 지우면 됩니다.
+
 ## 언어 (한국어 · English · 日本語)
 
 - 하단 `VIEW IN …` → 언어 설정 창에서 바꿉니다. 고른 언어는 브라우저에 저장되고, PC ↔ 모바일로 이동해도 유지됩니다.
