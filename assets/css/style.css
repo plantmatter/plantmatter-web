@@ -137,12 +137,11 @@ button, input, select { font: inherit; color: inherit; }
 .card { position: relative; }
 .card__link { display: block; }
 .card__img { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: #f4f4f2; }
-/* 사진 아래쪽 옅은 그라데이션 — 무룽 라야 사진의 자연스러운 그늘과 같은 정도(아래 70%부터 약 5.5%) */
+/* 모든 상품 사진 아래쪽에 같은 옅은 그라데이션 (아래 70%부터 약 5.5%) — 사진 배경은 도구로 순백 통일 */
 .card__img::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to bottom, rgba(23, 23, 23, 0) 68%, rgba(23, 23, 23, .055) 100%);
 }
-.card.no-shade .card__img::after { display: none; }
 
 .card__img img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
 .card__link:hover .card__img img { transform: scale(1.03); }
@@ -185,7 +184,8 @@ button, input, select { font: inherit; color: inherit; }
 .search__msg { max-width: 760px; margin: 18px auto 0; min-height: 1.6em; font-size: 14px; color: var(--muted); }
 .search__results { max-width: 760px; max-height: calc(100vh - 360px); margin: 6px auto 0; padding: 0; overflow-y: auto; list-style: none; }
 .hit { display: grid; grid-template-columns: 54px 1fr auto; gap: 18px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
-.hit__img { display: block; aspect-ratio: 3 / 4; overflow: hidden; background: #f4f4f2; }
+.hit__img { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: #f4f4f2; }
+.hit__img::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom, rgba(23, 23, 23, 0) 68%, rgba(23, 23, 23, .055) 100%); }
 .hit__img img { width: 100%; height: 100%; object-fit: cover; }
 .hit__name { display: block; font-size: 15px; line-height: 1.5; }
 .hit__sci { display: block; font-size: 13px; color: var(--muted); }

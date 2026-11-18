@@ -35,7 +35,7 @@
     const name = (p.name && (p.name[lang] || p.name.ko)) || p.id;
     const sold = p.status === 'soldout';
     const [italic = '', rest = ''] = p.sci || [];
-    return `<li class="card${sold ? ' is-soldout' : ''}${p.shade === false ? ' no-shade' : ''}" id="p-${esc(p.id)}">
+    return `<li class="card${sold ? ' is-soldout' : ''}" id="p-${esc(p.id)}">
       <a class="card__link" href="#" data-soon="${esc(name)}">
         <span class="card__img"><img src="${esc(p.image)}" alt="${esc(name)}" width="750" height="1000" loading="lazy"></span>
         ${sold ? `<span class="card__badge">${esc(t('soldOut'))}</span>` : ''}

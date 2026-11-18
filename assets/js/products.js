@@ -7,8 +7,8 @@
    sci      : 학명 [이탤릭으로 쓸 부분, 나머지]   예) ['Ficus', 'sp. ‘Murung Raya’']
    price    : 원 단위 숫자 (예: 32000). 아직 정하지 않았으면 null → '가격 문의'로 표시
    status   : 'available'(판매 중) | 'soldout'(품절)
-   image    : 세로 3:4 사진 (assets/img/products/ 에 올린 파일)
-   shade    : 사진 아래쪽에 옅은 그라데이션을 자동으로 넣습니다. 사진 자체에 이미 그늘이 있으면 false
+   image    : 세로 3:4 사진 — PC 저장소의 tools/prepare_product_photo.py 로 만든 파일
+              (흰 배경을 같은 순백으로 고르고 3:4로 자름. 아래쪽 그라데이션은 사이트가 똑같이 넣음)
  */
 window.PM_PRODUCTS = [
   {
@@ -18,8 +18,7 @@ window.PM_PRODUCTS = [
     sci: ['Ficus', 'sp. ‘Murung Raya’'],
     price: 22000,
     status: 'available',
-    image: '/assets/img/products/ficus-murung-raya.jpg',
-    shade: false                   /* 사진에 이미 아래쪽 그늘이 있음 */
+    image: '/assets/img/products/ficus-murung-raya.jpg?v=2'
   },
   {
     id: 'ficus-punctata',
@@ -28,6 +27,6 @@ window.PM_PRODUCTS = [
     sci: ['Ficus punctata', ''],
     price: 60000,
     status: 'available',
-    image: '/assets/img/products/ficus-punctata.jpg'
+    image: '/assets/img/products/ficus-punctata.jpg?v=2'
   }
 ];

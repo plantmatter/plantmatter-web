@@ -46,7 +46,11 @@
 
 ### 식물 등록하기
 
-1. 세로 3:4 사진을 `assets/img/products/`에 올립니다 (예: `new-plant.jpg`, 가로 750px 이상 권장).
+1. 사진을 도구로 정리합니다 — 흰 배경의 밝기·색감을 모든 사진이 같은 순백이 되도록 맞추고, 식물이 가운데 오게 세로 3:4(750×1000)로 자릅니다.
+   ```bash
+   python3 tools/prepare_product_photo.py 원본사진.jpg assets/img/products/new-plant.jpg
+   ```
+   (Python과 `pip install pillow numpy` 필요. 아래쪽 그라데이션은 사이트가 모든 사진에 똑같이 넣으므로 사진에는 넣지 않습니다.)
 2. `assets/js/products.js`에 한 묶음을 추가합니다 — 분류, 이름(한·영·일), 학명, 가격(원, 미정이면 `null` → "가격 문의"), 판매 상태(`available` / `soldout`), 사진 경로.
 3. PC·모바일 두 저장소에 똑같이 올립니다.
 - 지금 등록된 식물: 피커스 sp. ‘무룽 라야’ (₩22,000), 피커스 푼타타 Ficus punctata (₩60,000)
