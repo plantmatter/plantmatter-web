@@ -10,6 +10,10 @@
    image    : 세로 3:4 사진 — PC 저장소의 tools/prepare_product_photo.py 로 만든 파일
               (흰 배경을 같은 순백으로 고르고, 식물 크기를 '무룽 라야' 사진과 같은 비율로 맞춤.
                아래쪽 그라데이션은 사이트가 모든 사진에 똑같이 넣음)
+   (선택) images : 제품 상세에서 차례로 보일 사진 여러 장  예) ['/assets/img/products/a.jpg', '/assets/img/products/a-2.jpg']
+   (선택) desc   : 제품 상세의 설명 문구 { ko: '…', en: '…', ja: '…' }
+   (선택) stock  : 한 번에 살 수 있는 최대 수량 (없으면 shop.js 의 maxQty)
+   제품 상세 주소: /product/?id=아래의 id
  */
 window.PM_PRODUCTS = [
   {

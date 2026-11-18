@@ -145,7 +145,7 @@
       const name = (p.name && (p.name[lang] || p.name.ko)) || p.id;
       const [italic = '', rest = ''] = p.sci || [];
       const price = p.price == null ? t('priceAsk') : `₩ ${Number(p.price).toLocaleString('ko-KR')}`;
-      return `<li><a class="hit" href="/plant/?c=${encodeURIComponent(p.category)}#p-${encodeURIComponent(p.id)}">
+      return `<li><a class="hit" href="/product/?id=${encodeURIComponent(p.id)}">
         <span class="hit__img"><img src="${escHtml(p.image)}" alt="" width="750" height="1000" loading="lazy"></span>
         <span class="hit__text"><span class="hit__name">${escHtml(name)}</span><span class="hit__sci"><i>${escHtml(italic)}</i> ${escHtml(rest)}</span></span>
         <span class="hit__price">${escHtml(price)}</span>

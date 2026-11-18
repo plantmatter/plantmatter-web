@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <script>
+    /* 휴대폰으로 접속하면 모바일 사이트로 이동 (실제 도메인에서만 동작) */
+    (function () {
+      var MOBILE_URL = 'https://m.plantmatter.kr';
+      var LIVE_HOSTS = ['plantmatter.kr', 'www.plantmatter.kr'];
+      var LANGS = ['ko', 'en', 'ja'];
+      var q = new URLSearchParams(location.search);
+      var saved = q.get('lang');
+      try {
+        if (LANGS.indexOf(q.get('lang')) > -1) localStorage.setItem('pm-lang', q.get('lang'));
+        saved = localStorage.getItem('pm-lang');
+        localStorage.removeItem('pm-view');   /* 예전 'PC 버전 보기' 설정 정리 */
+      } catch (e) {}
+      /* 언어: 직접 고른 언어 → 브라우저 언어(한국어·일본어) → 영어 */
+      var nav = (navigator.language || '').toLowerCase();
+      var hasSaved = LANGS.indexOf(saved) > -1;
+      document.documentElement.lang = hasSaved ? saved : nav.indexOf('ko') === 0 ? 'ko' : nav.indexOf('ja') === 0 ? 'ja' : 'en';
+      var phone = /iPhone|iPod|Android.+Mobile|Windows Phone|Mobile.+Firefox|Opera Mini/i.test(navigator.userAgent);
+      if (phone && LIVE_HOSTS.indexOf(location.hostname) > -1) {
+        q.delete('view');
+        if (hasSaved) q.set('lang', saved);
+        var qs = q.toString();
+        location.replace(MOBILE_URL + location.pathname + (qs ? '?' + qs : '') + location.hash);
+      }
+    })();
+  </script>
+  <title>결제 결과 — PLANT MATTER</title>
+  <meta name="description" content="PLANT MATTER 플랜트매터 — 세계의 야생 식물과 자생 환경을 관찰하고 기록합니다.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="canonical" href="https://plantmatter.kr/checkout/fail/">
+  <link rel="alternate" media="only screen and (max-width: 640px)" href="https://m.plantmatter.kr/checkout/fail/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PLANT MATTER">
+  <meta property="og:title" content="결제 결과 — PLANT MATTER">
+  <meta property="og:description" content="세계의 야생 식물과 자생 환경을 관찰하고 기록합니다.">
+  <meta property="og:url" content="https://plantmatter.kr/checkout/fail/">
+  <meta property="og:image" content="https://plantmatter.kr/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/img/favicon-48.png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261118v">
+</head>
+<body class="page-sub page-res">
+  <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
+  <script src="/assets/js/layout.js?v=20261118v"></script>
+  <script>PM_LAYOUT.top()</script>
+
+  <!-- ───────── 결제 결과 (assets/js/result.js) ───────── -->
+  <main class="res" id="main" data-result="fail"></main>
+
+  <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
+  <script>PM_LAYOUT.bottom()</script>
+
+  <script src="/assets/js/i18n.js?v=20261118v" defer></script>
+  <script src="/assets/js/main.js?v=20261118v" defer></script>
+  <script src="/assets/js/products.js?v=20261118v" defer></script>
+  <script src="/assets/js/shop.js?v=20261118v" defer></script>
+  <script src="/assets/js/result.js?v=20261118v" defer></script>
+</body>
+</html>
