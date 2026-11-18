@@ -56,11 +56,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261118w">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261118x">
 </head>
 <body class="page-sub page-co">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261118w"></script>
+  <script src="/assets/js/layout.js?v=20261118x"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── 주문/결제 ─────────
@@ -70,6 +70,7 @@
       <h1 class="co__title" data-i18n="checkout">주문/결제</h1>
       <p class="co__test" data-test data-i18n="testMode" hidden>테스트 결제 모드 · 실제로 결제되지 않습니다</p>
     </div>
+    <p class="co__member" data-member-note hidden><span data-i18n="memberNote">회원이시면 로그인하고 저장된 정보로 주문할 수 있습니다.</span> <a href="/account/" data-i18n="login">로그인</a></p>
     <div class="co__none" data-none hidden></div>
     <form class="co__body" data-form novalidate>
       <div class="co__main">
@@ -82,12 +83,12 @@
           </div>
           <div class="field">
             <label for="f-buyer-phone" data-i18n="fPhone">휴대폰 번호</label>
-            <input id="f-buyer-phone" name="buyerPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" placeholder="숫자만 입력 (예: 01012345678)" data-i18n-attr="placeholder: fPhoneHint" required>
+            <input id="f-buyer-phone" name="buyerPhone" type="tel" data-rule="phone" data-digits inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="숫자만 입력 (예: 01012345678)" data-i18n-attr="placeholder: fPhoneHint" required>
             <p class="field__err" aria-live="polite"></p>
           </div>
           <div class="field">
             <label for="f-buyer-email" data-i18n="fEmail">이메일</label>
-            <input id="f-buyer-email" name="buyerEmail" type="email" autocomplete="email" maxlength="100" required>
+            <input id="f-buyer-email" name="buyerEmail" type="email" data-rule="email" autocomplete="email" maxlength="100" required>
             <p class="field__err" aria-live="polite"></p>
           </div>
         </section>
@@ -95,21 +96,21 @@
           <h2 class="co__h" id="h-ship" data-i18n="shipTo">배송지</h2>
           <label class="check"><input type="checkbox" name="same" checked><span class="check__box" aria-hidden="true"></span><span data-i18n="sameAsBuyer">주문자 정보와 같음</span></label>
           <div class="co__recv" data-recv hidden>
-          <div class="field">
-            <label for="f-recv-name" data-i18n="fRecipient">받는 분</label>
-            <input id="f-recv-name" name="recvName" autocomplete="shipping name" maxlength="40">
-            <p class="field__err" aria-live="polite"></p>
-          </div>
-          <div class="field">
-            <label for="f-recv-phone" data-i18n="fPhone">휴대폰 번호</label>
-            <input id="f-recv-phone" name="recvPhone" type="tel" inputmode="numeric" autocomplete="shipping tel" maxlength="11" placeholder="숫자만 입력 (예: 01012345678)" data-i18n-attr="placeholder: fPhoneHint">
-            <p class="field__err" aria-live="polite"></p>
-          </div>
+            <div class="field">
+              <label for="f-recv-name" data-i18n="fRecipient">받는 분</label>
+              <input id="f-recv-name" name="recvName" autocomplete="shipping name" maxlength="40">
+              <p class="field__err" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label for="f-recv-phone" data-i18n="fPhone">휴대폰 번호</label>
+              <input id="f-recv-phone" name="recvPhone" type="tel" data-rule="phone" data-digits inputmode="numeric" autocomplete="shipping tel" maxlength="13" placeholder="숫자만 입력 (예: 01012345678)" data-i18n-attr="placeholder: fPhoneHint">
+              <p class="field__err" aria-live="polite"></p>
+            </div>
           </div>
           <div class="field">
             <label for="f-zip" data-i18n="fZip">우편번호</label>
             <div class="field__row">
-              <input id="f-zip" name="zip" inputmode="numeric" autocomplete="shipping postal-code" maxlength="5" required>
+              <input id="f-zip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" data-rule="zip" data-digits required>
               <button class="btn-line" type="button" data-addr-find data-i18n="findAddr">주소 찾기</button>
             </div>
             <p class="field__err" aria-live="polite"></p>
@@ -146,30 +147,21 @@
         </div>
       </aside>
     </form>
-
-    <!-- 주소 찾기 (카카오 우편번호 서비스) -->
-    <div class="addr-layer" data-addr-layer hidden>
-      <div class="addr-layer__box" role="dialog" aria-modal="true" aria-labelledby="addr-title">
-        <div class="addr-layer__head">
-          <h2 id="addr-title" data-i18n="findAddr">주소 찾기</h2>
-          <button class="icon-btn" type="button" data-addr-close aria-label="닫기" data-i18n-attr="aria-label: close">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
-          </button>
-        </div>
-        <div class="addr-layer__frame" data-addr-frame></div>
-      </div>
-    </div>
   </main>
 
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
+  <script src="/assets/js/i18n.js?v=20261118x" defer></script>
+  <script src="/assets/js/main.js?v=20261118x" defer></script>
+  <script src="/assets/js/products.js?v=20261118x" defer></script>
+  <script src="/assets/js/shop.js?v=20261118x" defer></script>
+  <script src="/assets/js/form.js?v=20261118x" defer></script>
+  <script src="/assets/js/postcode.js?v=20261118x" defer></script>
+  <script src="/assets/vendor/supabase-2.118.0.js" defer></script>
+  <script src="/assets/js/auth.js?v=20261118x" defer></script>
   <!-- 토스페이먼츠 결제위젯 SDK -->
   <script src="https://js.tosspayments.com/v2/standard" defer></script>
-  <script src="/assets/js/i18n.js?v=20261118w" defer></script>
-  <script src="/assets/js/main.js?v=20261118w" defer></script>
-  <script src="/assets/js/products.js?v=20261118w" defer></script>
-  <script src="/assets/js/shop.js?v=20261118w" defer></script>
-  <script src="/assets/js/checkout.js?v=20261118w" defer></script>
+  <script src="/assets/js/checkout.js?v=20261118x" defer></script>
 </body>
 </html>

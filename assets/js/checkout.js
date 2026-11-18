@@ -1,10 +1,11 @@
 /* PLANT MATTER — 주문/결제 (/checkout/?id=식물id&qty=수량)
-   주문자 정보 · 배송지(우편번호 찾기: 카카오 우편번호 서비스) · 결제 수단(토스페이먼츠 결제위젯) · 주문 금액
+   주문자 정보 · 배송지(주소 찾기: assets/js/postcode.js) · 결제 수단(토스페이먼츠 결제위젯) · 주문 금액
+   로그인한 회원은 저장된 이름·휴대폰·배송지가 자동으로 채워집니다 (assets/js/auth.js). 비회원 주문도 됩니다.
    결제 설정(키, 배송비)은 assets/js/shop.js 에 있습니다. */
 (() => {
   const PM = window.PM;
   const S = window.PM_SHOP;
-  if (!PM || !S) return;
+  if (!PM || !S || !window.PM_FORM) return;
   const { t } = PM;
   const { esc, won } = S;
 
@@ -15,8 +16,10 @@
   const sumEl = document.querySelector('[data-sum]');
   const payBtn = document.querySelector('[data-pay]');
   const payErr = document.querySelector('[data-pay-err]');
-  const sameBox = form.elements.same;
+  const memberNote = document.querySelector('[data-member-note]');
   const recvEl = document.querySelector('[data-recv]');
+  const F = form.elements;
+  const sameBox = F.same;
 
   const q = new URLSearchParams(location.search);
   const p = S.find(q.get('id'));
@@ -59,94 +62,36 @@
   renderSummary();
 
   /* ---------- 입력 칸 ---------- */
-  const F = form.elements;
-  const digits = (v) => String(v || '').replace(/\D/g, '');
-  ['buyerPhone', 'recvPhone', 'zip'].forEach((n) => F[n].addEventListener('input', () => {
-    const d = digits(F[n].value);
-    if (F[n].value !== d) F[n].value = d;
-  }));
+  const check = window.PM_FORM.bind(form);
   const syncSame = () => {
     recvEl.hidden = sameBox.checked;
     F.recvName.required = F.recvPhone.required = !sameBox.checked;
   };
   sameBox.addEventListener('change', syncSame);
 
+  const fillEmpty = (values) => Object.entries(values).forEach(([k, v]) => { if (v && F[k] && !F[k].value) F[k].value = v; });
   /* 다시 결제하러 온 경우: 방금 쓴 정보를 다시 채워 둠 (이 탭 안에서만) */
   const prev = S.loadOrder();
   if (prev && prev.buyer && prev.ship) {
-    const fill = { buyerName: prev.buyer.name, buyerPhone: prev.buyer.phone, buyerEmail: prev.buyer.email,
-      recvName: prev.ship.name, recvPhone: prev.ship.phone, zip: prev.ship.zip, addr: prev.ship.addr, addr2: prev.ship.addr2, memo: prev.ship.memo };
-    Object.entries(fill).forEach(([k, v]) => { if (v && F[k]) F[k].value = v; });
+    fillEmpty({ buyerName: prev.buyer.name, buyerPhone: prev.buyer.phone, buyerEmail: prev.buyer.email,
+      recvName: prev.ship.name, recvPhone: prev.ship.phone, zip: prev.ship.zip, addr: prev.ship.addr, addr2: prev.ship.addr2, memo: prev.ship.memo });
     sameBox.checked = prev.ship.same !== false;
   }
   syncSame();
 
-  const RULES = {
-    buyerPhone: (v) => /^0\d{8,10}$/.test(v) || 'errPhone',
-    recvPhone: (v) => /^0\d{8,10}$/.test(v) || 'errPhone',
-    buyerEmail: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'errEmail',
-    zip: (v) => /^\d{5}$/.test(v) || 'errZip',
-  };
-  const setErr = (input, key) => {
-    const field = input.closest('.field');
-    field.classList.toggle('is-invalid', Boolean(key));
-    field.querySelector('.field__err').textContent = key ? t(key) : '';
-    input.setAttribute('aria-invalid', key ? 'true' : 'false');
-  };
-  const check = (input) => {
-    if (!input.required && !input.value.trim()) { setErr(input, null); return true; }
-    const v = input.value.trim();
-    let key = v ? null : 'errRequired';
-    if (!key && RULES[input.name]) { const r = RULES[input.name](v); key = r === true ? null : r; }
-    setErr(input, key);
-    return !key;
-  };
-  const fields = [...form.querySelectorAll('.field input')];
-  /* 틀린 칸은 고치는 즉시 오류 문구를 지움 (칸을 벗어날 때 검사하면 문구가 사라지며 화면이 움직여 버튼 클릭이 빗나감) */
-  fields.forEach((el) => el.addEventListener('input', () => { if (el.closest('.field').classList.contains('is-invalid')) check(el); }));
-  const validate = () => {
-    const bad = fields.filter((el) => !el.closest('[hidden]') && !check(el));
-    if (bad.length) bad[0].focus();
-    return !bad.length;
-  };
-
-  /* ---------- 주소 찾기 (카카오 우편번호 서비스) ---------- */
-  const layer = document.querySelector('[data-addr-layer]');
-  const frame = layer.querySelector('[data-addr-frame]');
-  const POSTCODE_SRC = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
-  let postcodeLoad;
-  const loadPostcode = () => postcodeLoad || (postcodeLoad = new Promise((resolve, reject) => {
-    if (window.daum && window.daum.Postcode) return resolve();
-    const s = document.createElement('script');
-    s.src = POSTCODE_SRC;
-    s.onload = () => (window.daum && window.daum.Postcode ? resolve() : reject(new Error('postcode')));
-    s.onerror = () => { postcodeLoad = null; reject(new Error('postcode')); };
-    document.head.appendChild(s);
-  }));
-  const closeLayer = () => { layer.hidden = true; frame.innerHTML = ''; document.documentElement.style.overflow = ''; };
-  document.querySelector('[data-addr-find]').addEventListener('click', async () => {
-    try {
-      await loadPostcode();
-    } catch (e) {
-      PM.toast(t('addrLoadFail'));
-      F.zip.focus();
-      return;
-    }
-    layer.hidden = false;
-    document.documentElement.style.overflow = 'hidden';
-    new window.daum.Postcode({
-      width: '100%', height: '100%',
-      oncomplete: (d) => {
-        F.zip.value = d.zonecode;
-        F.addr.value = d.userSelectedType === 'J' ? d.jibunAddress : (d.roadAddress || d.address);
-        setErr(F.zip, null); setErr(F.addr, null);
-        closeLayer();
-        F.addr2.focus();
-      },
-    }).embed(frame, { autoClose: false });
-  });
-  layer.addEventListener('click', (e) => { if (e.target === layer || e.target.closest('[data-addr-close]')) closeLayer(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !layer.hidden) closeLayer(); });
+  /* 회원: 저장된 정보로 채움 · 비회원: 로그인 안내 */
+  const A = window.PM_AUTH;
+  if (A && A.available()) {
+    A.ready.then(async (u) => {
+      if (!u) {
+        memberNote.querySelector('a').href = `/account/?next=${encodeURIComponent(location.pathname + location.search)}`;
+        memberNote.hidden = false;
+        return;
+      }
+      const c = await A.getCustomer().catch(() => null);
+      fillEmpty({ buyerEmail: u.email, buyerName: c && c.name, buyerPhone: c && c.phone, zip: c && c.zip, addr: c && c.addr, addr2: c && c.addr2 });
+    });
+  }
 
   /* ---------- 결제 수단 · 약관 (토스페이먼츠 결제위젯) ---------- */
   const showPayErr = (text) => { payErr.textContent = text; payErr.hidden = !text; };
@@ -170,7 +115,7 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     showPayErr('');
-    if (!validate() || !widgets) return;
+    if (!check.validate() || !widgets) return;
     const same = sameBox.checked;
     const buyer = { name: F.buyerName.value.trim(), phone: F.buyerPhone.value, email: F.buyerEmail.value.trim() };
     const order = {
@@ -179,6 +124,7 @@
       buyer,
       ship: { same, name: same ? buyer.name : F.recvName.value.trim(), phone: same ? buyer.phone : F.recvPhone.value,
         zip: F.zip.value, addr: F.addr.value.trim(), addr2: F.addr2.value.trim(), memo: F.memo.value.trim() },
+      member: (A && A.user() && A.user().id) || null,
       lang: PM.getLang(), createdAt: new Date().toISOString(),
     };
     S.saveOrder(order);

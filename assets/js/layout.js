@@ -34,7 +34,7 @@
       <button class="icon-btn" type="button" data-search-open aria-label="검색" data-i18n-attr="aria-label: search" aria-controls="search" aria-expanded="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
       </button>
-      <a class="icon-btn" href="#" data-soon="account" aria-label="내 정보" data-i18n-attr="aria-label: account">
+      <a class="icon-btn" href="/account/" aria-label="내 정보" data-i18n-attr="aria-label: account">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-7 8-7s8 2 8 7"/></svg>
       </a>
       <a class="icon-btn" href="#" data-soon="cart" aria-label="장바구니" data-i18n-attr="aria-label: cart">

@@ -295,6 +295,53 @@ button, input, select { font: inherit; color: inherit; }
 .res__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 40px; }
 .res__actions .btn-buy { width: auto; height: 48px; padding: 0 32px; font-size: 14px; letter-spacing: .04em; }
 
+/* ---------- 계정: 로그인 · 회원가입 · 비밀번호 찾기 · 마이페이지 (/account/) ---------- */
+.acct { min-height: 72vh; padding: calc(var(--gnb-h) + 64px) var(--side) 120px; }
+.acct__loading { padding: 80px 0; text-align: center; font-size: 12px; letter-spacing: .14em; color: var(--muted); }
+.auth { max-width: 420px; margin: 0 auto; }
+.auth--wide { max-width: 560px; }
+.auth__title { margin: 0 0 36px; font-size: 30px; font-weight: 300; line-height: 1.3; letter-spacing: .02em; text-align: center; }
+.auth__text { margin: -14px 0 30px; font-size: 14px; line-height: 1.8; color: var(--mid); text-align: center; }
+.auth > .btn-line { display: flex; width: 100%; }
+.auth__form .btn-buy { margin-top: 8px; }
+.auth__h { margin: 36px 0 18px; padding-top: 26px; border-top: 1px solid var(--text); font-size: 16px; font-weight: 300; letter-spacing: .03em; }
+.auth__err { margin: 4px 0 12px; font-size: 13px; line-height: 1.6; color: #b3261e; }
+.auth__links { margin-top: 18px; font-size: 13px; color: var(--muted); text-align: center; }
+.auth__links a, .co__member a { color: var(--text); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.auth__join { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--line); text-align: center; }
+.auth__join p { margin-bottom: 14px; font-size: 14px; color: var(--mid); }
+.auth__join .btn-line { width: 100%; }
+.auth__note { margin-top: 28px; font-size: 12px; color: var(--muted); text-align: center; }
+.field input[readonly] { background: #f6f6f4; border-color: #e6e6e3; color: var(--mid); }
+
+/* 약관 동의 */
+.agree { margin: 30px 0 20px; padding: 18px 20px 10px; border: 1px solid var(--line); }
+.agree.is-invalid { border-color: #b3261e; }
+.agree .check { flex: 1 1 auto; min-width: 0; align-items: flex-start; margin: 0; line-height: 1.6; }
+.agree .check__box { flex: none; margin-top: 2px; }
+.check--all { width: 100%; padding-bottom: 14px; margin-bottom: 6px !important; border-bottom: 1px solid var(--line); }
+.agree__row { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 4px 12px; padding: 8px 0; }
+.agree__view { flex: none; padding: 0; border: 0; background: none; cursor: pointer; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.agree__text { flex: 0 0 100%; margin: 4px 0 2px; padding: 12px 14px; background: #f6f6f4; font-size: 12px; line-height: 1.8; color: var(--mid); white-space: pre-line; }
+.agree__lead { margin-bottom: 6px; font-size: 13px; color: var(--mid); }
+.agree__err { margin: 2px 0 8px; font-size: 12px; color: #b3261e; }
+.agree__err:empty { display: none; }
+
+/* 마이페이지 */
+.my { max-width: 640px; margin: 0 auto; }
+.my__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; margin-bottom: 30px; }
+.my__title { margin: 0; font-size: 30px; font-weight: 300; line-height: 1.3; letter-spacing: .02em; }
+.my__hello { font-size: 14px; color: var(--mid); }
+.my__sec { padding: 26px 0 36px; border-top: 1px solid var(--text); }
+.my__sub { margin: 30px 0 16px; font-size: 14px; font-weight: 300; color: var(--mid); }
+.my__sec > .check { margin: 4px 0 22px; }
+.my__sec .btn-buy { margin-top: 4px; }
+.my__empty { font-size: 14px; color: var(--muted); }
+.my__foot { padding-top: 26px; border-top: 1px solid var(--line); text-align: right; }
+
+/* 주문/결제: 비회원에게 로그인 안내 */
+.co__member { margin: -20px 0 28px; font-size: 13px; color: var(--mid); }
+
 /* ---------- 검색 ---------- */
 .search { position: fixed; inset: 0; z-index: 40; visibility: hidden; transition: visibility 0s .45s; }
 .search.is-open { visibility: visible; transition: none; }

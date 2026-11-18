@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <script>
+    /* 휴대폰으로 접속하면 모바일 사이트로 이동 (실제 도메인에서만 동작) */
+    (function () {
+      var MOBILE_URL = 'https://m.plantmatter.kr';
+      var LIVE_HOSTS = ['plantmatter.kr', 'www.plantmatter.kr'];
+      var LANGS = ['ko', 'en', 'ja'];
+      var q = new URLSearchParams(location.search);
+      var saved = q.get('lang');
+      try {
+        if (LANGS.indexOf(q.get('lang')) > -1) localStorage.setItem('pm-lang', q.get('lang'));
+        saved = localStorage.getItem('pm-lang');
+        localStorage.removeItem('pm-view');   /* 예전 'PC 버전 보기' 설정 정리 */
+      } catch (e) {}
+      /* 언어: 직접 고른 언어 → 브라우저 언어(한국어·일본어) → 영어 */
+      var nav = (navigator.language || '').toLowerCase();
+      var hasSaved = LANGS.indexOf(saved) > -1;
+      document.documentElement.lang = hasSaved ? saved : nav.indexOf('ko') === 0 ? 'ko' : nav.indexOf('ja') === 0 ? 'ja' : 'en';
+      var phone = /iPhone|iPod|Android.+Mobile|Windows Phone|Mobile.+Firefox|Opera Mini/i.test(navigator.userAgent);
+      if (phone && LIVE_HOSTS.indexOf(location.hostname) > -1) {
+        q.delete('view');
+        if (hasSaved) q.set('lang', saved);
+        var qs = q.toString();
+        location.replace(MOBILE_URL + location.pathname + (qs ? '?' + qs : '') + location.hash);
+      }
+    })();
+  </script>
+  <title>비밀번호 찾기 — PLANT MATTER</title>
+  <meta name="description" content="PLANT MATTER 플랜트매터 — 세계의 야생 식물과 자생 환경을 관찰하고 기록합니다.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="canonical" href="https://plantmatter.kr/account/reset/">
+  <link rel="alternate" media="only screen and (max-width: 640px)" href="https://m.plantmatter.kr/account/reset/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PLANT MATTER">
+  <meta property="og:title" content="비밀번호 찾기 — PLANT MATTER">
+  <meta property="og:description" content="세계의 야생 식물과 자생 환경을 관찰하고 기록합니다.">
+  <meta property="og:url" content="https://plantmatter.kr/account/reset/">
+  <meta property="og:image" content="https://plantmatter.kr/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/img/favicon-48.png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261118x">
+</head>
+<body class="page-sub page-acct">
+  <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
+  <script src="/assets/js/layout.js?v=20261118x"></script>
+  <script>PM_LAYOUT.top()</script>
+
+  <!-- ───────── 비밀번호 찾기 (assets/js/account.js · auth.js) ───────── -->
+  <main class="acct" id="main" data-account="reset">
+    <section class="auth" data-view="request" hidden>
+      <h1 class="auth__title" data-i18n="resetTitle">비밀번호 찾기</h1>
+      <p class="auth__text" data-i18n="resetText">가입한 이메일을 입력하면 비밀번호를 다시 설정하는 링크를 보내 드립니다.</p>
+      <form class="auth__form" data-reset novalidate>
+        <div class="field">
+          <label for="r-email" data-i18n="fEmail">이메일</label>
+          <input id="r-email" name="email" type="email" data-rule="email" autocomplete="email" maxlength="100" required>
+          <p class="field__err" aria-live="polite"></p>
+        </div>
+        <p class="auth__err" data-err role="alert" hidden></p>
+        <button class="btn-buy" type="submit" data-i18n="resetSend">링크 보내기</button>
+      </form>
+      <p class="auth__links"><a href="/account/" data-i18n="backToLogin">로그인으로 돌아가기</a></p>
+    </section>
+
+    <section class="auth" data-view="sent" hidden>
+      <h1 class="auth__title" data-i18n="resetSentTitle">메일을 보냈습니다</h1>
+      <p class="auth__text" data-sent-text></p>
+      <a class="btn-line" href="/account/" data-i18n="backToLogin">로그인으로 돌아가기</a>
+    </section>
+
+    <section class="auth" data-view="newpw" hidden>
+      <h1 class="auth__title" data-i18n="newPwTitle">새 비밀번호 설정</h1>
+      <form class="auth__form" data-newpw novalidate>
+        <div class="field">
+          <label for="n-pw" data-i18n="fNewPw">새 비밀번호</label>
+          <input id="n-pw" name="password" type="password" data-rule="password" autocomplete="new-password" maxlength="72" placeholder="8자 이상" data-i18n-attr="placeholder: pwHint" required>
+          <p class="field__err" aria-live="polite"></p>
+        </div>
+        <div class="field">
+          <label for="n-pw2" data-i18n="fPassword2">비밀번호 확인</label>
+          <input id="n-pw2" name="password2" type="password" autocomplete="new-password" maxlength="72" data-match="password" required>
+          <p class="field__err" aria-live="polite"></p>
+        </div>
+        <p class="auth__err" data-err role="alert" hidden></p>
+        <button class="btn-buy" type="submit" data-i18n="newPwBtn">비밀번호 바꾸기</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
+  <script>PM_LAYOUT.bottom()</script>
+
+  <script src="/assets/js/i18n.js?v=20261118x" defer></script>
+  <script src="/assets/js/main.js?v=20261118x" defer></script>
+  <script src="/assets/js/form.js?v=20261118x" defer></script>
+  <script src="/assets/vendor/supabase-2.118.0.js" defer></script>
+  <script src="/assets/js/auth.js?v=20261118x" defer></script>
+  <script src="/assets/js/account.js?v=20261118x" defer></script>
+</body>
+</html>
