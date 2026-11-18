@@ -168,15 +168,17 @@
     };
     secs.forEach((sec) => sec.querySelector('.my__toggle').addEventListener('click', () => setOpen(sec, !sec.classList.contains('is-open'))));
 
-    /* ---------- 추가 배송지 (기본 배송지 외에 2곳까지, 서버에서도 2곳 제한 — supabase/web03) ---------- */
+    /* ---------- 배송지: 기본 배송지(회원 정보에 저장, 받는 분 = 회원) + 추가 배송지 2곳(서버에서도 2곳 제한 — supabase/web03) ---------- */
     const ADDR_MAX = 2;
+    const addrTitle = (el) => el.querySelector('[data-addr-form-title]');
+    const extraFields = root.querySelector('[data-addr-extra-fields]');
     const book = root.querySelector('[data-addr-book]');
     const listEl = book.querySelector('[data-addr-list]');
     const addBtn = book.querySelector('[data-addr-add]');
     const addrForm = book.querySelector('[data-addr-form]');
     const addrCheck = FORM.bind(addrForm);
     let addresses = [];
-    let editing = null;          // null · 'new' · 배송지 id
+    let editing = null;          // null · 'default'(기본 배송지) · 'new' · 추가 배송지 id
     let bookError = '';
     const renderBook = () => {
       if (bookError) {
@@ -184,7 +186,24 @@
         addBtn.hidden = true;
         return;
       }
-      listEl.innerHTML = addresses.length ? addresses.map((a, i) => `<li class="addr-item" data-id="${esc(a.id)}">
+      const c = customer;
+      const def = c && c.addr
+        ? `<li class="addr-item addr-item--default" data-id="default">
+          <div class="addr-item__text">
+            <span class="addr-item__label">${esc(t('addrDefault'))}</span>
+            ${c.name || c.phone ? `<span>${esc([c.name, c.phone].filter(Boolean).join(' · '))}</span>` : ''}
+            <span>(${esc(c.zip)}) ${esc(c.addr)} ${esc(c.addr2 || '')}</span>
+          </div>
+          <div class="addr-item__act"><button class="link-btn" type="button" data-addr-edit>${esc(t('addrEdit'))}</button></div>
+        </li>`
+        : `<li class="addr-item addr-item--default" data-id="default">
+          <div class="addr-item__text">
+            <span class="addr-item__label">${esc(t('addrDefault'))}</span>
+            <span>${esc(t('addrDefaultEmpty'))}</span>
+          </div>
+          <div class="addr-item__act"><button class="link-btn" type="button" data-addr-edit>${esc(t('addrRegister'))}</button></div>
+        </li>`;
+      listEl.innerHTML = def + addresses.map((a, i) => `<li class="addr-item" data-id="${esc(a.id)}">
           <div class="addr-item__text">
             <span class="addr-item__label">${esc(a.label || t('addrNoLabel', { n: i + 1 }))}</span>
             <span>${esc(a.name)} · ${esc(a.phone)}</span>
@@ -194,7 +213,7 @@
             <button class="link-btn" type="button" data-addr-edit>${esc(t('addrEdit'))}</button>
             <button class="link-btn" type="button" data-addr-del>${esc(t('addrDelete'))}</button>
           </div>
-        </li>`).join('') : `<li class="addr-empty">${esc(t('addrEmpty'))}</li>`;
+        </li>`).join('');
       addBtn.hidden = addresses.length >= ADDR_MAX || editing !== null;
     };
     const loadBook = async () => {
@@ -211,21 +230,30 @@
       renderBook();
     };
     const openAddrForm = (a) => {
-      editing = a ? a.id : 'new';
+      if (a === 'default' && !customer) {   // 기본 배송지는 회원 정보(동의 포함)를 먼저 저장해야 함
+        PM.toast(t('saveInfoFirst'));
+        setOpen(infoForm, true);
+        return;
+      }
+      editing = a === 'default' ? 'default' : a ? a.id : 'new';
       addrForm.reset();
       addrCheck.clear();
       showErr(addrForm, null);
       const F = addrForm.elements;
-      if (a) ['label', 'name', 'phone', 'zip', 'addr', 'addr2'].forEach((k) => { F[k].value = a[k] || ''; });
+      extraFields.hidden = editing === 'default';   // 기본 배송지는 받는 분이 회원 본인이라 주소만
+      if (editing === 'default') ['zip', 'addr', 'addr2'].forEach((k) => { F[k].value = customer[k] || ''; });
+      else if (a) ['label', 'name', 'phone', 'zip', 'addr', 'addr2'].forEach((k) => { F[k].value = a[k] || ''; });
+      addrTitle(book).textContent = t(editing === 'default' ? 'addrDefault' : editing === 'new' ? 'addrNewTitle' : 'addrEditTitle');
       addrForm.hidden = false;
       renderBook();
-      F.label.focus();
+      (editing === 'default' ? F.zip : F.label).focus();
     };
     addBtn.addEventListener('click', () => openAddrForm(null));
     addrForm.querySelector('[data-addr-cancel]').addEventListener('click', closeAddrForm);
     listEl.addEventListener('click', async (e) => {
       const item = e.target.closest('.addr-item');
       if (!item) return;
+      if (item.dataset.id === 'default') { if (e.target.closest('[data-addr-edit]')) openAddrForm('default'); return; }
       const a = addresses.find((x) => String(x.id) === item.dataset.id);
       if (!a) return;
       if (e.target.closest('[data-addr-edit]')) { openAddrForm(a); return; }
@@ -257,7 +285,12 @@
       const data = { label: F.label.value, name: F.name.value, phone: F.phone.value, zip: F.zip.value, addr: F.addr.value, addr2: F.addr2.value };
       busy(addrForm, true);
       try {
-        if (editing === 'new') await A.addAddress(data); else await A.updateAddress(editing, data);
+        if (editing === 'default') {
+          await A.saveCustomer({ name: customer.name, phone: customer.phone, zip: data.zip, addr: data.addr, addr2: data.addr2,
+            marketing: Boolean(customer.marketing_consent) });
+          customer = await A.getCustomer();
+        } else if (editing === 'new') await A.addAddress(data);
+        else await A.updateAddress(editing, data);
         closeAddrForm();
         await loadBook();
         PM.toast(t('addrSaved'));
@@ -286,7 +319,7 @@
       firstBox.hidden = Boolean(customer);
       if (!customer) setOpen(infoForm, true);   // 웹을 처음 쓰는 회원: 정보·동의 입력이 필요하니 펼쳐 둠
       if (customer) {
-        ['name', 'phone', 'zip', 'addr', 'addr2'].forEach((k) => { F[k].value = customer[k] || ''; });
+        ['name', 'phone'].forEach((k) => { F[k].value = customer[k] || ''; });
         F.marketing.checked = Boolean(customer.marketing_consent);
       } else if (!F.name.value) {
         const m = u.user_metadata || {};   // 앱에서 정한 이름이 있으면 미리 채움
@@ -339,14 +372,16 @@
       busy(infoForm, true);
       try {
         await A.saveCustomer({
-          name: val(infoForm, 'name'), phone: val(infoForm, 'phone'), zip: val(infoForm, 'zip'),
-          addr: val(infoForm, 'addr'), addr2: val(infoForm, 'addr2'), marketing: infoForm.elements.marketing.checked,
+          name: val(infoForm, 'name'), phone: val(infoForm, 'phone'),
+          zip: (customer && customer.zip) || '', addr: (customer && customer.addr) || '', addr2: (customer && customer.addr2) || '',   // 기본 배송지는 '배송지' 칸에서
+          marketing: infoForm.elements.marketing.checked,
           ...(firstBox.hidden ? {} : firstAgree.values()),
         });
         customer = await A.getCustomer();
         firstBox.hidden = Boolean(customer);
         updateNameHint();
         setHello();
+        renderBook();   // 기본 배송지 카드의 이름·휴대폰도 새로
         PM.toast(t('saved'));
       } catch (err) {
         const locked = /name_locked:(\S+)/.exec(String((err && err.message) || ''));

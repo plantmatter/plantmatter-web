@@ -56,11 +56,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261119g">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261119h">
 </head>
 <body class="page-sub page-acct">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261119g"></script>
+  <script src="/assets/js/layout.js?v=20261119h"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── 로그인 · 마이페이지 (assets/js/account.js · auth.js) ───────── -->
@@ -130,25 +130,6 @@
           <input id="m-phone" name="phone" type="tel" data-rule="phone" data-digits inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="숫자만 입력 (예: 01012345678)" data-i18n-attr="placeholder: fPhoneHint" required>
           <p class="field__err" aria-live="polite"></p>
         </div>
-        <h3 class="my__sub" data-i18n="defaultAddr">기본 배송지</h3>
-        <div class="field">
-          <label for="m-zip" data-i18n="fZip">우편번호</label>
-          <div class="field__row">
-            <input id="m-zip" name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" data-rule="zip" data-digits required>
-            <button class="btn-line" type="button" data-addr-find data-i18n="findAddr">주소 찾기</button>
-          </div>
-          <p class="field__err" aria-live="polite"></p>
-        </div>
-        <div class="field">
-          <label for="m-addr" data-i18n="fAddr">주소</label>
-          <input id="m-addr" name="addr" autocomplete="address-line1" maxlength="120" required>
-          <p class="field__err" aria-live="polite"></p>
-        </div>
-        <div class="field">
-          <label for="m-addr2" data-i18n="fAddr2">상세 주소</label>
-          <input id="m-addr2" name="addr2" autocomplete="address-line2" maxlength="80">
-          <p class="field__err" aria-live="polite"></p>
-        </div>
         <label class="check"><input type="checkbox" name="marketing"><span class="check__box" aria-hidden="true"></span><span data-i18n="agreeMarketing">[선택] 새 식물·행사 소식 받기 (이메일·문자)</span></label>
         <div class="agree agree--first" data-first-agree hidden>
           <p class="agree__lead" data-i18n="consentNeeded">웹사이트를 처음 이용하시네요. 아래 항목에 동의해 주세요.</p>
@@ -173,12 +154,14 @@
       </form>
 
       <section class="my__sec" data-addr-book>
-        <h2 class="my__h"><button class="my__toggle" type="button" aria-expanded="false" aria-controls="sec-extraAddr"><span data-i18n="extraAddr">추가 배송지</span><svg class="acc__chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg></button></h2>
-        <div class="my__body" id="sec-extraAddr"><div class="my__inner" inert><div class="my__pad">
-        <p class="my__note" data-i18n="extraAddrNote">기본 배송지 외에 2곳까지 저장할 수 있습니다.</p>
+        <h2 class="my__h"><button class="my__toggle" type="button" aria-expanded="false" aria-controls="sec-shipAddrs"><span data-i18n="shipAddrs">배송지</span><svg class="acc__chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg></button></h2>
+        <div class="my__body" id="sec-shipAddrs"><div class="my__inner" inert><div class="my__pad">
+        <p class="my__note" data-i18n="addrBookNote">기본 배송지 1곳과 추가 배송지 2곳까지 저장할 수 있습니다.</p>
         <ul class="addr-list" data-addr-list></ul>
         <button class="btn-line addr-add" type="button" data-addr-add data-i18n="addrAdd">+ 배송지 추가</button>
         <form class="addr-form" data-addr-form novalidate hidden>
+          <p class="addr-form__title" data-addr-form-title></p>
+          <div data-addr-extra-fields>
           <div class="field">
             <label for="b-label" data-i18n="addrLabel">배송지 이름 (선택)</label>
             <input id="b-label" name="label" maxlength="20" placeholder="예: 회사, 부모님 댁" data-i18n-attr="placeholder: addrLabelHint">
@@ -193,6 +176,7 @@
             <label for="b-phone" data-i18n="fPhone">휴대폰 번호</label>
             <input id="b-phone" name="phone" type="tel" data-rule="phone" data-digits inputmode="numeric" autocomplete="shipping tel" maxlength="13" placeholder="숫자만 입력 (예: 01012345678)" data-i18n-attr="placeholder: fPhoneHint" required>
             <p class="field__err" aria-live="polite"></p>
+          </div>
           </div>
           <div class="field">
             <label for="b-zip" data-i18n="fZip">우편번호</label>
@@ -253,12 +237,12 @@
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
-  <script src="/assets/js/i18n.js?v=20261119g" defer></script>
-  <script src="/assets/js/main.js?v=20261119g" defer></script>
-  <script src="/assets/js/form.js?v=20261119g" defer></script>
-  <script src="/assets/js/postcode.js?v=20261119g" defer></script>
+  <script src="/assets/js/i18n.js?v=20261119h" defer></script>
+  <script src="/assets/js/main.js?v=20261119h" defer></script>
+  <script src="/assets/js/form.js?v=20261119h" defer></script>
+  <script src="/assets/js/postcode.js?v=20261119h" defer></script>
   <script src="/assets/vendor/supabase-2.118.0.js" defer></script>
-  <script src="/assets/js/auth.js?v=20261119g" defer></script>
-  <script src="/assets/js/account.js?v=20261119g" defer></script>
+  <script src="/assets/js/auth.js?v=20261119h" defer></script>
+  <script src="/assets/js/account.js?v=20261119h" defer></script>
 </body>
 </html>

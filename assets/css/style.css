@@ -381,6 +381,8 @@ button, input, select { font: inherit; color: inherit; }
 .addr-add { margin-top: 4px; }
 .addr-form { margin-top: 8px; padding: 22px 22px 6px; background: #f8f8f6; }
 .addr-form .field input { background: #fff; }
+.addr-form__title { margin: 0 0 14px; font-size: 14px; color: var(--text); }
+.addr-item--default .addr-item__label::after { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 0 2px 8px; border-radius: 50%; background: var(--text); vertical-align: middle; }
 .addr-form__btns { display: flex; gap: 8px; margin: 4px 0 16px; }
 .addr-form__btns .btn-buy { flex: 1; height: 48px; }
 .addr-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 20px; }
