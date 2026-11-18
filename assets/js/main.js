@@ -117,14 +117,51 @@
     search.setAttribute('aria-hidden', String(!open));
     searchOpen.setAttribute('aria-expanded', String(open));
     if (open) setTimeout(() => input.focus(), 200);
-    else { msg.textContent = ''; searchOpen.focus(); }
+    else { input.value = ''; showResults(''); searchOpen.focus(); }
   };
   searchOpen.addEventListener('click', () => { setMenu(null); setSearch(true); });
   search.querySelectorAll('[data-search-close]').forEach((el) => el.addEventListener('click', () => setSearch(false)));
+  /* 등록된 식물(products.js) 중 이름(한·영·일)이나 학명이 맞는 것을 입력하는 동안 바로 보여줌.
+     띄어쓰기·따옴표는 무시 ('무룽라야' → 무룽 라야) */
+  const resultsEl = search.querySelector('.search__results');
+  const norm = (s) => String(s ?? '').normalize('NFKC').toLowerCase().replace(/[\s'"‘’“”「」・.·-]/g, '');
+  const escHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const findPlants = (q) => {
+    const nq = norm(q);
+    if (!nq) return [];
+    return (window.PM_PRODUCTS || []).filter((p) =>
+      [p.id, ...Object.values(p.name || {}), (p.sci || []).join(' ')].some((v) => norm(v).includes(nq)));
+  };
+  const showResults = (q, submitted = false) => {
+    const query = q.trim();
+    if (!query) {
+      resultsEl.innerHTML = '';
+      msg.textContent = submitted ? t('searchEmpty') : '';
+      return;
+    }
+    const list = findPlants(query);
+    msg.textContent = list.length ? t('searchCount', { n: list.length }) : t('searchNone', { q: query });
+    resultsEl.innerHTML = list.map((p) => {
+      const name = (p.name && (p.name[lang] || p.name.ko)) || p.id;
+      const [italic = '', rest = ''] = p.sci || [];
+      const price = p.price == null ? t('priceAsk') : `₩ ${Number(p.price).toLocaleString('ko-KR')}`;
+      return `<li><a class="hit" href="/plant/?c=${encodeURIComponent(p.category)}#p-${encodeURIComponent(p.id)}">
+        <span class="hit__img"><img src="${escHtml(p.image)}" alt="" width="750" height="1000" loading="lazy"></span>
+        <span class="hit__text"><span class="hit__name">${escHtml(name)}</span><span class="hit__sci"><i>${escHtml(italic)}</i> ${escHtml(rest)}</span></span>
+        <span class="hit__price">${escHtml(price)}</span>
+      </a></li>`;
+    }).join('');
+  };
+  let searchTimer;
+  input.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => showResults(input.value), 120);
+  });
+  langListeners.push(() => { if (search.classList.contains('is-open')) showResults(input.value); });
   search.querySelector('form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const q = input.value.trim();
-    msg.textContent = q ? t('searchSoon', { q }) : t('searchEmpty');
+    clearTimeout(searchTimer);
+    showResults(input.value, true);
   });
 
   /* ---------- 언어 설정 창 ---------- */
@@ -159,6 +196,7 @@
     getLang: () => lang,
     onLang: (fn) => langListeners.push(fn),
     closeMenu: () => setMenu(null),
+    closeSearch: () => { if (search.classList.contains('is-open')) setSearch(false); },
     toast: showToast,
   };
 

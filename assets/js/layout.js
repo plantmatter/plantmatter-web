@@ -71,6 +71,7 @@ ${megaItems}
         </button>
       </form>
       <p class="search__msg" aria-live="polite"></p>
+      <ul class="search__results"></ul>
       <button class="search__close" type="button" data-search-close>CLOSE</button>
     </div>
     <div class="search__dim" data-search-close></div>

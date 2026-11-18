@@ -35,7 +35,7 @@
     const name = (p.name && (p.name[lang] || p.name.ko)) || p.id;
     const sold = p.status === 'soldout';
     const [italic = '', rest = ''] = p.sci || [];
-    return `<li class="card${sold ? ' is-soldout' : ''}${p.shade === false ? ' no-shade' : ''}">
+    return `<li class="card${sold ? ' is-soldout' : ''}${p.shade === false ? ' no-shade' : ''}" id="p-${esc(p.id)}">
       <a class="card__link" href="#" data-soon="${esc(name)}">
         <span class="card__img"><img src="${esc(p.image)}" alt="${esc(name)}" width="750" height="1000" loading="lazy"></span>
         ${sold ? `<span class="card__badge">${esc(t('soldOut'))}</span>` : ''}
@@ -67,10 +67,22 @@
     emptyEl.hidden = list.length > 0;
   };
 
-  const go = (next, push = true) => {
+  /* 검색 결과에서 온 경우(#p-식물id): 그 칸까지 내려가서 잠깐 테두리로 표시 */
+  const reveal = (hash) => {
+    const el = hash && document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (!el) return;
+    const gnbH = document.querySelector('.gnb')?.offsetHeight || 0;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - gnbH - 24, behavior: 'smooth' });
+    el.classList.remove('is-found');
+    void el.offsetWidth;
+    el.classList.add('is-found');
+  };
+
+  const go = (next, push = true, hash = '') => {
     cat = valid(next);
-    if (push) history.pushState(null, '', urlFor(cat));
+    if (push) history.pushState(null, '', urlFor(cat) + hash);
     render();
+    if (hash) reveal(hash);
   };
 
   /* 탭·메뉴의 분류 링크는 이 페이지 안에서 바로 바꿈 (PLANT 탭 자체는 제외) */
@@ -79,10 +91,13 @@
     if (!a || a.hasAttribute('data-menu') || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     PM.closeMenu();
-    go(new URL(a.href, location.href).searchParams.get('c'));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (PM.closeSearch) PM.closeSearch();
+    const u = new URL(a.href, location.href);
+    go(u.searchParams.get('c'), true, u.hash);
+    if (!u.hash) window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  window.addEventListener('popstate', () => go(fromUrl(), false));
+  window.addEventListener('popstate', () => go(fromUrl(), false, location.hash));
   PM.onLang(render);
   render();
+  if (location.hash) setTimeout(() => reveal(location.hash), 150);
 })();
