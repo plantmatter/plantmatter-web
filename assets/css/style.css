@@ -67,17 +67,17 @@ button, input, select { font: inherit; color: inherit; }
 .icon-btn:hover svg { stroke-width: 1.9; }
 
 /* ---------- 탭 아래로 내려오는 메뉴 ---------- */
-.gnb { transition: background-color .25s; }
+.gnb { transition: background-color .38s var(--ease); }
 .gnb.is-menu-open { background: #fff; }
-.mega { position: fixed; inset: var(--gnb-h) 0 0 0; z-index: 19; visibility: hidden; transition: visibility 0s .3s; }
+.mega { position: fixed; inset: var(--gnb-h) 0 0 0; z-index: 19; visibility: hidden; transition: visibility 0s .38s; }
 .mega.is-open { visibility: visible; transition: none; }
 .mega__panel {
   position: relative; z-index: 1;
   padding: 28px var(--side) 44px; background: #fff; border-top: 1px solid var(--line);
-  opacity: 0; transform: translateY(-8px); transition: opacity .3s var(--ease), transform .3s var(--ease);
+  opacity: 0; transform: translateY(-8px); transition: opacity .38s var(--ease), transform .38s var(--ease);
 }
 .mega.is-open .mega__panel { opacity: 1; transform: none; }
-.mega__dim { position: absolute; inset: 0; background: rgba(23, 23, 23, .45); opacity: 0; transition: opacity .3s var(--ease); }
+.mega__dim { position: absolute; inset: 0; background: rgba(23, 23, 23, .45); opacity: 0; transition: opacity .38s var(--ease); }
 .mega.is-open .mega__dim { opacity: 1; }
 .mega__list { display: flex; gap: 16px; margin: 0; padding: 0; list-style: none; }
 .mega__item { display: block; width: 214px; }
