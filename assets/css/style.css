@@ -308,6 +308,8 @@ button, input, select { font: inherit; color: inherit; }
 .auth__err { margin: 4px 0 12px; font-size: 13px; line-height: 1.6; color: #b3261e; }
 .auth__links { margin-top: 18px; font-size: 13px; color: var(--muted); text-align: center; }
 .auth__links a, .co__member a { color: var(--text); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.auth__resend { padding: 0; border: 0; background: none; cursor: pointer; font-size: 13px; font-weight: 300; color: var(--text); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.auth__resend:disabled { color: var(--muted); cursor: default; }
 .auth__join { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--line); text-align: center; }
 .auth__join p { margin-bottom: 14px; font-size: 14px; color: var(--mid); }
 .auth__join .btn-line { width: 100%; }

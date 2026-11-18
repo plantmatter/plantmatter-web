@@ -1,9 +1,9 @@
 -- PLANT MATTER WEB / 01 — 웹사이트 회원 정보 (쇼핑용)
 -- Supabase 대시보드 > SQL Editor 에 이 파일 전체를 붙여 넣고 한 번 실행하세요. 다시 실행해도 안전합니다.
 --
--- 앱(plant-matter-field)과 같은 Supabase 프로젝트·같은 계정을 씁니다. 이 파일은 앱의 테이블을 바꾸지 않습니다.
---   · 웹에서 가입하면 앱의 profiles 에도 자동으로 줄이 생기지만(앱의 기존 트리거), 표시 이름은 비어 있어
---     앱의 공개 프로필·회원 검색·랭킹에 나오지 않습니다. (회원 검색은 승인된 베타 멤버만 대상)
+-- PLANT MATTER 앱(plantmatter/plantmatter-app)과 같은 Supabase 프로젝트·같은 계정을 씁니다.
+-- 앱의 schema.sql 을 먼저 실행한 프로젝트에 실행하세요. 이 파일은 앱의 테이블을 바꾸지 않습니다.
+--   · 웹에서 가입해도 앱의 profiles 는 만들지 않습니다. 그 계정으로 앱에 처음 들어가면 앱이 이름·약관을 물어 만듭니다.
 --   · 이름·휴대폰·배송지·동의 기록은 아래의 shop_customers 에만 저장되고, 본인만 읽을 수 있습니다.
 --   · 계정을 삭제하면 shop_customers 의 줄도 함께 지워집니다 (on delete cascade).
 

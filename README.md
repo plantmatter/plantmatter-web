@@ -78,21 +78,21 @@
 
 ## 로그인 · 회원 (/account/)
 
-- 앱(plant-matter-field)과 **같은 Supabase 프로젝트·같은 계정**을 씁니다. 앱 계정으로 웹에 로그인할 수 있고, 웹에서 가입한 계정으로 앱에도 로그인됩니다.
-  - 웹 가입자는 앱의 공개 프로필 이름이 비어 있어 앱의 회원 검색·랭킹에 나오지 않습니다.
-  - 이름·휴대폰·배송지·동의 기록은 `shop_customers` 테이블에 저장되고 **본인만** 읽을 수 있습니다.
-- 페이지: `/account/`(로그인 ↔ 마이페이지), `/account/signup/`(회원가입), `/account/reset/`(비밀번호 찾기)
+- **PLANT MATTER 앱(plantmatter/plantmatter-app)과 같은 Supabase 프로젝트·같은 계정**을 씁니다. 앱에서 이메일로 가입한 계정으로 웹에 로그인되고, 웹에서 가입한 계정으로 앱에도 로그인됩니다.
+  - 연결 값(Project URL · Publishable key)은 `assets/js/auth.js` 맨 위 `CONFIG` — 앱의 `.env`(EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_KEY)와 **같은 값**이어야 합니다. 시크릿·service_role 키는 절대 넣지 않습니다.
+  - 가입 확인 · 비밀번호 찾기는 앱과 같이 **메일로 받은 6자리 코드**를 입력합니다 (앱 README 1-5의 메일 템플릿).
+  - 앱에서 Apple로만 가입한 계정은 비밀번호가 없어서, 웹에서는 '비밀번호 찾기'로 비밀번호를 만든 뒤 로그인합니다.
+  - 이름·휴대폰·배송지·동의 기록은 `shop_customers` 테이블에 저장되고 **본인만** 읽을 수 있습니다. 앱의 테이블은 건드리지 않습니다.
+- 페이지: `/account/`(로그인 ↔ 마이페이지), `/account/signup/`(회원가입 → 코드 입력), `/account/reset/`(코드 + 새 비밀번호)
 - 상단의 사람 아이콘 → `/account/`. 주문/결제에서 로그인하면 저장된 정보가 자동으로 채워집니다(비회원 주문도 가능).
-- 파일: `assets/js/auth.js`(연결 설정), `account.js`(화면), `form.js`(입력 검사), `postcode.js`(주소 찾기), `assets/vendor/supabase-2.118.0.js`(Supabase 라이브러리)
-- `auth.js`에는 공개용 Project URL과 Publishable key만 있습니다. service_role 키·시크릿 키는 절대 사이트에 넣지 않습니다.
+- 파일: `assets/js/auth.js`(연결), `account.js`(화면), `form.js`(입력 검사), `postcode.js`(주소 찾기), `assets/vendor/supabase-2.118.0.js`(Supabase 라이브러리)
 
-### 처음 한 번 해야 할 설정 (Supabase 대시보드)
+### 처음 한 번 해야 할 설정 (앱이 쓰는 Supabase 프로젝트에서)
 
-1. **SQL Editor**에서 `supabase/web01_shop_customers.sql` 전체를 붙여 넣고 실행 → 회원 정보 테이블과 저장 기능이 생깁니다. (앱의 기존 테이블은 바꾸지 않습니다)
-2. **Authentication > URL Configuration > Redirect URLs**에 `https://plantmatter.kr/**` 와 `https://m.plantmatter.kr/**` 추가 → 가입 확인·비밀번호 재설정 메일의 링크가 웹사이트로 돌아옵니다. (Site URL은 앱 주소 그대로 둡니다)
-3. 실제 운영 전: **Authentication > Emails > SMTP Settings**에 메일 발송 서비스를 연결하세요. Supabase 기본 메일은 시간당 보낼 수 있는 양이 아주 적습니다. 메일 문구(템플릿)는 앱과 함께 씁니다.
+1. **SQL Editor**에서 `supabase/web01_shop_customers.sql` 전체를 붙여 넣고 실행 → 회원 정보 테이블과 저장 기능이 생깁니다.
+2. 메일 발송 서버(SMTP)와 코드 메일 템플릿은 앱 설정(앱 README 1-5, 1-6)을 그대로 함께 씁니다.
 
-- 아직 없는 것: 회원 탈퇴(앱 계정도 함께 지워지므로 안내 문구와 함께 따로 만들 예정), 주문 내역(결제 승인 서버 연결 후)
+- 아직 없는 것: 회원 탈퇴(앱 계정도 함께 지워지므로 안내와 함께 따로 만들 예정), 주문 내역(결제 승인 서버 연결 후)
 
 ## 언어 (한국어 · English · 日本語)
 

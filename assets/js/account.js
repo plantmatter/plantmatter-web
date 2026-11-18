@@ -1,7 +1,8 @@
 /* PLANT MATTER — 계정 페이지
    /account/         로그인 ↔ 마이페이지(회원 정보 · 기본 배송지 · 비밀번호 변경 · 주문 내역 · 로그아웃)
-   /account/signup/  회원가입 (이메일 · 비밀번호 · 이름 · 휴대폰 · 기본 배송지 · 약관 동의)
-   /account/reset/   비밀번호 찾기 (메일로 링크 받기 → 새 비밀번호 설정)
+   /account/signup/  회원가입 (이메일 · 비밀번호 · 이름 · 휴대폰 · 기본 배송지 · 약관 동의 → 메일로 받은 코드 입력)
+   /account/reset/   비밀번호 찾기 (메일로 받은 코드 + 새 비밀번호)
+   가입 확인과 비밀번호 찾기는 앱과 같이 메일로 받은 6자리 코드를 씁니다.
    로그인 처리는 assets/js/auth.js, 입력 검사는 assets/js/form.js 에 있습니다.
    /account/?next=/checkout/… 처럼 next 를 붙이면 로그인 후 그 페이지로 돌아갑니다. */
 (() => {
@@ -14,16 +15,16 @@
   const root = document.querySelector('[data-account]');
   const page = root.dataset.account;
   const views = [...root.querySelectorAll('[data-view]')];
-  const show = (name) => {
-    views.forEach((v) => { v.hidden = v.dataset.view !== name; });
-    const h = root.querySelector(`[data-view="${name}"] h1`);
-    if (h) document.title = `${h.textContent} — PLANT MATTER`;
-  };
-  PM.onLang(() => {
+  const setTitle = () => {
     const v = views.find((x) => !x.hidden);
     const h = v && v.querySelector('h1');
     if (h) document.title = `${h.textContent} — PLANT MATTER`;
-  });
+  };
+  const show = (name) => {
+    views.forEach((v) => { v.hidden = v.dataset.view !== name; });
+    setTitle();
+  };
+  PM.onLang(setTitle);
 
   const showErr = (form, err) => {
     const box = form.querySelector('[data-err]');
@@ -42,6 +43,12 @@
     return n && /^\/(?!\/)/.test(n) ? n : null;   // 이 사이트 안의 주소만
   };
   const val = (form, name) => (form.elements[name] ? form.elements[name].value.trim() : '');
+  /* '코드 다시 받기': 너무 자주 보내지 않도록 60초 동안 잠금 */
+  const resendButton = (btn, send) => btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try { await send(); PM.toast(t('codeSent')); } catch (err) { PM.toast(t(A.errorKey(err) || 'errNetwork')); }
+    setTimeout(() => { btn.disabled = false; }, 60000);
+  });
 
   /* 약관 '보기' 펼치기 */
   root.addEventListener('click', (e) => {
@@ -58,6 +65,45 @@
     root.querySelectorAll('form').forEach((f) => showErr(f, 'errNetwork'));
     return;
   }
+
+  /* ---------- 가입 확인 코드 입력 (회원가입 · 로그인 화면 공통: [data-view="verify"]) ---------- */
+  const setupVerify = (onDone) => {
+    const view = root.querySelector('[data-view="verify"]');
+    const form = view.querySelector('[data-verify]');
+    const text = view.querySelector('[data-verify-text]');
+    const check = FORM.bind(form);
+    let email = '';
+    const setText = () => { text.textContent = t('verifyText', { email }); };
+    PM.onLang(() => { if (email) setText(); });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showErr(form, null);
+      if (!check.validate()) return;
+      busy(form, true);
+      try {
+        await A.verifySignup(email, val(form, 'code'));
+        PM.toast(t('welcome'));
+        await onDone();
+      } catch (err) {
+        showErr(form, err);
+      } finally {
+        busy(form, false);
+      }
+    });
+    resendButton(view.querySelector('[data-resend]'), () => A.resendSignup(email));
+    return {
+      open(address) {
+        email = address;
+        form.reset();
+        check.clear();
+        showErr(form, null);
+        setText();
+        show('verify');
+        window.scrollTo(0, 0);
+        form.elements.code.focus();
+      },
+    };
+  };
 
   /* ---------- /account/ : 로그인 · 마이페이지 ---------- */
   const home = () => {
@@ -90,39 +136,41 @@
       if (customer) {
         ['name', 'phone', 'zip', 'addr', 'addr2'].forEach((k) => { F[k].value = customer[k] || ''; });
         F.marketing.checked = Boolean(customer.marketing_consent);
+      } else if (!F.name.value) {
+        const m = u.user_metadata || {};   // 앱에서 정한 이름이 있으면 미리 채움
+        F.name.value = String(m.display_name || m.full_name || m.name || '').slice(0, 40);
       }
       setHello();
     };
-    const openLogin = (msgKey) => {
-      show('login');
-      showErr(loginForm, msgKey || null);
-    };
+    const openLogin = () => { show('login'); showErr(loginForm, null); };
+    const goNext = () => { const n = nextUrl(); if (n) { location.href = n; return true; } return false; };
     A.onChange((u) => (u ? openMy() : openLogin()));
+    const verify = setupVerify(async () => { goNext(); });
 
     A.ready.then((u) => {
-      const n = nextUrl();
-      if (u && n) { location.replace(n); return; }
-      if (u) {
-        if (A.link.type === 'signup') PM.toast(t('welcome'));
-        openMy();
-      } else {
-        openLogin(A.link.error ? (A.errorKey({ code: A.link.error }) || 'errLink') : null);
-      }
+      if (u && nextUrl()) { location.replace(nextUrl()); return; }
+      if (u) openMy(); else openLogin();
     });
 
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       showErr(loginForm, null);
       if (!loginCheck.validate()) return;
+      const email = val(loginForm, 'email');
       busy(loginForm, true);
       try {
-        await A.signIn(val(loginForm, 'email'), loginForm.elements.password.value);
+        await A.signIn(email, loginForm.elements.password.value);
         loginForm.reset();
         PM.toast(t('loggedIn'));
-        const n = nextUrl();
-        if (n) location.href = n;
+        goNext();
       } catch (err) {
-        showErr(loginForm, err);
+        if (A.errorKey(err) === 'errNotConfirmed') {
+          /* 가입 확인을 안 마친 계정: 코드를 다시 보내고 입력 화면으로 */
+          try { await A.resendSignup(email); } catch (e2) { /* 방금 보낸 코드가 있으면 그대로 사용 */ }
+          verify.open(email);
+        } else {
+          showErr(loginForm, err);
+        }
       } finally {
         busy(loginForm, false);
       }
@@ -180,14 +228,13 @@
     });
   };
 
-  /* ---------- /account/signup/ : 회원가입 ---------- */
+  /* ---------- /account/signup/ : 회원가입 → 코드 입력 ---------- */
   const signup = () => {
     const form = root.querySelector('[data-signup]');
-    const sentText = root.querySelector('[data-sent-text]');
     const check = FORM.bind(form);
     const agree = FORM.bindAgree(form.querySelector('[data-agree-box]'));
-    let sentTo = '';
-    PM.onLang(() => { if (sentTo) sentText.textContent = t('signupSentText', { email: sentTo }); });
+    const done = () => { setTimeout(() => { location.href = nextUrl() || '/account/'; }, 700); };
+    const verify = setupVerify(done);
     A.ready.then((u) => { if (u) location.replace(nextUrl() || '/account/'); });   // 이미 로그인 상태
 
     form.addEventListener('submit', async (e) => {
@@ -203,15 +250,8 @@
           zip: val(form, 'zip'), addr: val(form, 'addr'), addr2: val(form, 'addr2'),
           marketing: Boolean(v.marketing), terms: Boolean(v.terms), privacy: Boolean(v.privacy), age14: Boolean(v.age14),
         });
-        if (r.confirm) {
-          sentTo = email;
-          sentText.textContent = t('signupSentText', { email });
-          show('sent');
-          window.scrollTo(0, 0);
-        } else {
-          PM.toast(t('welcome'));
-          location.href = nextUrl() || '/account/';
-        }
+        if (r.confirm) verify.open(email);
+        else { PM.toast(t('welcome')); done(); }
       } catch (err) {
         showErr(form, err);
       } finally {
@@ -220,37 +260,31 @@
     });
   };
 
-  /* ---------- /account/reset/ : 비밀번호 찾기 ---------- */
+  /* ---------- /account/reset/ : 코드 받기 → 코드 + 새 비밀번호 ---------- */
   const reset = () => {
     const reqForm = root.querySelector('[data-reset]');
-    const newForm = root.querySelector('[data-newpw]');
-    const sentText = root.querySelector('[data-sent-text]');
+    const codeForm = root.querySelector('[data-newpw]');
+    const text = root.querySelector('[data-sent-text]');
     const reqCheck = FORM.bind(reqForm);
-    const newCheck = FORM.bind(newForm);
-    let sentTo = '';
-    PM.onLang(() => { if (sentTo) sentText.textContent = t('resetSentText', { email: sentTo }); });
-
-    if (A.link.type === 'recovery') {
-      A.ready.then((u) => {
-        if (u) show('newpw');
-        else { show('request'); showErr(reqForm, 'errLink'); }
-      });
-    } else {
-      show('request');
-      if (A.link.error) showErr(reqForm, A.errorKey({ code: A.link.error }) || 'errLink');
-    }
+    const codeCheck = FORM.bind(codeForm);
+    let email = '';
+    const setText = () => { text.textContent = t('resetCodeText', { email }); };
+    PM.onLang(() => { if (email) setText(); });
+    show('request');
 
     reqForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       showErr(reqForm, null);
       if (!reqCheck.validate()) return;
-      const email = val(reqForm, 'email');
       busy(reqForm, true);
       try {
-        await A.sendReset(email);
-        sentTo = email;
-        sentText.textContent = t('resetSentText', { email });
-        show('sent');
+        await A.sendReset(val(reqForm, 'email'));
+        email = val(reqForm, 'email');
+        codeForm.reset();
+        codeCheck.clear();
+        setText();
+        show('code');
+        codeForm.elements.code.focus();
       } catch (err) {
         showErr(reqForm, err);
       } finally {
@@ -258,20 +292,21 @@
       }
     });
 
-    newForm.addEventListener('submit', async (e) => {
+    codeForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      showErr(newForm, null);
-      if (!newCheck.validate()) return;
-      busy(newForm, true);
+      showErr(codeForm, null);
+      if (!codeCheck.validate()) return;
+      busy(codeForm, true);
       try {
-        await A.updatePassword(newForm.elements.password.value);
+        await A.resetWithCode(email, val(codeForm, 'code'), codeForm.elements.password.value);
         PM.toast(t('pwChanged'));
         setTimeout(() => { location.href = '/account/'; }, 900);
       } catch (err) {
-        showErr(newForm, err);
-        busy(newForm, false);
+        showErr(codeForm, err);
+        busy(codeForm, false);
       }
     });
+    resendButton(root.querySelector('[data-view="code"] [data-resend]'), () => A.sendReset(email));
   };
 
   ({ home, signup, reset })[page]();

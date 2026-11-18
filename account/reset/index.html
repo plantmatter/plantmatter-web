@@ -56,18 +56,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261118x">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261118z">
 </head>
 <body class="page-sub page-acct">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261118x"></script>
+  <script src="/assets/js/layout.js?v=20261118z"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── 비밀번호 찾기 (assets/js/account.js · auth.js) ───────── -->
   <main class="acct" id="main" data-account="reset">
     <section class="auth" data-view="request" hidden>
       <h1 class="auth__title" data-i18n="resetTitle">비밀번호 찾기</h1>
-      <p class="auth__text" data-i18n="resetText">가입한 이메일을 입력하면 비밀번호를 다시 설정하는 링크를 보내 드립니다.</p>
+      <p class="auth__text" data-i18n="resetText">가입한 이메일을 입력하면 비밀번호를 다시 설정하는 코드를 보내 드립니다.</p>
       <form class="auth__form" data-reset novalidate>
         <div class="field">
           <label for="r-email" data-i18n="fEmail">이메일</label>
@@ -75,20 +75,20 @@
           <p class="field__err" aria-live="polite"></p>
         </div>
         <p class="auth__err" data-err role="alert" hidden></p>
-        <button class="btn-buy" type="submit" data-i18n="resetSend">링크 보내기</button>
+        <button class="btn-buy" type="submit" data-i18n="resetSend">코드 받기</button>
       </form>
       <p class="auth__links"><a href="/account/" data-i18n="backToLogin">로그인으로 돌아가기</a></p>
     </section>
 
-    <section class="auth" data-view="sent" hidden>
-      <h1 class="auth__title" data-i18n="resetSentTitle">메일을 보냈습니다</h1>
-      <p class="auth__text" data-sent-text></p>
-      <a class="btn-line" href="/account/" data-i18n="backToLogin">로그인으로 돌아가기</a>
-    </section>
-
-    <section class="auth" data-view="newpw" hidden>
+    <section class="auth" data-view="code" hidden>
       <h1 class="auth__title" data-i18n="newPwTitle">새 비밀번호 설정</h1>
+      <p class="auth__text" data-sent-text></p>
       <form class="auth__form" data-newpw novalidate>
+        <div class="field">
+          <label for="n-code" data-i18n="fCode">인증 코드</label>
+          <input id="n-code" name="code" data-rule="code" data-digits inputmode="numeric" autocomplete="one-time-code" maxlength="10" required>
+          <p class="field__err" aria-live="polite"></p>
+        </div>
         <div class="field">
           <label for="n-pw" data-i18n="fNewPw">새 비밀번호</label>
           <input id="n-pw" name="password" type="password" data-rule="password" autocomplete="new-password" maxlength="72" placeholder="8자 이상" data-i18n-attr="placeholder: pwHint" required>
@@ -102,17 +102,18 @@
         <p class="auth__err" data-err role="alert" hidden></p>
         <button class="btn-buy" type="submit" data-i18n="newPwBtn">비밀번호 바꾸기</button>
       </form>
+      <p class="auth__links"><button class="auth__resend" type="button" data-resend data-i18n="resendCode">코드 다시 받기</button></p>
     </section>
   </main>
 
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
-  <script src="/assets/js/i18n.js?v=20261118x" defer></script>
-  <script src="/assets/js/main.js?v=20261118x" defer></script>
-  <script src="/assets/js/form.js?v=20261118x" defer></script>
+  <script src="/assets/js/i18n.js?v=20261118z" defer></script>
+  <script src="/assets/js/main.js?v=20261118z" defer></script>
+  <script src="/assets/js/form.js?v=20261118z" defer></script>
   <script src="/assets/vendor/supabase-2.118.0.js" defer></script>
-  <script src="/assets/js/auth.js?v=20261118x" defer></script>
-  <script src="/assets/js/account.js?v=20261118x" defer></script>
+  <script src="/assets/js/auth.js?v=20261118z" defer></script>
+  <script src="/assets/js/account.js?v=20261118z" defer></script>
 </body>
 </html>
