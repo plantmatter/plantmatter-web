@@ -16,7 +16,7 @@ window.PM_PRODUCTS = [
     category: 'tropical',
     name: { ko: '피커스 sp. ‘무룽 라야’', en: 'Ficus sp. ‘Murung Raya’', ja: 'フィカス sp.「ムルン・ラヤ」' },
     sci: ['Ficus', 'sp. ‘Murung Raya’'],
-    price: null,
+    price: 22000,
     status: 'available',
     image: '/assets/img/products/ficus-murung-raya.jpg',
     shade: false                   /* 사진에 이미 아래쪽 그늘이 있음 */
