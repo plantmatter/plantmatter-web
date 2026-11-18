@@ -144,7 +144,7 @@
   });
 
   /* ---------- 홈 사진 슬라이드 (자동으로 넘어감) ---------- */
-  const SLIDE_INTERVAL = 5000;   /* 한 장이 머무는 시간 (밀리초) */
+  const SLIDE_INTERVAL = 8000;   /* 한 장이 머무는 시간 (밀리초) */
   const hero = document.querySelector('.hero');
   const track = hero && hero.querySelector('.slides__track');
   if (track) {

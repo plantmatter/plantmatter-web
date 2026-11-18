@@ -107,7 +107,7 @@ button, input, select { font: inherit; color: inherit; }
 .bar::before, .bar__fill { content: ""; position: absolute; left: 0; top: 50%; height: 1px; margin-top: -.5px; }
 .bar::before { right: 0; background: rgba(255, 255, 255, .3); }
 .bar__fill { width: 0; background: #fff; }
-.bar.is-active .bar__fill { animation: bar-fill var(--interval, 5s) linear forwards; }
+.bar.is-active .bar__fill { animation: bar-fill var(--interval, 8s) linear forwards; }
 @keyframes bar-fill { to { width: 100%; } }
 .hero.is-paused .bar.is-active .bar__fill { animation-play-state: paused; }
 
