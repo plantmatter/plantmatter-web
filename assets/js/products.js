@@ -31,12 +31,12 @@ window.PM_PRODUCTS = [
     image: '/assets/img/products/ficus-punctata.jpg?v=6'
   },
   {
-    id: 'ficus-tropicarpa',
+    id: 'ficus-trichocarpa',
     category: 'tropical',
-    name: { ko: '피커스 트로피카르파', en: 'Ficus tropicarpa', ja: 'フィカス・トロピカルパ' },
-    sci: ['Ficus tropicarpa', ''],
+    name: { ko: '피커스 트리코카르파', en: 'Ficus trichocarpa', ja: 'フィカス・トリコカルパ' },
+    sci: ['Ficus trichocarpa', ''],
     price: 120000,
     status: 'available',
-    image: '/assets/img/products/ficus-tropicarpa.jpg?v=1'
+    image: '/assets/img/products/ficus-trichocarpa.jpg?v=2'
   }
 ];
