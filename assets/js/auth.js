@@ -11,8 +11,8 @@
      → supabase/web01_shop_customers.sql 을 같은 프로젝트의 SQL Editor 에서 한 번 실행해야 합니다. */
 (() => {
   const CONFIG = {
-    url: 'https://gjtgjnylemhtbjlzzrgv.supabase.co',
-    key: 'sb_publishable_5PGyKKQa2ELuivoVToKo5w_2ToujiLO',
+    url: 'https://qssrtzvipwvxcfszxomo.supabase.co',
+    key: 'sb_publishable_qJhjHRcc95Ew7bYRs3Qt4A_N0nQw9hu',
   };
 
   let client = null;
