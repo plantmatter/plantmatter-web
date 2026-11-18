@@ -118,6 +118,45 @@
     const firstAgree = FORM.bindAgree(firstBox);
     let customer = null;
 
+    /* 이름 변경 제한: 처음 정한 이름은 제외, 2번까지는 바로, 그 뒤로는 마지막 변경 후 60일 (서버에서도 막음 — supabase/web02) */
+    const NAME_FREE = 2;
+    const NAME_WAIT_DAYS = 60;
+    const nameInput = infoForm.elements.name;
+    const nameHint = infoForm.querySelector('[data-name-hint]');
+    const fmtDate = (d) => d.toLocaleDateString({ ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' }[PM.getLang()] || 'ko-KR',
+      { year: 'numeric', month: 'long', day: 'numeric' });
+    const nameLockedUntil = () => {
+      if (!customer || !customer.name) return null;
+      const n = customer.name_change_count || 0;
+      if (n < NAME_FREE || !customer.name_changed_at) return null;
+      const until = new Date(new Date(customer.name_changed_at).getTime() + NAME_WAIT_DAYS * 86400000);
+      return until > new Date() ? until : null;
+    };
+    const updateNameHint = () => {
+      const saved = (customer && customer.name) || '';
+      const n = (customer && customer.name_change_count) || 0;
+      const until = nameLockedUntil();
+      nameInput.readOnly = Boolean(until);
+      let text = t('nameRule');
+      let warn = false;
+      if (until) {
+        text = t('nameLocked', { date: fmtDate(until) });
+      } else if (saved) {
+        const editing = nameInput.value.trim() !== saved;
+        if (editing && n + 1 >= NAME_FREE) { text = t('nameWarn'); warn = true; }   // 이번에 바꾸면 60일 기다려야 함
+        else if (!editing && n < NAME_FREE) text = t('nameLeft', { n: NAME_FREE - n });
+      }
+      nameHint.textContent = text;
+      nameHint.classList.toggle('is-warn', warn);
+    };
+    nameInput.addEventListener('input', updateNameHint);
+    PM.onLang(updateNameHint);
+    const showText = (form, text) => {
+      const box = form.querySelector('[data-err]');
+      box.textContent = text;
+      box.hidden = !text;
+    };
+
     const setHello = () => {
       const n = customer && customer.name;
       helloEl.textContent = n ? t('hello', { name: n }) : t('helloNoName');
@@ -140,6 +179,7 @@
         const m = u.user_metadata || {};   // 앱에서 정한 이름이 있으면 미리 채움
         F.name.value = String(m.display_name || m.full_name || m.name || '').slice(0, 40);
       }
+      updateNameHint();
       setHello();
     };
     const openLogin = () => { show('login'); showErr(loginForm, null); };
@@ -190,10 +230,19 @@
         });
         customer = await A.getCustomer();
         firstBox.hidden = Boolean(customer);
+        updateNameHint();
         setHello();
         PM.toast(t('saved'));
       } catch (err) {
-        showErr(infoForm, err);
+        const locked = /name_locked:(\S+)/.exec(String((err && err.message) || ''));
+        if (locked) {
+          showText(infoForm, t('nameLocked', { date: fmtDate(new Date(locked[1])) }));
+          try { customer = await A.getCustomer(); } catch (e2) { /* 그대로 */ }
+          if (customer) nameInput.value = customer.name || '';
+          updateNameHint();
+        } else {
+          showErr(infoForm, err);
+        }
       } finally {
         busy(infoForm, false);
       }

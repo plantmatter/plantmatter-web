@@ -160,6 +160,11 @@ window.PM_I18N = {
     pwHide: '비밀번호 숨기기',
     exactShip: '동일 상품 배송',
     exactShipText: '사진 속 바로 그 식물을 보내 드립니다.',
+    nameRule: '이름은 2번까지 바로 바꿀 수 있고, 그 뒤로는 마지막으로 바꾼 날부터 60일이 지나야 다시 바꿀 수 있습니다.',
+    nameLeft: '이름을 바로 바꿀 수 있는 횟수가 {n}번 남았습니다.',
+    nameWarn: '저장하면 다음 이름 변경은 60일 뒤부터 가능합니다.',
+    nameLocked: '이름은 {date}부터 다시 바꿀 수 있습니다.',
+    errNameLocked: '지금은 이름을 바꿀 수 없습니다. 마지막 변경 후 60일이 지나야 합니다.',
     close: '닫기'
   },
   en: {
@@ -319,6 +324,11 @@ window.PM_I18N = {
     pwHide: 'Hide password',
     exactShip: 'Ships as pictured',
     exactShipText: 'You receive the exact plant shown in the photo.',
+    nameRule: 'You can change your name twice right away; after that, 60 days must pass after the last change.',
+    nameLeft: 'Immediate name changes left: {n}',
+    nameWarn: 'If you save, your next name change will be possible in 60 days.',
+    nameLocked: 'You can change your name again on {date}.',
+    errNameLocked: 'Your name cannot be changed yet. 60 days must pass after the last change.',
     close: 'Close'
   },
   ja: {
@@ -478,6 +488,11 @@ window.PM_I18N = {
     pwHide: 'パスワードを隠す',
     exactShip: '写真の株をお届け',
     exactShipText: '写真に写っている株そのものをお届けします。',
+    nameRule: 'お名前はすぐに2回まで変更できます。その後は、最後の変更から60日経つと再び変更できます。',
+    nameLeft: 'すぐに変更できる残り回数：{n}回',
+    nameWarn: '保存すると、次のお名前の変更は60日後から可能になります。',
+    nameLocked: 'お名前は{date}から再び変更できます。',
+    errNameLocked: '現在はお名前を変更できません。最後の変更から60日経つ必要があります。',
     close: '閉じる'
   }
 };

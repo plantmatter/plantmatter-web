@@ -134,6 +134,7 @@
       if (code === 'same_password') return 'errSamePw';
       if (/rate_limit|over_.*limit/.test(code) || /rate limit|security purposes/i.test(msg)) return 'errRate';
       if (/consent required/i.test(msg)) return 'errAgree';
+      if (/name_locked/.test(msg)) return 'errNameLocked';
       if (code === '42P01' || code === 'PGRST202' || code === 'PGRST205' || /shop_customers|save_shop_customer|schema cache/i.test(msg)) return 'errSetup';
       if (code === 'network' || /failed to fetch|network|load failed/i.test(msg)) return 'errNetwork';
       return '';
