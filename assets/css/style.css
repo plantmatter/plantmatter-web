@@ -310,6 +310,15 @@ button, input, select { font: inherit; color: inherit; }
 .auth__links a, .co__member a { color: var(--text); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .auth__resend { padding: 0; border: 0; background: none; cursor: pointer; font-size: 13px; font-weight: 300; color: var(--text); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .auth__resend:disabled { color: var(--muted); cursor: default; }
+/* 비밀번호 보기/숨기기 (눈 모양 버튼) */
+.pw { position: relative; }
+.pw input { padding-right: 48px; }
+.pw input::-ms-reveal, .pw input::-ms-clear { display: none; }   /* Edge 기본 눈 아이콘은 숨김 (중복 방지) */
+.pw__toggle { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.pw__toggle:hover { color: var(--text); }
+.pw__toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.pw__toggle .pw__hide, .pw__toggle[aria-pressed="true"] .pw__show { display: none; }
+.pw__toggle[aria-pressed="true"] .pw__hide { display: block; }
 .auth__join { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--line); text-align: center; }
 .auth__join p { margin-bottom: 14px; font-size: 14px; color: var(--mid); }
 .auth__join .btn-line { width: 100%; }

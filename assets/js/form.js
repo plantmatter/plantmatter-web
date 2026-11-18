@@ -30,7 +30,7 @@
       input.setAttribute('aria-invalid', key ? 'true' : 'false');
     };
     const check = (input) => {
-      const v = input.type === 'password' ? input.value : input.value.trim();
+      const v = (input.type === 'password' || input.dataset.pw) ? input.value : input.value.trim();   // 비밀번호는 보이게 해도 앞뒤 공백 그대로
       if (!input.required && !v) { setErr(input, null); return true; }
       let key = v ? null : 'errRequired';
       const rule = RULES[input.dataset.rule];
@@ -81,6 +81,45 @@
       values: () => Object.fromEntries(items.map((i) => [i.dataset.agree, i.checked])),
     };
   };
+
+  /* 비밀번호 칸: 오른쪽 눈 모양 버튼으로 보이기 ↔ 숨기기 (모든 .field 의 비밀번호 칸에 자동으로 붙음) */
+  const EYE = '<svg class="pw__show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>'
+    + '<svg class="pw__hide" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>';
+  const toggles = [];
+  const label = (btn) => {
+    const shown = btn.getAttribute('aria-pressed') === 'true';
+    btn.setAttribute('aria-label', window.PM ? window.PM.t(shown ? 'pwHide' : 'pwShow') : '');
+  };
+  document.querySelectorAll('.field input[type="password"]').forEach((input) => {
+    input.dataset.pw = '1';
+    const wrap = document.createElement('div');
+    wrap.className = 'pw';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pw__toggle';
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-controls', input.id);
+    btn.innerHTML = EYE;
+    wrap.appendChild(btn);
+    label(btn);
+    toggles.push(btn);
+    const set = (show) => {
+      input.type = show ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(show));
+      label(btn);
+    };
+    btn.addEventListener('click', () => {
+      const pos = input.selectionStart;
+      set(input.type === 'password');
+      input.focus();
+      if (pos != null) { try { input.setSelectionRange(pos, pos); } catch (e) { /* 일부 브라우저 */ } }
+    });
+    /* 양식을 비우거나(로그인·변경 완료) 다른 화면으로 넘어갈 때는 다시 숨김 */
+    if (input.form) input.form.addEventListener('reset', () => set(false));
+  });
+  if (window.PM) window.PM.onLang(() => toggles.forEach(label));
 
   window.PM_FORM = { bind, bindAgree, digits };
 })();

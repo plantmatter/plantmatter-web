@@ -156,6 +156,8 @@ window.PM_I18N = {
     resetCodeText: '{email} 주소로 보낸 6자리 코드와 새 비밀번호를 입력해 주세요.',
     errCode: '코드가 맞지 않거나 만료되었습니다. 다시 확인해 주세요.',
     errCodeFormat: '메일로 받은 숫자 코드를 입력해 주세요.',
+    pwShow: '비밀번호 보기',
+    pwHide: '비밀번호 숨기기',
     close: '닫기'
   },
   en: {
@@ -311,6 +313,8 @@ window.PM_I18N = {
     resetCodeText: 'Enter the 6-digit code we sent to {email} and your new password.',
     errCode: 'The code is incorrect or has expired. Please check it again.',
     errCodeFormat: 'Please enter the number code from the email.',
+    pwShow: 'Show password',
+    pwHide: 'Hide password',
     close: 'Close'
   },
   ja: {
@@ -466,6 +470,8 @@ window.PM_I18N = {
     resetCodeText: '{email} に送信した6桁のコードと新しいパスワードを入力してください。',
     errCode: 'コードが正しくないか、有効期限が切れています。もう一度ご確認ください。',
     errCodeFormat: 'メールに届いた数字のコードを入力してください。',
+    pwShow: 'パスワードを表示',
+    pwHide: 'パスワードを隠す',
     close: '閉じる'
   }
 };
