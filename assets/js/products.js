@@ -8,6 +8,7 @@
    price    : 원 단위 숫자 (예: 32000). 아직 정하지 않았으면 null → '가격 문의'로 표시
    status   : 'available'(판매 중) | 'soldout'(품절)
    image    : 세로 3:4 사진 (assets/img/products/ 에 올린 파일)
+   shade    : 사진 아래쪽에 옅은 그라데이션을 자동으로 넣습니다. 사진 자체에 이미 그늘이 있으면 false
 
    ※ 아래 이름 중 '확인 필요'라고 적힌 것은 사진만 보고 임시로 붙인 이름입니다. 실제 학명으로 바꿔 주세요. */
 window.PM_PRODUCTS = [
@@ -18,7 +19,8 @@ window.PM_PRODUCTS = [
     sci: ['Ficus', 'sp. ‘Murung Raya’'],
     price: null,
     status: 'available',
-    image: '/assets/img/products/ficus-murung-raya.jpg'
+    image: '/assets/img/products/ficus-murung-raya.jpg',
+    shade: false                   /* 사진에 이미 아래쪽 그늘이 있음 */
   },
   {
     id: 'biophytum',               /* 확인 필요: 사진만 보고 붙인 임시 이름 */
