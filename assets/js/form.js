@@ -30,7 +30,7 @@
       input.setAttribute('aria-invalid', key ? 'true' : 'false');
     };
     const check = (input) => {
-      const v = (input.type === 'password' || input.dataset.pw) ? input.value : input.value.trim();   // 비밀번호는 보이게 해도 앞뒤 공백 그대로
+      const v = (input.type === 'password' || input.dataset.pwToggle) ? input.value : input.value.trim();   // 비밀번호는 보이게 해도 앞뒤 공백 그대로
       if (!input.required && !v) { setErr(input, null); return true; }
       let key = v ? null : 'errRequired';
       const rule = RULES[input.dataset.rule];
@@ -91,7 +91,7 @@
     btn.setAttribute('aria-label', window.PM ? window.PM.t(shown ? 'pwHide' : 'pwShow') : '');
   };
   document.querySelectorAll('.field input[type="password"]').forEach((input) => {
-    input.dataset.pw = '1';
+    input.dataset.pwToggle = '1';   // (data-pw 는 비밀번호 변경 양식 이름이라 겹치지 않게)
     const wrap = document.createElement('div');
     wrap.className = 'pw';
     input.parentNode.insertBefore(wrap, input);
