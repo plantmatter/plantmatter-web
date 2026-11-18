@@ -1,17 +1,24 @@
 /* PLANT MATTER — 입력 양식 공통 (주문/결제 · 회원가입 · 마이페이지 · 비밀번호)
    .field 안의 input 을 검사합니다.
      required          : 꼭 입력
-     data-rule="…"     : phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상) · code(메일 인증 코드)
+     data-rule="…"     : phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상 + 대문자·숫자·특수문자) · code(메일 인증 코드)
      data-match="이름" : 다른 칸과 같아야 함 (비밀번호 확인)
      data-digits       : 숫자만 남김
    오류 문구는 칸 아래 .field__err 에 나오고, 고치는 즉시 사라집니다. */
 (() => {
   const digits = (v) => String(v || '').replace(/\D/g, '');
+  /* 새 비밀번호 조건 (회원가입 · 비밀번호 찾기 · 비밀번호 변경). 로그인 칸에는 적용하지 않음 */
+  const PW_CHECKS = [
+    ['pwRuleLen', (v) => v.length >= 8],
+    ['pwRuleUpper', (v) => /[A-Z]/.test(v)],
+    ['pwRuleDigit', (v) => /[0-9]/.test(v)],
+    ['pwRuleSpecial', (v) => /[!-\/:-@[-`{-~]/.test(v)],   // ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~
+  ];
   const RULES = {
     phone: (v) => /^0\d{8,10}$/.test(v) || 'errPhone',
     email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'errEmail',
     zip: (v) => /^\d{5}$/.test(v) || 'errZip',
-    password: (v) => v.length >= 8 || 'errPwShort',
+    password: (v) => PW_CHECKS.every(([, ok]) => ok(v)) || 'errPwRule',   // 8자 이상 + 영어 대문자 + 숫자 + 특수문자
     code: (v) => /^\d{6,10}$/.test(v) || 'errCodeFormat',   // 메일로 받은 인증 코드 (기본 6자리)
   };
 
@@ -120,6 +127,25 @@
     if (input.form) input.form.addEventListener('reset', () => set(false));
   });
   if (window.PM) window.PM.onLang(() => toggles.forEach(label));
+
+  /* 새 비밀번호 칸 아래: 조건 4가지를 보여 주고, 맞출 때마다 진하게 */
+  const ruleLists = [];
+  document.querySelectorAll('.field input[data-rule="password"]').forEach((input) => {
+    const ul = document.createElement('ul');
+    ul.className = 'pw-rules';
+    ul.innerHTML = PW_CHECKS.map(([key]) => `<li data-k="${key}"></li>`).join('');
+    const field = input.closest('.field');
+    field.insertBefore(ul, field.querySelector('.field__err'));
+    const paint = () => {
+      PW_CHECKS.forEach(([key, ok]) => ul.querySelector(`[data-k="${key}"]`).classList.toggle('is-ok', ok(input.value)));
+    };
+    const words = () => PW_CHECKS.forEach(([key]) => { ul.querySelector(`[data-k="${key}"]`).textContent = window.PM ? window.PM.t(key) : key; });
+    words();
+    input.addEventListener('input', paint);
+    if (input.form) input.form.addEventListener('reset', () => setTimeout(paint, 0));
+    ruleLists.push(words);
+  });
+  if (window.PM) window.PM.onLang(() => ruleLists.forEach((fn) => fn()));
 
   window.PM_FORM = { bind, bindAgree, digits };
 })();

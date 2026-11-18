@@ -255,6 +255,11 @@ button, input, select { font: inherit; color: inherit; }
 .field__hint { margin: 6px 0 0; font-size: 12px; line-height: 1.6; color: var(--muted); }
 .field__hint:empty { display: none; }
 .field__hint.is-warn { color: var(--text); }
+/* 새 비밀번호 조건 (맞추면 진하게) */
+.pw-rules { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 12px; line-height: 1.6; color: #a8a8a8; }
+.pw-rules li { display: inline-flex; align-items: center; gap: 6px; transition: color .2s; }
+.pw-rules li::before { content: ""; width: 8px; height: 4px; margin-top: -3px; border-left: 1.3px solid currentColor; border-bottom: 1.3px solid currentColor; transform: rotate(-45deg); }
+.pw-rules li.is-ok { color: var(--text); }
 .field__row { display: flex; gap: 8px; }
 .field__row input { flex: 0 0 180px; }
 .check { position: relative; display: inline-flex; align-items: center; gap: 10px; margin: -4px 0 22px; font-size: 14px; cursor: pointer; }
