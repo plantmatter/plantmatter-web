@@ -1,7 +1,7 @@
 /* PLANT MATTER — 입력 양식 공통 (주문/결제 · 회원가입 · 마이페이지 · 비밀번호)
    .field 안의 input 을 검사합니다.
      required          : 꼭 입력
-     data-rule="…"     : phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상 + 대문자·숫자·특수문자) · code(메일 인증 코드)
+     data-rule="…"     : phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상 + 대문자·소문자·숫자·특수문자) · code(메일 인증 코드)
      data-match="이름" : 다른 칸과 같아야 함 (비밀번호 확인)
      data-digits       : 숫자만 남김
    오류 문구는 칸 아래 .field__err 에 나오고, 고치는 즉시 사라집니다. */
@@ -11,6 +11,7 @@
   const PW_CHECKS = [
     ['pwRuleLen', (v) => v.length >= 8],
     ['pwRuleUpper', (v) => /[A-Z]/.test(v)],
+    ['pwRuleLower', (v) => /[a-z]/.test(v)],
     ['pwRuleDigit', (v) => /[0-9]/.test(v)],
     ['pwRuleSpecial', (v) => /[!-\/:-@[-`{-~]/.test(v)],   // ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~
   ];
@@ -18,7 +19,7 @@
     phone: (v) => /^0\d{8,10}$/.test(v) || 'errPhone',
     email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'errEmail',
     zip: (v) => /^\d{5}$/.test(v) || 'errZip',
-    password: (v) => PW_CHECKS.every(([, ok]) => ok(v)) || 'errPwRule',   // 8자 이상 + 영어 대문자 + 숫자 + 특수문자
+    password: (v) => PW_CHECKS.every(([, ok]) => ok(v)) || 'errPwRule',   // 8자 이상 + 영어 대문자 + 소문자 + 숫자 + 특수문자 (Supabase 'Lowercase, uppercase letters, digits and symbols' 와 같음)
     code: (v) => /^\d{6,10}$/.test(v) || 'errCodeFormat',   // 메일로 받은 인증 코드 (기본 6자리)
   };
 

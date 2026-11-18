@@ -101,7 +101,7 @@ window.PM_I18N = {
     fPassword: '비밀번호',
     fPassword2: '비밀번호 확인',
     fNewPw: '새 비밀번호',
-    pwHint: '8자 이상, 대문자·숫자·특수문자 포함',
+    pwHint: '8자 이상, 대·소문자·숫자·특수문자 포함',
     forgotPw: '비밀번호 찾기',
     noAccount: '아직 회원이 아니신가요?',
     haveAccount: '이미 회원이신가요?',
@@ -187,9 +187,10 @@ window.PM_I18N = {
     saveInfoFirst: '회원 정보를 먼저 저장해 주세요.',
     pwRuleLen: '8자 이상',
     pwRuleUpper: '영어 대문자',
+    pwRuleLower: '영어 소문자',
     pwRuleDigit: '숫자',
     pwRuleSpecial: '특수문자',
-    errPwRule: '8자 이상으로, 영어 대문자·숫자·특수문자를 모두 넣어 주세요.',
+    errPwRule: '8자 이상으로, 영어 대문자·소문자·숫자·특수문자를 모두 넣어 주세요.',
     close: '닫기'
   },
   en: {
@@ -290,7 +291,7 @@ window.PM_I18N = {
     fPassword: 'Password',
     fPassword2: 'Confirm password',
     fNewPw: 'New password',
-    pwHint: '8+ characters with A-Z, 0-9 and a symbol',
+    pwHint: '8+ characters with A-Z, a-z, 0-9 and a symbol',
     forgotPw: 'Forgot your password?',
     noAccount: 'New to PLANT MATTER?',
     haveAccount: 'Already a member?',
@@ -376,9 +377,10 @@ window.PM_I18N = {
     saveInfoFirst: 'Please save your account details first.',
     pwRuleLen: '8+ characters',
     pwRuleUpper: 'Uppercase letter',
+    pwRuleLower: 'Lowercase letter',
     pwRuleDigit: 'Number',
     pwRuleSpecial: 'Symbol',
-    errPwRule: 'Use 8 or more characters with an uppercase letter, a number and a symbol.',
+    errPwRule: 'Use 8 or more characters with an uppercase letter, a lowercase letter, a number and a symbol.',
     close: 'Close'
   },
   ja: {
@@ -479,7 +481,7 @@ window.PM_I18N = {
     fPassword: 'パスワード',
     fPassword2: 'パスワード（確認）',
     fNewPw: '新しいパスワード',
-    pwHint: '8文字以上、大文字・数字・記号を含む',
+    pwHint: '8文字以上、大文字・小文字・数字・記号を含む',
     forgotPw: 'パスワードをお忘れの方',
     noAccount: 'はじめての方',
     haveAccount: 'すでに会員の方',
@@ -565,9 +567,10 @@ window.PM_I18N = {
     saveInfoFirst: '先に会員情報を保存してください。',
     pwRuleLen: '8文字以上',
     pwRuleUpper: '英大文字',
+    pwRuleLower: '英小文字',
     pwRuleDigit: '数字',
     pwRuleSpecial: '記号',
-    errPwRule: '8文字以上で、英大文字・数字・記号をすべて含めてください。',
+    errPwRule: '8文字以上で、英大文字・英小文字・数字・記号をすべて含めてください。',
     close: '閉じる'
   }
 };
