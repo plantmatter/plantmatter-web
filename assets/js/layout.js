@@ -27,6 +27,7 @@
     <nav class="gnb__menu" aria-label="주요 메뉴" data-i18n-attr="aria-label: menu">
       <a href="/plant/" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
       <a href="#" data-soon="MATTER">MATTER</a>
+      <a href="#" data-soon="COLLABORATION">COLLABORATION</a>
       <a href="#" data-soon="CONTACT">CONTACT</a>
     </nav>
 

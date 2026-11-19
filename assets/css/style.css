@@ -57,6 +57,7 @@ button, input, select { font: inherit; color: inherit; }
   transition: transform .35s var(--ease);
 }
 .gnb__menu a:hover::after, .gnb__menu a.is-current::after { transform: scaleX(1); }
+@media (max-width: 1180px) { .gnb__menu { gap: 32px; margin-left: 56px; } }   /* 좁은 창: 탭이 오른쪽 아이콘에 닿지 않게 */
 .gnb__util { display: flex; gap: 6px; margin-left: auto; margin-right: -8px; }
 
 .icon-btn {
