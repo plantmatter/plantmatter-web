@@ -250,11 +250,12 @@ button, input, select { font: inherit; color: inherit; }
 .field input::placeholder { color: #b5b5b5; }
 .field input:focus { border-color: var(--text); }
 .field.is-invalid input { border-color: #b3261e; }
-.field__err { margin: 6px 0 0; font-size: 12px; color: #b3261e; }
+.field__err { margin: 6px 0 0; font-size: 12px; line-height: 1.6; color: #b3261e; }
 .field__err:empty { display: none; }
 .field__hint { margin: 6px 0 0; font-size: 12px; line-height: 1.6; color: var(--muted); }
 .field__hint:empty { display: none; }
 .field__hint.is-warn { color: var(--text); }
+.field.is-invalid .field__hint { display: none; }   /* 오류 문구가 보일 때는 안내 문구를 숨겨 겹치지 않게 */
 /* 새 비밀번호 조건 (맞추면 진하게) */
 .pw-rules { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 12px; line-height: 1.6; color: #a8a8a8; }
 .pw-rules li { display: inline-flex; align-items: center; gap: 6px; transition: color .2s; }
@@ -365,30 +366,31 @@ button, input, select { font: inherit; color: inherit; }
 .my__body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease); }
 .my__sec.is-open > .my__body { grid-template-rows: 1fr; }
 .my__inner { min-height: 0; margin: 0 -6px; overflow: hidden; }
-.my__pad { padding: 4px 6px 34px; }
-.my__sub { margin: 30px 0 16px; font-size: 14px; font-weight: 300; color: var(--mid); }
-.my__pad > .check { margin: 4px 0 22px; }
-.my__pad > .btn-buy { margin-top: 4px; }
-.my__empty { font-size: 14px; color: var(--muted); }
+.my__pad { padding: 2px 6px 32px; }
+.my__pad > .check { margin: 2px 0 24px; }
+.my .agree--first { margin: 0 0 24px; }
+.my .auth__err { margin: 0 0 12px; }
+.my__pad > .btn-buy { margin-top: 0; }
+.my__empty { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
 .my__foot { padding-top: 26px; border-top: 1px solid var(--line); text-align: right; }
 
 /* 추가 배송지 (마이페이지) · 배송지 고르기 (주문/결제) */
-.my__note { margin: -10px 0 16px; font-size: 13px; color: var(--muted); }
-.addr-list { margin: 0 0 16px; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.my__note { margin: 0 0 16px; font-size: 12px; line-height: 1.6; color: var(--muted); }
+.addr-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .addr-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-.addr-item__text { display: grid; gap: 2px; font-size: 14px; line-height: 1.6; color: var(--mid); }
+.addr-item__text { display: grid; gap: 2px; min-width: 0; font-size: 14px; line-height: 1.65; color: var(--mid); overflow-wrap: anywhere; }
 .addr-item__label { color: var(--text); }
 .addr-item__act { display: flex; flex: none; gap: 14px; }
 .addr-empty { padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
 .link-btn { padding: 0; border: 0; background: none; cursor: pointer; font-size: 13px; font-weight: 300; color: var(--mid); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .link-btn:hover { color: var(--text); }
 .link-btn.is-armed { color: #b3261e; }
-.addr-add { margin-top: 4px; }
-.addr-form { margin-top: 8px; padding: 22px 22px 6px; background: #f8f8f6; }
+.addr-add { margin-top: 20px; }
+.addr-form { margin-top: 20px; padding: 22px 22px 4px; background: #f8f8f6; }
 .addr-form .field input { background: #fff; }
-.addr-form__title { margin: 0 0 14px; font-size: 14px; color: var(--text); }
+.addr-form__title { margin: 0 0 16px; font-size: 14px; line-height: 1.6; color: var(--text); }
 .addr-item--default .addr-item__label::after { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 0 2px 8px; border-radius: 50%; background: var(--text); vertical-align: middle; }
-.addr-form__btns { display: flex; gap: 8px; margin: 4px 0 16px; }
+.addr-form__btns { display: flex; gap: 8px; margin: 6px 0 18px; }
 .addr-form__btns .btn-buy { flex: 1; height: 48px; }
 .addr-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 20px; }
 .addr-pick .pill { border: 0; cursor: pointer; font-family: inherit; font-weight: 300; }
