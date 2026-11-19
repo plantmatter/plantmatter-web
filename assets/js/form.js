@@ -1,7 +1,7 @@
 /* PLANT MATTER — 입력 양식 공통 (주문/결제 · 회원가입 · 마이페이지 · 비밀번호)
    .field 안의 input 을 검사합니다.
      required          : 꼭 입력
-     data-rule="…"     : phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상 + 대문자·소문자·숫자·특수문자) · code(메일 인증 코드)
+     data-rule="…"     : userid(아이디) · phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상 + 대문자·소문자·숫자·특수문자) · code(메일 인증 코드)
      data-match="이름" : 다른 칸과 같아야 함 (비밀번호 확인)
      data-digits       : 숫자만 남김
    오류 문구는 칸 아래 .field__err 에 나오고, 고치는 즉시 사라집니다. */
@@ -21,6 +21,7 @@
     zip: (v) => /^\d{5}$/.test(v) || 'errZip',
     password: (v) => PW_CHECKS.every(([, ok]) => ok(v)) || 'errPwRule',   // 8자 이상 + 영어 대문자 + 소문자 + 숫자 + 특수문자 (Supabase 'Lowercase, uppercase letters, digits and symbols' 와 같음)
     code: (v) => /^\d{6,10}$/.test(v) || 'errCodeFormat',   // 메일로 받은 인증 코드 (기본 6자리)
+    userid: (v) => /^[가-힣A-Za-z0-9._-]{2,20}$/.test(v) || 'errIdFormat',   // 아이디: 2~20자, 한글·영문·숫자 . _ -
   };
 
   const bind = (form) => {
@@ -42,7 +43,8 @@
       if (!input.required && !v) { setErr(input, null); return true; }
       let key = v ? null : 'errRequired';
       const rule = RULES[input.dataset.rule];
-      if (!key && rule) { const r = rule(v); key = r === true ? null : r; }
+      const kept = input.dataset.keep && v === input.dataset.keep;   // 예전부터 쓰던 값을 그대로 두는 것은 통과
+      if (!key && rule && !kept) { const r = rule(v); key = r === true ? null : r; }
       if (!key && input.dataset.match) {
         const other = form.elements[input.dataset.match];
         if (other && other.value !== input.value) key = 'errPwMatch';

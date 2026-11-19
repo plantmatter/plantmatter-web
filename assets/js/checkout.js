@@ -127,7 +127,7 @@
         return;
       }
       const [c, extras] = await Promise.all([A.getCustomer().catch(() => null), A.listAddresses().catch(() => [])]);
-      fillEmpty({ buyerEmail: u.email, buyerName: c && c.name, buyerPhone: c && c.phone, zip: c && c.zip, addr: c && c.addr, addr2: c && c.addr2 });
+      fillEmpty({ buyerEmail: u.email, buyerName: c && c.real_name, buyerPhone: c && c.phone, zip: c && c.zip, addr: c && c.addr, addr2: c && c.addr2 });   // 이름은 본인인증 실명 (아이디가 아님)
       setupPick(c, extras);
     });
   }

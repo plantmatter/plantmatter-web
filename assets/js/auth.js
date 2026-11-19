@@ -130,6 +130,13 @@
       if (error) throw error;
     },
 
+    /* 아이디를 쓸 수 있는지 (형식 + 다른 회원과 겹치지 않는지 — supabase/web04). 서버에 못 물어보면 null */
+    async idAvailable(id) {
+      const { data, error } = await need().rpc('shop_id_available', { p_id: id });
+      if (error) return null;
+      return data === true;
+    },
+
     /* 추가 배송지 (기본 배송지 외에 2곳까지 — supabase/web03) */
     async listAddresses() {
       if (!user) return [];
@@ -163,6 +170,8 @@
       if (/rate_limit|over_.*limit/.test(code) || /rate limit|security purposes/i.test(msg)) return 'errRate';
       if (/consent required/i.test(msg)) return 'errAgree';
       if (/name_locked/.test(msg)) return 'errNameLocked';
+      if (/id_taken|shop_customers_id_unique/.test(msg)) return 'errIdTaken';
+      if (/id_invalid/.test(msg)) return 'errIdFormat';
       if (/address_limit/.test(msg)) return 'addrLimit';
       if (code === '42P01' || code === 'PGRST202' || code === 'PGRST205' || /shop_customers|shop_addresses|save_shop_customer|schema cache/i.test(msg)) return 'errSetup';
       if (code === 'network' || /failed to fetch|network|load failed/i.test(msg)) return 'errNetwork';
