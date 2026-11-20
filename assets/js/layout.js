@@ -56,15 +56,16 @@
   var cartCls = cartN ? ' has-items' : '';
   var cartText = cartN > 99 ? '99+' : cartN ? String(cartN) : '';
 
-  var megaList = function (items, base) {
+  /* marquee: 이름이 칸보다 길면 두 줄로 내려가지 않고 한 줄로 옆으로 흐름 (COLLABORATION 메뉴만 — 아래 setupMarquee) */
+  var megaList = function (items, base, marquee) {
     return items.map(function (c) {
       return '        <li><a class="mega__item" href="' + base + '?c=' + c.id + '"><span class="mega__img">' +
         (c.img ? '<img src="' + c.img + '" alt="" width="720" height="960" loading="lazy">' : '') +
-        '</span><span class="mega__name">' + c.name + '</span></a></li>';
+        '</span><span class="mega__name' + (marquee ? ' is-marquee"><span class="mega__track">' + c.name + '</span>' : '">' + c.name) + '</span></a></li>';
     }).join('\n');
   };
   var megaItems = megaList(CATEGORIES, '/plant/');
-  var collabItems = megaList(COLLABS, '/collaboration/');
+  var collabItems = megaList(COLLABS, '/collaboration/', true);
 
   var TOP = `  <!-- ───────── 상단 바 ───────── -->
   <header class="gnb">
@@ -164,6 +165,57 @@ ${collabItems}
 
   <div class="toast" role="status" aria-live="polite"></div>
 `;
+
+  /* COLLABORATION 메뉴의 긴 이름: 칸에 다 들어가면 그대로, 넘치면 멈춤 → 끝까지 천천히 흐름 → 멈춤 → 처음으로 (반복)
+     PC(마우스) 는 그 이름에 마우스를 올렸을 때만, 모바일(터치) 은 메뉴가 열려 있는 동안 항상.
+     '동작 줄이기' 설정이면 움직이지 않고 끝을 … 으로 줄임 (style.css) */
+  function setupMarquee() {
+    var hover = window.matchMedia('(hover: hover)').matches;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var menu = document.getElementById('menu-collab');
+    if (!menu || !Element.prototype.animate) return;
+    var boxes = Array.prototype.slice.call(menu.querySelectorAll('.mega__name.is-marquee'));
+    var runs = boxes.map(function (box) {
+      var track = box.querySelector('.mega__track');
+      var anim = null;
+      var over = function () { return track.scrollWidth - box.clientWidth; };
+      var stop = function () { if (anim) { anim.cancel(); anim = null; } };
+      var start = function () {
+        var d = over();
+        if (d <= 1 || reduce.matches || anim) return;
+        var wait = hover ? 400 : 1400;                 // 처음 멈춤 (마우스는 짧게)
+        var slide = Math.max(1200, d / 30 * 1000);     // 1초에 30px 정도
+        var hold = 1200;                               // 끝에서 멈춤
+        var total = wait + slide + hold + slide;
+        anim = track.animate([
+          { transform: 'translateX(0)', offset: 0 },
+          { transform: 'translateX(0)', offset: wait / total, easing: 'ease-in-out' },
+          { transform: 'translateX(' + (-d) + 'px)', offset: (wait + slide) / total },
+          { transform: 'translateX(' + (-d) + 'px)', offset: (wait + slide + hold) / total, easing: 'ease-in-out' },
+          { transform: 'translateX(0)', offset: 1 }
+        ], { duration: total, iterations: Infinity });
+      };
+      var link = box.closest('.mega__item');
+      if (hover) {
+        link.addEventListener('mouseenter', start);
+        link.addEventListener('mouseleave', stop);
+        link.addEventListener('focus', start);
+        link.addEventListener('blur', stop);
+      }
+      return { start: start, stop: stop };
+    });
+    /* 모바일: 메뉴가 열리면 흐르기 시작, 닫히면 멈춤 */
+    if (!hover) {
+      var sync = function () { runs.forEach(function (r) { if (menu.classList.contains('is-open')) r.start(); else r.stop(); }); };
+      new MutationObserver(sync).observe(menu, { attributes: true, attributeFilter: ['class'] });
+    }
+    /* 글꼴이 늦게 들어오거나 화면 크기가 바뀌면 길이를 다시 잼 */
+    var restart = function () { runs.forEach(function (r) { r.stop(); }); if (!hover && menu.classList.contains('is-open')) runs.forEach(function (r) { r.start(); }); };
+    window.addEventListener('resize', restart);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupMarquee);
+  else setTimeout(setupMarquee, 0);
 
   function insertHere(html) { document.currentScript.insertAdjacentHTML('afterend', html); }
   window.PM_LAYOUT = {

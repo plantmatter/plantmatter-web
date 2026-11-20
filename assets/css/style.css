@@ -671,6 +671,16 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 .adm-editor__del { display: block; margin: 18px auto 0; padding: 8px; border: 0; background: none; color: #b3261e; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .adm-row__btns { justify-content: flex-end; }
 
+/* COLLABORATION 메뉴 긴 이름: 한 줄로 두고 넘치면 옆으로 흐름 (layout.js setupMarquee) */
+.mega__name.is-marquee { overflow: hidden; white-space: nowrap; }
+.mega__track { display: inline-block; white-space: nowrap; will-change: transform; }
+.mega__item:hover .mega__name.is-marquee { text-decoration: none; }
+.mega__item:hover .mega__track { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+@media (prefers-reduced-motion: reduce) {
+  .mega__name.is-marquee { text-overflow: ellipsis; }
+  .mega__track { display: inline; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bar.is-active .bar__fill { width: 100%; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
