@@ -81,7 +81,7 @@
     const lang = PM.getLang();
     document.title = `${t('checkout')} — PLANT MATTER`;
     itemsEl.innerHTML = lines.map(({ p, qty }) => `<li class="co-item">
-      <a class="co-item__img" href="/product/?id=${encodeURIComponent(p.id)}"><img src="${esc(p.image)}" alt="" width="750" height="1000"></a>
+      <a class="co-item__img${p.plain ? ' is-plain' : ''}" href="/product/?id=${encodeURIComponent(p.id)}"><img src="${esc(p.image)}" alt="" width="750" height="1000"></a>
       <span class="co-item__text">
         <span class="co-item__name">${esc(S.nameOf(p, lang))}</span>
         <span class="co-item__sci">${S.sciHtml(p)}</span>

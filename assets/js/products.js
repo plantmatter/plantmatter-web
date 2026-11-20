@@ -14,6 +14,10 @@
    (선택) desc   : 제품 상세의 설명 문구 { ko: '…', en: '…', ja: '…' }
    (선택) stock  : 한 번에 살 수 있는 최대 수량 (없으면 shop.js 의 maxQty). 한 개체뿐이면 1
    (선택) exact  : true 이면 '동일 상품 배송' — 사진 속 바로 그 식물을 보냄 (목록·상세에 표시)
+   ── 식물이 아닌 협업 제품 (화분 등) ──
+   collab   : layout.js 의 COLLABS 이름 (예: 'thichi-yuiitsumuni') → COLLABORATION 페이지 그 탭에 나옴. category 는 넣지 않음 (PLANT 목록에서 빠짐)
+   sub      : 이름 아래 둘째 줄 (학명 대신, 이탤릭 아님)  예) 'BOWL LONG - 4'
+   plain    : true 이면 사진 아래쪽 그라데이션 없음 — 사진은 tools/prepare_product_photo.py --bg f4f4f2 (단색 아주 밝은 회색)
    팔리면 status 를 'soldout' 으로 바꿔 주세요.
    제품 상세 주소: /product/?id=아래의 id
  */
@@ -66,5 +70,42 @@ window.PM_PRODUCTS = [
     stock: 1,
     exact: true,
     image: '/assets/img/products/specklinia-grobyi-2.jpg?v=2'
+  },
+  /* ───── COLLABORATION · THICHI YUIITSUMUNI — 협업 화분 (식물이 아니라 PLANT 목록에는 나오지 않음) ───── */
+  {
+    id: 'thichi-bucotsu-bowl-long-4',
+    collab: 'thichi-yuiitsumuni',
+    name: { ko: 'THICHIのBUCOTSU鉢', en: 'THICHIのBUCOTSU鉢', ja: 'THICHIのBUCOTSU鉢' },
+    sub: 'BOWL LONG - 4',
+    price: null,
+    status: 'available',
+    stock: 1,
+    exact: true,
+    plain: true,
+    image: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=1'
+  },
+  {
+    id: 'thichi-bucotsu-bowl-mid-4',
+    collab: 'thichi-yuiitsumuni',
+    name: { ko: 'THICHIのBUCOTSU鉢', en: 'THICHIのBUCOTSU鉢', ja: 'THICHIのBUCOTSU鉢' },
+    sub: 'BOWL MID - 4',
+    price: null,
+    status: 'available',
+    stock: 1,
+    exact: true,
+    plain: true,
+    image: '/assets/img/products/thichi-bucotsu-bowl-mid-4.jpg?v=1'
+  },
+  {
+    id: 'thichi-bucotsu-bowl-mid-5',
+    collab: 'thichi-yuiitsumuni',
+    name: { ko: 'THICHIのBUCOTSU鉢', en: 'THICHIのBUCOTSU鉢', ja: 'THICHIのBUCOTSU鉢' },
+    sub: 'BOWL MID - 5',
+    price: null,
+    status: 'available',
+    stock: 1,
+    exact: true,
+    plain: true,
+    image: '/assets/img/products/thichi-bucotsu-bowl-mid-5.jpg?v=1'
   }
 ];

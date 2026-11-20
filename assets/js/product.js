@@ -48,6 +48,7 @@
     }
     const name = S.nameOf(p, lang);
     const cat = S.category(p.category);
+    const col = S.collabOf(p);   // 협업 제품 (THICHI 화분 등)
     const sold = p.status === 'soldout';
     const canBuy = !sold && p.price != null;
     const images = (p.images && p.images.length ? p.images : [p.image]).filter(Boolean);
@@ -58,7 +59,7 @@
 
     main.innerHTML = `
       <div class="pd__media">
-        ${images.map((src, i) => `<figure class="pd__img"><img src="${esc(src)}" alt="${i ? '' : esc(name)}" width="750" height="1000"${i ? ' loading="lazy"' : ''}></figure>`).join('')}
+        ${images.map((src, i) => `<figure class="pd__img${p.plain ? ' is-plain' : ''}"><img src="${esc(src)}" alt="${i ? '' : esc(name)}" width="750" height="1000"${i ? ' loading="lazy"' : ''}></figure>`).join('')}
       </div>
       <div class="pd__info"><div class="pd__inner">
         <h1 class="pd__name">${esc(name)}</h1>
@@ -88,15 +89,17 @@
           <details class="acc__item">
             <summary>${esc(t('infoTitle'))}${CHEV}</summary>
             <dl class="acc__body">
-              <dt>${esc(t('sciLabel'))}</dt><dd>${S.sciHtml(p)}</dd>
+              <dt>${esc(t(p.sub ? 'modelLabel' : 'sciLabel'))}</dt><dd>${S.sciHtml(p)}</dd>
               ${cat ? `<dt>${esc(t('catLabel'))}</dt><dd><a href="/plant/?c=${esc(cat.id)}">${esc(cat.name)}</a></dd>` : ''}
+              ${col ? `<dt>${esc(t('collabLabel'))}</dt><dd><a href="/collaboration/?c=${esc(col.id)}">${esc(col.name)}</a></dd>` : ''}
             </dl>
           </details>
         </div>
       </div></div>`;
 
-    crumb.innerHTML = `<a href="/">HOME</a><span aria-hidden="true">/</span><a href="/plant/">PLANT</a>`
-      + (cat ? `<span aria-hidden="true">/</span><a href="/plant/?c=${esc(cat.id)}">${esc(cat.name)}</a>` : '')
+    crumb.innerHTML = `<a href="/">HOME</a><span aria-hidden="true">/</span>`
+      + (col ? `<a href="/collaboration/">COLLABORATION</a><span aria-hidden="true">/</span><a href="/collaboration/?c=${esc(col.id)}">${esc(col.name)}</a>`
+        : `<a href="/plant/">PLANT</a>` + (cat ? `<span aria-hidden="true">/</span><a href="/plant/?c=${esc(cat.id)}">${esc(cat.name)}</a>` : ''))
       + `<span aria-hidden="true">/</span><span aria-current="page">${esc(name)}</span>`;
     if (canBuy) update();
   };

@@ -22,8 +22,6 @@
   let cat = fromUrl();
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-  const price = (p) => (p == null ? t('priceAsk') : `₩ ${Number(p).toLocaleString('ko-KR')}`);
-  const BAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>';
 
   /* 분류 탭 */
   pillsEl.innerHTML = [{ id: 'all', name: 'ALL' }, ...CATS]
@@ -31,25 +29,8 @@
     .join('');
   const pills = [...pillsEl.querySelectorAll('.pill')];
 
-  const card = (p, lang) => {
-    const name = (p.name && (p.name[lang] || p.name.ko)) || p.id;
-    const sold = p.status === 'soldout';
-    const canAdd = window.PM_CART && !sold && p.price != null;   // 가방 버튼 → 장바구니에 담기 (assets/js/cart.js)
-    const [italic = '', rest = ''] = p.sci || [];
-    return `<li class="card${sold ? ' is-soldout' : ''}" id="p-${esc(p.id)}">
-      <a class="card__link" href="/product/?id=${encodeURIComponent(p.id)}">
-        <span class="card__img"><img src="${esc(p.image)}" alt="${esc(name)}" width="750" height="1000" loading="lazy"></span>
-        ${sold ? `<span class="card__badge">${esc(t('soldOut'))}</span>` : ''}
-        <span class="card__body">
-          <span class="card__name">${esc(name)}</span>
-          <span class="card__sci"><i>${esc(italic)}</i> ${esc(rest)}</span>
-          <span class="card__price">${esc(price(p.price))}</span>
-          ${p.exact ? `<span class="card__note">${esc(t('exactShip'))}</span>` : ''}
-        </span>
-      </a>
-      ${canAdd ? `<button class="card__cart" type="button" data-cart-add="${esc(p.id)}" aria-label="${esc(t('addToCartName', { name }))}">${BAG}</button>` : ''}
-    </li>`;
-  };
+  /* 상품 칸은 assets/js/shop.js 의 cardHtml (COLLABORATION 페이지와 같은 모양) */
+  const card = (p, lang) => window.PM_SHOP.cardHtml(p, lang);
 
   /* 분류 탭 표시는 누르는 즉시, 제목·개수·식물 목록은 renderContent() 에서 */
   const renderPills = () => {
@@ -66,7 +47,7 @@
     titleEl.textContent = label;
     crumbEl.textContent = label;
     document.title = `${label} — PLANT MATTER`;
-    const list = PRODUCTS.filter((p) => cat === 'all' || p.category === cat);
+    const list = PRODUCTS.filter((p) => (cat === 'all' ? CATS.some((c) => c.id === p.category) : p.category === cat));   // 식물만 (협업 화분 등은 COLLABORATION 페이지에)
     countEl.textContent = list.length === 1 ? t('countOne') : t('count', { n: list.length });
     gridEl.innerHTML = list.map((p) => card(p, lang)).join('');
     emptyEl.hidden = list.length > 0;

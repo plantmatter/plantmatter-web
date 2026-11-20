@@ -12,6 +12,9 @@
                       --zoom 0.7 처럼 1보다 작으면 축소하고 순백 여백을 더함
     (선택) --fy 0.52  : 확대할 때 세로 위치를 직접 지정 (0=위 … 1=아래)
     (선택) --size 1.15: 자동 맞춤은 그대로 두고 이 식물만 조금 크게(1.15 = 가로·세로 15%) / 작게(0.9)
+    (선택) --bg f4f4f2 : 순백 대신 이 색의 단색 배경 (화분·협업 제품용, 아주 밝은 회색)
+                      순백으로 고른 뒤 사진 전체에 이 색을 곱함 → 배경은 정확히 이 색, 제품 색은 거의 그대로(4% 정도)
+                      이렇게 만든 제품은 products.js 에 plain: true 를 넣어 사이트의 아래쪽 그라데이션도 빼 주세요
     옵션 없이 실행하면 자동으로 크기·위치를 맞춥니다 (권장). 옵션을 주면 그 값대로 직접 자릅니다.
 
 필요한 것: Python 3, Pillow, NumPy  (pip install pillow numpy)
@@ -210,6 +213,14 @@ def crop_3x4(img, fx=None, zoom=1.0, fy=None):
     return img.resize((OUT_W, OUT_H), Image.LANCZOS)
 
 
+def tint_background(img, hex_color):
+    """순백(#fff) 배경을 단색으로: 사진 전체에 그 색을 곱함 (흰색 → 그 색, 어두운 부분은 거의 그대로, 경계 번짐 없음)"""
+    h = hex_color.lstrip('#')
+    rgb = np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)], dtype=np.float32) / 255.0
+    a = np.asarray(img, dtype=np.float32) * rgb
+    return Image.fromarray(np.clip(np.round(a), 0, 255).astype(np.uint8))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('src')
@@ -218,11 +229,14 @@ def main():
     ap.add_argument('--zoom', type=float, default=1.0)
     ap.add_argument('--fy', type=float, default=None)
     ap.add_argument('--size', type=float, default=1.0)
+    ap.add_argument('--bg', default=None, help='단색 배경 (예: f4f4f2)')
     args = ap.parse_args()
     img = Image.open(args.src).convert('RGB')
     flat = flatten_background(img)
     manual = args.fx is not None or args.fy is not None or args.zoom != 1.0
     out = crop_3x4(flat, args.fx, args.zoom, args.fy) if manual else fit_3x4(flat, args.size)
+    if args.bg:
+        out = tint_background(out, args.bg)
     out.save(args.dst, quality=84, optimize=True, progressive=True)
     print(f'saved {args.dst} ({out.size[0]}x{out.size[1]})')
 

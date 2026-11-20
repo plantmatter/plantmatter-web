@@ -26,9 +26,33 @@
   const shippingFor = (subtotal) =>
     config.shippingFee > 0 && !(config.freeShippingOver != null && subtotal >= config.freeShippingOver) ? config.shippingFee : 0;
   const isTest = () => /^test_/.test(config.clientKey);
+  /* 이름 아래 둘째 줄: 식물은 학명(앞부분 이탤릭), 협업 제품은 sub (예: BOWL LONG - 4) */
   const sciHtml = (p) => {
+    if (p.sub) return esc(p.sub);
     const [italic = '', rest = ''] = p.sci || [];
     return `<i>${esc(italic)}</i>${rest ? ' ' + esc(rest) : ''}`;
+  };
+  const collabOf = (p) => (p && p.collab && (window.PM_COLLABS || []).find((c) => c.id === p.collab)) || null;
+  /* 목록 카드 (PLANT 목록 · COLLABORATION 페이지 공통): 사진 · 이름 · 둘째 줄 · 가격 · 동일 상품 배송 · 가방 버튼 */
+  const BAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>';
+  const cardHtml = (p, lang) => {
+    const t = window.PM.t;
+    const name = nameOf(p, lang);
+    const sold = p.status === 'soldout';
+    const canAdd = window.PM_CART && !sold && p.price != null;   // 가방 버튼 → 장바구니에 담기 (assets/js/cart.js)
+    return `<li class="card${sold ? ' is-soldout' : ''}" id="p-${esc(p.id)}">
+      <a class="card__link" href="/product/?id=${encodeURIComponent(p.id)}">
+        <span class="card__img${p.plain ? ' is-plain' : ''}"><img src="${esc(p.image)}" alt="${esc(name)}" width="750" height="1000" loading="lazy"></span>
+        ${sold ? `<span class="card__badge">${esc(t('soldOut'))}</span>` : ''}
+        <span class="card__body">
+          <span class="card__name">${esc(name)}</span>
+          <span class="card__sci">${sciHtml(p)}</span>
+          <span class="card__price">${esc(p.price == null ? t('priceAsk') : won(p.price))}</span>
+          ${p.exact ? `<span class="card__note">${esc(t('exactShip'))}</span>` : ''}
+        </span>
+      </a>
+      ${canAdd ? `<button class="card__cart" type="button" data-cart-add="${esc(p.id)}" aria-label="${esc(t('addToCartName', { name }))}">${BAG}</button>` : ''}
+    </li>`;
   };
   /* 주문번호: PM + 날짜 + 무작위 8자 (토스페이먼츠 규칙: 영문·숫자·-·_ 6~64자) */
   const newOrderId = () => {
@@ -43,5 +67,5 @@
   const saveOrder = (o) => { try { sessionStorage.setItem(ORDER_KEY, JSON.stringify(o)); } catch (e) {} };
   const loadOrder = () => { try { return JSON.parse(sessionStorage.getItem(ORDER_KEY) || 'null'); } catch (e) { return null; } };
 
-  window.PM_SHOP = { config, esc, won, find, nameOf, category, maxQty, shippingFor, isTest, sciHtml, newOrderId, saveOrder, loadOrder };
+  window.PM_SHOP = { config, esc, won, find, nameOf, category, collabOf, maxQty, shippingFor, isTest, sciHtml, cardHtml, newOrderId, saveOrder, loadOrder };
 })();

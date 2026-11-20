@@ -110,7 +110,11 @@
 - 페이지: 경로 글씨 · 제목 · 분류 탭(ALL · 각 협업) · 옆으로 넘기는 애니메이션 — `assets/js/collaboration.js`
   - ALL: 협업 카드 목록 / 각 협업(`/collaboration/?c=gecko-in-the-library`): 지금은 '소개를 준비하고 있습니다'
 - 항목(이름 · 메뉴 썸네일 3:4)은 `assets/js/layout.js` 의 `COLLABS` 에서 추가·수정 (PC·모바일 두 저장소 모두)
-  - 지금: GECKO IN THE LIBRARY, THICHI YUIITSUMUNI (사진 없음 → 회색 칸)
+  - 지금: GECKO IN THE LIBRARY (사진 없음 → 회색 칸), THICHI YUIITSUMUNI (메뉴 사진 = BOWL LONG - 4)
+- 각 협업의 제품: `products.js` 에 `collab: 'thichi-yuiitsumuni'` 로 추가 → 그 탭에 PLANT 와 같은 카드로 나옴 (PLANT 목록에는 안 나옴)
+  - 둘째 줄은 학명 대신 `sub` (예: 'BOWL LONG - 4'), 상세의 정보에는 '모델' · '협업'
+  - 사진: 단색 아주 밝은 회색 배경 · 그라데이션 없음 → `python3 tools/prepare_product_photo.py 원본.jpg assets/img/products/이름.jpg --zoom 1.0 --fy 0.5 --bg f4f4f2` 후 `plain: true`
+    (`--zoom 1.0` = 확대 없이 원본 가로 전체를 쓰고 3:4 에 맞게 위아래 빈 배경만 조금 자름)
 
 ## CONTACT · B2B(도매) 문의 · COLLAB(협업 제안) (/contact/)
 

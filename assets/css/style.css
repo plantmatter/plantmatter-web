@@ -607,6 +607,9 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 .ct__list dd { margin: 0; overflow-wrap: anywhere; }
 .ct__list a { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 
+/* 협업 화분 등 단색(아주 밝은 회색 #f4f4f2) 배경 사진: 아래쪽 그라데이션 없음 — products.js 의 plain: true */
+.card__img.is-plain::after, .pd__img.is-plain::after, .co-item__img.is-plain::after, .hit__img.is-plain::after { content: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .bar.is-active .bar__fill { width: 100%; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }

@@ -130,7 +130,7 @@
     const nq = norm(q);
     if (!nq) return [];
     return (window.PM_PRODUCTS || []).filter((p) =>
-      [p.id, ...Object.values(p.name || {}), (p.sci || []).join(' ')].some((v) => norm(v).includes(nq)));
+      [p.id, ...Object.values(p.name || {}), (p.sci || []).join(' '), p.sub || ''].some((v) => norm(v).includes(nq)));
   };
   const showResults = (q, submitted = false) => {
     const query = q.trim();
@@ -146,8 +146,8 @@
       const [italic = '', rest = ''] = p.sci || [];
       const price = p.price == null ? t('priceAsk') : `₩ ${Number(p.price).toLocaleString('ko-KR')}`;
       return `<li><a class="hit" href="/product/?id=${encodeURIComponent(p.id)}">
-        <span class="hit__img"><img src="${escHtml(p.image)}" alt="" width="750" height="1000" loading="lazy"></span>
-        <span class="hit__text"><span class="hit__name">${escHtml(name)}</span><span class="hit__sci"><i>${escHtml(italic)}</i> ${escHtml(rest)}</span></span>
+        <span class="hit__img${p.plain ? ' is-plain' : ''}"><img src="${escHtml(p.image)}" alt="" width="750" height="1000" loading="lazy"></span>
+        <span class="hit__text"><span class="hit__name">${escHtml(name)}</span><span class="hit__sci">${p.sub ? escHtml(p.sub) : `<i>${escHtml(italic)}</i> ${escHtml(rest)}`}</span></span>
         <span class="hit__price">${escHtml(price)}</span>
       </a></li>`;
     }).join('');

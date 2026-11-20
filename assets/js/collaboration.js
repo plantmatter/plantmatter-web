@@ -1,7 +1,7 @@
 /* PLANT MATTER — COLLABORATION 페이지 (/collaboration/) — PLANT 목록(assets/js/plant.js)과 같은 형식
    분류 탭(ALL · GECKO IN THE LIBRARY · THICHI YUIITSUMUNI …)을 누르면 새로고침 없이 옆으로 넘기며 바뀌고,
    주소도 /collaboration/?c=gecko-in-the-library 처럼 바뀌어 그대로 공유·즐겨찾기할 수 있습니다.
-   항목(이름 · 메뉴 썸네일)은 assets/js/layout.js 의 COLLABS 에서 관리합니다.
+   항목(이름 · 메뉴 썸네일)은 assets/js/layout.js 의 COLLABS, 각 협업의 제품은 assets/js/products.js (collab: '이름') 에서 관리합니다.
    PC(plantmatter-web)와 모바일(plantmatter-mobile) 저장소에 같은 파일이 있으니 둘 다 고쳐 주세요. */
 (() => {
   const PM = window.PM;
@@ -51,10 +51,12 @@
     crumbEl.textContent = label;
     document.title = `${label} — PLANT MATTER`;
     if (c) {
-      /* 각 협업 소개 — 내용이 생기면 여기에 */
-      countEl.textContent = '';
-      gridEl.innerHTML = '';
-      emptyEl.hidden = false;
+      /* 이 협업의 제품 (products.js 에서 collab 이 이 이름인 것) — PLANT 목록과 같은 카드 */
+      const list = (window.PM_PRODUCTS || []).filter((p) => p.collab === c.id);
+      const lang = PM.getLang();
+      countEl.textContent = list.length ? t('countItems', { n: list.length }) : '';
+      gridEl.innerHTML = window.PM_SHOP ? list.map((p) => window.PM_SHOP.cardHtml(p, lang)).join('') : '';
+      emptyEl.hidden = list.length > 0;
     } else {
       countEl.textContent = t('collabCount', { n: ITEMS.length });
       gridEl.innerHTML = ITEMS.map(card).join('');
