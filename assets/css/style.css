@@ -674,6 +674,7 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 /* COLLABORATION 메뉴 긴 이름: 한 줄로 두고 넘치면 옆으로 흐름 (layout.js setupMarquee) */
 .mega__name.is-marquee { overflow: hidden; white-space: nowrap; }
 .mega__track { display: inline-block; white-space: nowrap; will-change: transform; }
+.mega__dup { padding-left: 2.5em; }   /* 이어 붙는 두 번째 이름과의 간격 */
 .mega__item:hover .mega__name.is-marquee { text-decoration: none; }
 .mega__item:hover .mega__track { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
 @media (prefers-reduced-motion: reduce) {

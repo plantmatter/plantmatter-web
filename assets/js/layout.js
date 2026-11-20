@@ -61,7 +61,7 @@
     return items.map(function (c) {
       return '        <li><a class="mega__item" href="' + base + '?c=' + c.id + '"><span class="mega__img">' +
         (c.img ? '<img src="' + c.img + '" alt="" width="720" height="960" loading="lazy">' : '') +
-        '</span><span class="mega__name' + (marquee ? ' is-marquee"><span class="mega__track">' + c.name + '</span>' : '">' + c.name) + '</span></a></li>';
+        '</span><span class="mega__name' + (marquee ? ' is-marquee"><span class="mega__track"><span class="mega__txt">' + c.name + '</span></span>' : '">' + c.name) + '</span></a></li>';
     }).join('\n');
   };
   var megaItems = megaList(CATEGORIES, '/plant/');
@@ -166,7 +166,8 @@ ${collabItems}
   <div class="toast" role="status" aria-live="polite"></div>
 `;
 
-  /* COLLABORATION 메뉴의 긴 이름: 칸에 다 들어가면 그대로, 넘치면 멈춤 → 끝까지 천천히 흐름 → 멈춤 → 처음으로 (반복)
+  /* COLLABORATION 메뉴의 긴 이름: 칸에 다 들어가면 그대로, 넘치면 한쪽(왼쪽)으로만 계속 흐름 —
+     뒤에 같은 이름을 하나 더 이어 붙여 끊김 없이 돌고, 한 바퀴마다 처음 자리에서 잠깐 멈춤
      PC(마우스) 는 그 이름에 마우스를 올렸을 때만, 모바일(터치) 은 메뉴가 열려 있는 동안 항상.
      '동작 줄이기' 설정이면 움직이지 않고 끝을 … 으로 줄임 (style.css) */
   function setupMarquee() {
@@ -177,22 +178,27 @@ ${collabItems}
     var boxes = Array.prototype.slice.call(menu.querySelectorAll('.mega__name.is-marquee'));
     var runs = boxes.map(function (box) {
       var track = box.querySelector('.mega__track');
+      var txt = track.querySelector('.mega__txt');
       var anim = null;
-      var over = function () { return track.scrollWidth - box.clientWidth; };
+      var over = function () { return txt.offsetWidth - box.clientWidth; };
       var stop = function () { if (anim) { anim.cancel(); anim = null; } };
       var start = function () {
-        var d = over();
-        if (d <= 1 || reduce.matches || anim) return;
-        var wait = hover ? 400 : 1400;                 // 처음 멈춤 (마우스는 짧게)
-        var slide = Math.max(1200, d / 30 * 1000);     // 1초에 30px 정도
-        var hold = 1200;                               // 끝에서 멈춤
-        var total = wait + slide + hold + slide;
+        if (over() <= 1 || reduce.matches || anim) return;
+        var dup = track.querySelector('.mega__dup');
+        if (!dup) {                                    // 이어 붙는 두 번째 이름 (읽어 주기에서는 숨김)
+          dup = txt.cloneNode(true);
+          dup.classList.add('mega__dup');
+          dup.setAttribute('aria-hidden', 'true');
+          track.appendChild(dup);
+        }
+        var d = dup.offsetLeft - txt.offsetLeft;       // 이름 하나 + 사이 간격 = 한 바퀴
+        var wait = hover ? 400 : 1400;                 // 한 바퀴마다 처음 자리에서 멈춤 (마우스는 짧게)
+        var slide = d / 30 * 1000;                     // 1초에 30px 정도
+        var total = wait + slide;
         anim = track.animate([
           { transform: 'translateX(0)', offset: 0 },
-          { transform: 'translateX(0)', offset: wait / total, easing: 'ease-in-out' },
-          { transform: 'translateX(' + (-d) + 'px)', offset: (wait + slide) / total },
-          { transform: 'translateX(' + (-d) + 'px)', offset: (wait + slide + hold) / total, easing: 'ease-in-out' },
-          { transform: 'translateX(0)', offset: 1 }
+          { transform: 'translateX(0)', offset: wait / total },
+          { transform: 'translateX(' + (-d) + 'px)', offset: 1 }
         ], { duration: total, iterations: Infinity });
       };
       var link = box.closest('.mega__item');
