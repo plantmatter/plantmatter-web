@@ -12,7 +12,7 @@
 
 ## 현재 구성 (홈 화면만)
 
-- 상단 바: PLANT MATTER 워드마크 · PLANT / MATTER / CONTACT 탭 · 검색 / 내 정보 / 장바구니 아이콘
+- 상단 바: PLANT MATTER 워드마크 · PLANT / MATTER / COLLABORATION / CONTACT 탭 · 검색 / 내 정보 / 장바구니 아이콘
 - 홈: 사진 3장이 8초마다 자동으로 넘어가는 슬라이드 (아래 가는 막대를 누르면 그 사진으로, 휴대폰은 손가락으로 밀어서 넘김)
   - 사진 바꾸기: `assets/img/hero/`의 `hero-1~3.jpg`와 `.webp`를 같은 이름으로 교체 (PC·모바일 두 저장소 모두)
   - 넘어가는 간격: `assets/js/main.js`의 `SLIDE_INTERVAL` (밀리초, 기본 8000)
@@ -103,6 +103,25 @@
 2. 메일 발송 서버(SMTP)와 코드 메일 템플릿은 앱 설정(앱 README 1-5, 1-6)을 그대로 함께 씁니다.
 
 - 아직 없는 것: 회원 탈퇴(앱 계정도 함께 지워지므로 안내와 함께 따로 만들 예정), 주문 내역(결제 승인 서버 연결 후)
+
+## CONTACT · 도매 문의 (/contact/)
+
+- 상단 **CONTACT** 탭 → 도매 문의 양식: 업체명, 사업자등록번호(검증 숫자까지 확인), 담당자 성함, 이메일, 휴대폰 번호, 업종, 관심 식물·수량, 받으실 지역·시기, 문의 내용, **사업자등록증 파일**(PDF·JPG·PNG·HEIC·WEBP, 10MB 이하), 개인정보 수집·이용 동의(필수)
+- 보내면 → Supabase Edge Function `wholesale-inquiry` (`supabase/functions/wholesale-inquiry/index.ts`)가
+  1. 내용을 다시 확인하고 (같은 곳에서 1시간 5건까지, 자동 프로그램 걸러 냄)
+  2. 사업자등록증을 비공개 저장소 `wholesale-docs`, 내용을 표 `wholesale_inquiries`에 저장 (사이트 공개 키로는 읽기·쓰기 불가)
+  3. **운영자에게 메일** (`noreply@plantmatter.kr` → `WHOLESALE_TO`, 사업자등록증 첨부). 메일에 **답장하면 문의한 분에게** 바로 갑니다.
+  4. 1년 지난 문의·파일은 새 문의가 들어올 때 지웁니다 (동의 문구의 보유 기간과 같음)
+- 저장된 문의 보기: Supabase 대시보드 › Table Editor › `wholesale_inquiries`, 파일은 Storage › `wholesale-docs`. 메일이 안 갔으면 `email_error` 칸에 이유가 남습니다.
+- 양식 위에 연락처(이메일·전화·카카오톡·인스타그램·응대 시간)를 함께 보이려면 `assets/js/contact.js` 맨 위 `CONTACT`에 넣기 (비워 두면 안 보임)
+
+### 처음 한 번 설정 (끝남)
+1. `supabase/web05_wholesale_inquiries.sql` 실행 — 표 · 비공개 버킷
+2. 함수 배포: Management API `functions/deploy?slug=wholesale-inquiry`, `verify_jwt: false` (또는 `supabase functions deploy wholesale-inquiry --no-verify-jwt`)
+3. Supabase 대시보드 › Edge Functions › **Secrets** (https://supabase.com/dashboard/project/qssrtzvipwvxcfszxomo/functions/secrets)
+   - `RESEND_API_KEY` — Resend › API Keys › Create (Sending access, 도메인 plantmatter.kr)
+   - `WHOLESALE_TO` — 문의를 받을 이메일 (여러 개면 쉼표). 받는 주소를 바꿀 때도 여기서만 바꾸면 됩니다.
+   - 둘 중 하나라도 없으면 양식에 '지금은 온라인 문의를 받을 수 없습니다'가 나옵니다.
 
 ## 언어 (한국어 · English · 日本語)
 
