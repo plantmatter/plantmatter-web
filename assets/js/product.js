@@ -3,7 +3,8 @@
    장바구니에 담기는 assets/js/cart.js 가 처리합니다 ([data-cart-add] · data-qty = 고른 수량).
    내용은 assets/js/products.js 에서 읽습니다. 사진 여러 장은 products.js 에 images: ['…', '…'] 로 넣으면 차례로 보입니다.
    설명 문구는 desc: { ko: '…', en: '…', ja: '…' } 로 넣으면 가격 아래에 보입니다. */
-(() => {
+/* 제품 목록(products.js → Supabase)을 다 읽은 뒤 시작 */
+(window.PM_PRODUCTS_READY || Promise.resolve()).then(() => {
   const PM = window.PM;
   const S = window.PM_SHOP;
   if (!PM || !S) return;
@@ -133,4 +134,4 @@
 
   PM.onLang(render);
   render();
-})();
+});

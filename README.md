@@ -46,6 +46,8 @@
 
 ### 식물 등록하기
 
+> **지금은 관리자 페이지(/admin/)에서 제품을 올리고 고칩니다.** 아래 products.js 는 예비 목록입니다.
+>
 > **가격 기준:** 제품을 올릴 때는 네이버 스마트스토어 **https://smartstore.naver.com/plant_matter** 의 판매가를 그대로 씁니다.
 > 운영자가 따로 금액 정정을 요청한 경우에만 그 금액으로 바꿉니다. 스토어에 아직 없는 제품은 `price: null` ('가격 문의').
 
@@ -106,6 +108,23 @@
 2. 메일 발송 서버(SMTP)와 코드 메일 템플릿은 앱 설정(앱 README 1-5, 1-6)을 그대로 함께 씁니다.
 
 - 아직 없는 것: 회원 탈퇴(앱 계정도 함께 지워지므로 안내와 함께 따로 만들 예정), 주문 내역(결제 승인 서버 연결 후)
+
+## 관리자 페이지 (/admin/) — 제품 · 재고 · 문의 관리
+
+- 관리자 계정으로 로그인 → **마이페이지 아래 [관리자 페이지]** 또는 `/admin/` (검색엔진 비노출)
+  - 관리자 = 앱과 같은 관리자 명단 `public.app_admins` (지금: plantmatter.biz@gmail.com). 앱의 MATTER 행사 · 매장 등록 권한도 같음
+  - 관리자 추가: Supabase SQL Editor 에서
+    `insert into public.app_admins (user_id) select id from auth.users where lower(email) = lower('이메일') on conflict do nothing;`
+- **PRODUCTS**: 가격 · 재고 · 상태(판매 중 / 품절 / 숨김)를 고치고 그 줄의 [저장] → 사이트에 바로 반영
+  - 재고 0 = SOLD OUT, 비우면 수량 관리 안 함, 재고가 있으면 한 번에 그 수까지만 구매 가능
+  - ↑ ↓ 로 목록 순서, [편집] 으로 이름(한·영·일) · 구분(PLANT 분류 / COLLABORATION) · 학명 또는 모델명 · 동일 상품 배송 · 단색 배경 · 설명 · 사진
+  - **+ 새 제품**: 사진은 세로 3:4(750×1000)로 가운데 기준 자동 맞춤만 됨 → 배경 정리 · 톤 보정은 `tools/prepare_product_photo.py` 로 한 사진을 올리기
+  - 지우기 대신 '숨김'을 권장 (주문 기록과 맞추기 위해)
+- **B2B · COLLAB**: 도매 문의 · 협업 제안 목록 (메일 발송 실패도 표시), 사업자등록증 열기(2분짜리 임시 링크), 지우기
+- 데이터: Supabase `shop_products` 표 · `product-images` 공개 버킷 (`supabase/web08_admin_products.sql`)
+  - 사이트는 이 표를 읽고(약 0.1~0.3초), 못 읽으면 `assets/js/products.js` 의 예비 목록을 씀
+  - 권한은 서버(RLS)가 확인: 누구나 읽기(숨김 제외), 고치기 · 문의 보기는 관리자만
+- 아직 없음: 결제 완료 시 재고 자동 차감 · 주문 관리 → 실결제(토스 가맹 + 결제 승인 서버) 붙일 때 함께
 
 ## COLLABORATION (/collaboration/)
 

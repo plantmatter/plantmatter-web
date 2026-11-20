@@ -4,7 +4,8 @@
    주문자 정보 · 배송지(주소 찾기: assets/js/postcode.js) · 결제 수단(토스페이먼츠 결제위젯) · 주문 금액
    로그인한 회원은 저장된 이름·휴대폰·배송지가 자동으로 채워집니다 (assets/js/auth.js). 비회원 주문도 됩니다.
    결제 설정(키, 배송비)은 assets/js/shop.js 에 있습니다. */
-(() => {
+/* 제품 목록(products.js → Supabase)을 다 읽은 뒤 시작 */
+(window.PM_PRODUCTS_READY || Promise.resolve()).then(() => {
   const PM = window.PM;
   const S = window.PM_SHOP;
   if (!PM || !S || !window.PM_FORM) return;
@@ -254,4 +255,4 @@
   });
   /* 결제창에서 '뒤로'로 돌아온 경우 버튼 다시 켜기 */
   window.addEventListener('pageshow', (e) => { if (e.persisted && ready && widgetAmount === amount) payBtn.disabled = false; });
-})();
+});

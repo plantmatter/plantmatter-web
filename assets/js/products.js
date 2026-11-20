@@ -1,5 +1,8 @@
-/* PLANT MATTER — 판매 식물 목록
-   여기에 한 줄(중괄호 한 묶음)씩 추가하면 PLANT 목록 페이지에 나타납니다.
+/* PLANT MATTER — 판매 제품 목록
+   ▸ 실제 판매 정보(가격 · 재고 · 품절 · 새 제품)는 관리자 페이지 /admin/ 에서 고칩니다.
+     사이트는 Supabase 의 shop_products 표를 읽고(supabase/web08_admin_products.sql),
+     아래 목록은 그 표를 읽지 못할 때(서버 장애 · 4초 넘게 응답 없음) 대신 쓰는 예비입니다.
+   ▸ 아래 칸 설명은 관리자 페이지의 입력 칸과 같은 뜻입니다.
    PC(plantmatter-web)와 모바일(plantmatter-mobile) 저장소에 같은 파일이 있으니 둘 다 고쳐 주세요.
 
    category : 'tropical' | 'orchid' | 'fern' | 'caudex'   (layout.js 의 CATEGORIES 와 같은 이름)
@@ -105,3 +108,32 @@ window.PM_PRODUCTS = [
     image: '/assets/img/products/thichi-bucotsu-bowl-mid-5.jpg?v=3'
   }
 ];
+
+/* ---------- 실제 제품 목록 읽기 (Supabase shop_products) ----------
+   페이지 스크립트는 PM_PRODUCTS_READY 가 끝난 뒤 그립니다 (plant · collaboration · product · checkout · cart).
+   남은 수량(stock)이 0 이면 품절로 표시. 숨김(hidden) 제품은 서버가 보내지 않음 */
+(function () {
+  var URL = 'https://qssrtzvipwvxcfszxomo.supabase.co/rest/v1/shop_products?select=*&order=sort.asc,id.asc';
+  var KEY = 'sb_publishable_qJhjHRcc95Ew7bYRs3Qt4A_N0nQw9hu';   // 공개 키 (auth.js 와 같음). 시크릿 키는 절대 넣지 말 것
+  var fromRow = function (r) {
+    var p = { id: r.id, name: r.name || {}, price: r.price, status: r.stock === 0 ? 'soldout' : r.status, image: r.image };
+    if (r.category) p.category = r.category;
+    if (r.collab) p.collab = r.collab;
+    if (r.sci) p.sci = r.sci;
+    if (r.sub) p.sub = r.sub;
+    if (r.stock != null) p.stock = r.stock;
+    if (r.exact) p.exact = true;
+    if (r.plain) p.plain = true;
+    if (r.images && r.images.length) p.images = r.images;
+    if (r.description) p.desc = r.description;
+    return p;
+  };
+  var load = window.fetch
+    ? fetch(URL, { headers: { apikey: KEY } }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    : Promise.resolve(null);
+  var timeout = new Promise(function (res) { setTimeout(function () { res(null); }, 4000); });
+  window.PM_PRODUCTS_READY = Promise.race([load, timeout]).then(function (rows) {
+    if (Array.isArray(rows) && rows.length) window.PM_PRODUCTS = rows.map(fromRow);
+    return window.PM_PRODUCTS;
+  });
+})();

@@ -3,7 +3,8 @@
    주소도 /collaboration/?c=gecko-in-the-library 처럼 바뀌어 그대로 공유·즐겨찾기할 수 있습니다.
    항목(이름 · 메뉴 썸네일)은 assets/js/layout.js 의 COLLABS, 각 협업의 제품은 assets/js/products.js (collab: '이름') 에서 관리합니다.
    PC(plantmatter-web)와 모바일(plantmatter-mobile) 저장소에 같은 파일이 있으니 둘 다 고쳐 주세요. */
-(() => {
+/* 제품 목록(products.js → Supabase)을 다 읽은 뒤 시작 */
+(window.PM_PRODUCTS_READY || Promise.resolve()).then(() => {
   const PM = window.PM;
   if (!PM) return;
   const { t } = PM;
@@ -111,4 +112,4 @@
   window.addEventListener('popstate', () => go(fromUrl(), false));
   PM.onLang(render);
   render();
-})();
+});

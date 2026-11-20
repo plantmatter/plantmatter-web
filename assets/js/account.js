@@ -315,7 +315,16 @@
     };
     PM.onLang(setHello);
 
+    /* 관리자 계정이면 마이페이지 아래에 '관리자 페이지' 버튼 (로그인할 때마다 확인) */
+    const showAdminLink = async () => {
+      const foot = root.querySelector('.my__foot');
+      const link = foot && foot.querySelector('[data-admin-link]');
+      const ok = A.isAdmin ? await A.isAdmin() : false;
+      if (ok && foot && !link) foot.insertAdjacentHTML('afterbegin', '<a class="btn-line" href="/admin/" data-admin-link>관리자 페이지</a>');
+      if (!ok && link) link.remove();
+    };
     const openMy = async () => {
+      showAdminLink();
       const u = A.user();
       if (!u) return;
       show('my');

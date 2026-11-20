@@ -2,7 +2,8 @@
    분류 탭(ALL · Tropical Plant · Orchid · Fern · Caudex)을 누르면 새로고침 없이 목록이 바뀌고,
    주소도 /plant/?c=orchid 처럼 바뀌어서 그대로 공유·즐겨찾기할 수 있습니다.
    상품은 assets/js/products.js, 분류는 assets/js/layout.js 에서 관리합니다. */
-(() => {
+/* 제품 목록(products.js → Supabase)을 다 읽은 뒤 시작 */
+(window.PM_PRODUCTS_READY || Promise.resolve()).then(() => {
   const PM = window.PM;
   if (!PM) return;
   const { t } = PM;
@@ -115,4 +116,4 @@
   PM.onLang(render);
   render();
   if (location.hash) setTimeout(() => reveal(location.hash), 150);
-})();
+});

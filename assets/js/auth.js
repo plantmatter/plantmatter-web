@@ -60,6 +60,13 @@
   const api = {
     ready,
     available: () => Boolean(client),
+    client: () => client,   // 관리자 페이지(assets/js/admin.js)가 제품 · 문의 표를 직접 읽고 씀 (권한은 서버 RLS 가 확인)
+    /* 관리자인지 (앱과 같은 관리자 명단 public.app_admins — supabase/web08) */
+    async isAdmin() {
+      if (!user || !client) return false;
+      const { data, error } = await client.rpc('is_app_admin');
+      return !error && data === true;
+    },
     user: () => user,
     onChange: (fn) => listeners.push(fn),
 

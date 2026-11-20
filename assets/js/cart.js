@@ -31,7 +31,8 @@
       .map((x) => ({ id: x.id, qty: Math.min(S.maxQty(S.find(x.id)), Math.max(1, parseInt(x.qty, 10) || 1)) }));
   };
   const load = () => { try { return clean(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { return []; } };
-  let lines = load();
+  let lines = [];   // 제품 목록을 다 읽은 뒤 채움 (아래 whenReady)
+  const whenReady = (fn) => (window.PM_PRODUCTS_READY || Promise.resolve()).then(fn);
   const listeners = [];
   /* typing: 수량 칸에 숫자를 입력하는 중 → 입력 칸은 다시 그리지 않고 금액·합계만 바꿈 */
   const save = (typing) => {
@@ -195,10 +196,12 @@
     const addBtn = e.target.closest('[data-cart-add]');
     if (addBtn) {
       e.preventDefault();
-      add(addBtn.dataset.cartAdd, addBtn.dataset.qty || 1);
+      const id = addBtn.dataset.cartAdd;
+      const qty = addBtn.dataset.qty || 1;
+      whenReady(() => add(id, qty));
       return;
     }
-    if (e.target.closest('[data-cart-open]')) { e.preventDefault(); setOpen(true); }
+    if (e.target.closest('[data-cart-open]')) { e.preventDefault(); whenReady(() => setOpen(true)); }
   });
   drawer.addEventListener('click', (e) => {
     if (e.target.closest('[data-cart-close]')) { setOpen(false); return; }
@@ -264,10 +267,13 @@
   window.addEventListener('pageshow', (e) => { if (e.persisted) { lines = load(); changed(); } });
 
   PM.onLang(render);
-  render();
+  let isReady = false;
+  whenReady(() => { lines = load(); isReady = true; changed(); });
+  /* 장바구니를 다 읽기 전에 들어온 담기 · 수량 · 빼기 요청은 읽은 뒤에 처리 (결제 완료 페이지의 '주문한 식물 빼기' 등) */
+  const later = (fn) => (...args) => (isReady ? fn(...args) : whenReady(() => fn(...args)));
 
   window.PM_CART = {
-    items, orderable, count, add, setQty, remove,
+    items, orderable, count, add: later(add), setQty: later(setQty), remove: later(remove),
     open: () => setOpen(true),
     close: () => setOpen(false),
     onChange: (fn) => listeners.push(fn),
