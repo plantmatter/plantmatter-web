@@ -15,39 +15,88 @@
     instagram: '',   // 계정 이름, 예: 'plantmatter'
     hours: { ko: '', en: '', ja: '' },   // 응대 시간, 예: { ko: '평일 10:00 – 18:00', en: 'Weekdays 10:00 – 18:00', ja: '平日 10:00 – 18:00' }
   };
-  const TABS = { b2b: 'B2B', collab: 'COLLAB' };   // 주소 ?c= 값 → 탭 · 경로 글씨
+  const TABS = { b2b: 'B2B', collab: 'COLLAB' };   // 주소 ?c= 값 → 탭 · 제목 · 경로 글씨 (이 순서 = 탭 순서, 넘기는 방향)
 
   const PM = window.PM;
   if (!PM || !window.PM_FORM) return;
   const { t } = PM;
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
-  /* ---------- 분류 탭 (새로고침 없이 바뀌고, 주소도 바뀌어 그대로 공유 가능) ---------- */
+  /* ---------- 분류 탭 — PLANT 목록(assets/js/plant.js)과 같은 방식 ----------
+     누르면 탭 표시는 바로, 제목·경로 글씨·내용은 옆으로 넘기는 애니메이션과 함께 바뀜.
+     주소(/contact/?c=collab)도 바뀌어 그대로 공유 · 뒤로 가기 가능 */
+  const ORDER = Object.keys(TABS);
   const tabs = [...document.querySelectorAll('[data-ct]')];
   const panels = [...document.querySelectorAll('[data-ct-panel]')];
   const crumb = document.querySelector('[data-ct-crumb]');
-  const fromUrl = () => { const c = new URLSearchParams(location.search).get('c'); return TABS[c] ? c : 'b2b'; };
-  let cur = null;
-  const show = (c, push) => {
-    if (c === cur) return;
-    const first = cur === null;
-    cur = c;
+  const titleEl = document.querySelector('[data-ct-title]');
+  const headEl = document.querySelector('.ct__head');
+  const valid = (c) => (TABS[c] ? c : 'b2b');
+  const fromUrl = () => valid(new URLSearchParams(location.search).get('c'));
+  const urlFor = (c) => (c === 'b2b' ? '/contact/' : `/contact/?c=${c}`);
+  const panelOf = (c) => panels.find((p) => p.dataset.ctPanel === c);
+  let cur = fromUrl();
+
+  const renderTabs = () => {
     tabs.forEach((a) => {
-      const on = a.dataset.ct === c;
+      const on = a.dataset.ct === cur;
       a.classList.toggle('is-active', on);
       if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    panels.forEach((p) => {
-      const on = p.dataset.ctPanel === c;
-      p.hidden = !on;
-      p.classList.toggle('is-in', on && !first);   // 탭을 바꿀 때만 살짝 나타나는 효과
-    });
-    crumb.textContent = TABS[c];
-    if (push) history.pushState(null, '', c === 'b2b' ? '/contact/' : `/contact/?c=${c}`);
   };
-  tabs.forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); show(a.dataset.ct, true); }));
-  window.addEventListener('popstate', () => show(fromUrl(), false));
-  show(fromUrl(), false);
+  const renderContent = () => {
+    const label = TABS[cur];
+    titleEl.textContent = label;
+    crumb.textContent = label;
+    document.title = `${label} — PLANT MATTER`;
+    panels.forEach((p) => { p.hidden = p.dataset.ctPanel !== cur; });
+  };
+
+  /* 탭을 바꿀 때 옆으로 넘기는 애니메이션 (PLANT 목록과 같은 거리·시간·곡선)
+     오른쪽 탭으로 가면 지금 내용이 왼쪽으로 빠지고 새 내용이 오른쪽에서 들어옴 (왼쪽 탭이면 반대)
+     '동작 줄이기' 설정을 켠 기기에서는 바로 바뀜 */
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let running = [];
+  const slideTo = (from, update) => {
+    const dir = Math.sign(ORDER.indexOf(cur) - ORDER.indexOf(from));
+    running.forEach((a) => a.cancel());
+    running = [];
+    if (!dir || reduceMotion.matches || !headEl.animate) { update(); return; }
+    const dist = Math.round(Math.min(72, window.innerWidth * 0.08));
+    const outs = [headEl, panelOf(from)].filter(Boolean).map((el) => el.animate(
+      [{ transform: 'none', opacity: 1 }, { transform: `translateX(${-dir * dist}px)`, opacity: 0 }],
+      { duration: 220, easing: 'cubic-bezier(.55, 0, .75, .3)', fill: 'forwards' }));
+    running = outs;
+    Promise.all(outs.map((a) => a.finished)).then(() => {
+      update();
+      outs.forEach((a) => a.cancel());
+      running = [headEl, panelOf(cur)].map((el, i) => el.animate(
+        [{ transform: `translateX(${dir * dist}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
+        { duration: 560, delay: i === 1 ? 40 : 0, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' }));
+    }, () => { /* 더 빨리 다른 탭을 눌러 중간에 취소됨 */ });
+  };
+
+  const go = (next, push = true) => {
+    const from = cur;
+    cur = valid(next);
+    if (push) history.pushState(null, '', urlFor(cur));
+    renderTabs();
+    slideTo(from, renderContent);
+  };
+
+  /* 탭 · 경로의 CONTACT · 상단 CONTACT 탭 링크는 이 페이지 안에서 바로 바꿈 */
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="/contact/"]');
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    PM.closeMenu();
+    if (PM.closeSearch) PM.closeSearch();
+    go(new URL(a.href, location.href).searchParams.get('c'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  window.addEventListener('popstate', () => go(fromUrl(), false));
+  renderTabs();
+  renderContent();
 
   /* ---------- 연락처 (넣은 것만) ---------- */
   const list = document.querySelector('[data-contact-list]');
@@ -165,7 +214,7 @@
   setupForm(document.querySelector('[data-collab]'), document.querySelector('[data-collab-done]'), 'collab');
 
   const render = () => {
-    document.title = 'CONTACT — PLANT MATTER';
+    renderContent();
     renderList();
     setups.forEach((fn) => fn());
   };
