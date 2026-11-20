@@ -39,7 +39,8 @@ FIT_CX, FIT_CY = 0.50, 0.51 # 무룽 라야: 식물 중심이 가로 50%, 세로
 #   SKIN_TONE : 빛을 받은 피부(밝기 150 이상)의 평균 밝기와 색 기운 — 그늘진 손바닥은 같은 비율로 따라감
 POT_TONE = {'y10': 18.0, 'y50': 33.0, 'y90': 65.3, 'cb': -0.55, 'cr': 0.98}
 BRASS_TONE = {'y10': 83.3, 'y50': 113.0, 'y90': 158.3, 'cb': -25.68, 'cr': 18.08}
-SKIN_TONE = {'y': 203.0, 'cb': -17.24, 'cr': 21.18}   # 원래(노란 기운) 와 붉게 고친 값의 딱 중간 (2026-11 요청)
+SKIN_TONE = {'y': 203.0, 'cb': -17.24, 'cr': 21.18,   # 원래(노란 기운) 와 붉게 고친 값의 딱 중간 (2026-11 요청)
+             'c_lit': 26.7, 'c_shadow': 25.7}           # 채도(빛 받은 피부 · 그늘진 피부) — 세 사진 평균, 강한 햇빛 사진의 진한 그늘을 맞춤
 
 
 def _fill_missing(grid):
@@ -144,7 +145,15 @@ def flatten_background(img):
         if field is None:
             return img
     gain = np.clip(255.0 / np.maximum(field, 1), 1.0, 1.6)   # 어둡게는 하지 않음
-    out = np.clip(a * gain, 0, 255)
+    if field.mean() < 228:
+        # 회색 벽처럼 어두운 배경: 사진 전체를 밝히면 손 · 화분의 밝은 곳이 하얗게 날아가므로(깨짐) 배경만 밝힘
+        f_lum = field.mean(axis=2)
+        rel = lum / np.maximum(f_lum, 1)
+        bgw = np.clip((rel - 0.78) / 0.14, 0, 1) * np.clip((14 - chroma) / 6, 0, 1)   # 배경 밝기에 가깝고 색이 거의 없는 곳만
+        bgw = np.asarray(Image.fromarray((bgw * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.5)), dtype=np.float32) / 255
+        out = np.clip(a * (1 + (gain - 1) * bgw[..., None]), 0, 255)
+    else:
+        out = np.clip(a * gain, 0, 255)
     # 식물·화분·그림자와 그 주변은 순백 정리에서 제외 (부드럽게 경계)
     o_lum = out.mean(axis=2)
     o_chroma = out.max(axis=2) - out.min(axis=2)
@@ -277,10 +286,24 @@ def match_tones(img):
     skin = colored & ~inside & (bw < 0.05)
     lit = skin & (Y > 150)
     if lit.sum() > 500:
-        sw = np.clip((_soft(skin, 4) - 0.3) / 0.4, 0, 1) * color_gate * (1 - bw)
+        # 손 안의 밝은 반사 · 주름도 같이 고치도록 피부 영역을 메워서(빈틈 없이) 고르게 적용 — 얼룩(깨짐) 방지.
+        # 바깥 흰 배경 쪽(아주 밝고 색 없는 곳)으로는 번지지 않게
+        sw = np.clip((_soft(skin, 6) - 0.2) / 0.3, 0, 1) * (1 - bw)
+        sw *= 1 - np.clip((Y - 238) / 10, 0, 1) * np.clip((8 - chroma) / 4, 0, 1)
         t = SKIN_TONE
         gain = t['y'] / Y[lit].mean()
-        fixed = _to_rgb(Y * gain, Cb + (t['cb'] - Cb[lit].mean()), Cr + (t['cr'] - Cr[lit].mean()))
+        Yn = Y * gain
+        Yn = np.where(Yn > 230, 230 + 25 * np.tanh((Yn - 230) / 25), Yn)      # 밝은 곳은 부드럽게 눌러 하얗게 날아가지 않게
+        Cbn = Cb + (t['cb'] - Cb[lit].mean())
+        Crn = Cr + (t['cr'] - Cr[lit].mean())
+        # 채도: 빛 받은 곳 · 그늘진 곳을 각각 기준에 맞춤 (밝기에 따라 사이 값)
+        shade = skin & (Y <= 150)
+        c_now = np.hypot(Cbn, Crn)
+        s_lit = np.clip(t['c_lit'] / max(c_now[lit].mean(), 1e-3), 0.7, 1.2)
+        s_sh = np.clip(t['c_shadow'] / max(c_now[shade].mean(), 1e-3), 0.7, 1.2) if shade.sum() > 500 else s_lit
+        k = np.clip((Y - 120) / 60, 0, 1)
+        sc = s_sh + (s_lit - s_sh) * k
+        fixed = _to_rgb(Yn, Cbn * sc, Crn * sc)
         out += sw[..., None] * (fixed - out)
 
     return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8))
