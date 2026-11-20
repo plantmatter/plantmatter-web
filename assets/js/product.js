@@ -1,5 +1,6 @@
 /* PLANT MATTER — 제품 상세 (/product/?id=식물id)
-   왼쪽 큰 사진 · 오른쪽 이름 · 학명 · 가격 · 수량 · 총 금액 · 구매하기 · 제품 정보 (탬버린즈 · 무지개맨션 참고)
+   왼쪽 큰 사진 · 오른쪽 이름 · 학명 · 가격 · 수량 · 총 금액 · 장바구니에 담기 / 구매하기 · 제품 정보 (탬버린즈 · 무지개맨션 참고)
+   장바구니에 담기는 assets/js/cart.js 가 처리합니다 ([data-cart-add] · data-qty = 고른 수량).
    내용은 assets/js/products.js 에서 읽습니다. 사진 여러 장은 products.js 에 images: ['…', '…'] 로 넣으면 차례로 보입니다.
    설명 문구는 desc: { ko: '…', en: '…', ja: '…' } 로 넣으면 가격 아래에 보입니다. */
 (() => {
@@ -31,6 +32,8 @@
     if (down) down.disabled = qty <= 1;   // 한 개체뿐인 식물은 +/− 버튼 없이 수량 1
     if (up) up.disabled = qty >= max;
     main.querySelector('[data-buy]').href = buyHref();
+    const add = main.querySelector('[data-cart-add]');
+    if (add) add.dataset.qty = qty;
   };
 
   const render = () => {
@@ -72,7 +75,10 @@
           </div>
         </div>
         <div class="pd__total"><span>${esc(t('total'))}</span><span><strong data-total>${esc(won(p.price * qty))}</strong> <small data-pcs>${esc(pcs(qty))}</small></span></div>
-        <div class="pd__cta"><a class="btn-buy" data-buy href="${buyHref()}">${esc(t('buyNow'))}</a></div>` : `
+        <div class="pd__cta">
+          ${window.PM_CART ? `<button class="btn-buy btn-buy--line" type="button" data-cart-add="${esc(p.id)}" data-qty="${qty}">${esc(t('addToCart'))}</button>` : ''}
+          <a class="btn-buy" data-buy href="${buyHref()}">${esc(t('buyNow'))}</a>
+        </div>` : `
         <div class="pd__cta"><button class="btn-buy" type="button" disabled>${esc(sold ? t('soldOut') : t('priceAsk'))}</button></div>`}
         <div class="acc">
           <details class="acc__item">

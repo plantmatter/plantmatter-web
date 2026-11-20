@@ -2,7 +2,8 @@
    토스페이먼츠 결제창이 끝나면 이 페이지로 돌아옵니다.
    - 성공: ?paymentKey=…&orderId=…&amount=… → 금액을 확인하고, 결제 승인 서버(shop.js 의 confirmUrl)에 승인을 요청
            (승인 서버가 없고 테스트 키이면 '테스트 결제 완료' 안내만 보여 줌)
-   - 실패/취소: ?code=…&message=…&orderId=… */
+   - 실패/취소: ?code=…&message=…&orderId=…
+   장바구니에서 한 주문이면 결제가 끝난 뒤 주문한 식물을 장바구니에서 뺍니다 (assets/js/cart.js). */
 (() => {
   const PM = window.PM;
   const S = window.PM_SHOP;
@@ -41,8 +42,8 @@
     let text = '';
     if (state === 'test') text = t('testDoneText');
     if (state === 'error' || state === 'fail') text = detail;
-    const retry = mine && mine.items && mine.items[0]
-      ? `/checkout/?id=${encodeURIComponent(mine.items[0].id)}&qty=${mine.items[0].qty}` : '';
+    const retry = !mine ? '' : mine.fromCart ? '/checkout/?from=cart'
+      : mine.items && mine.items[0] ? `/checkout/?id=${encodeURIComponent(mine.items[0].id)}&qty=${mine.items[0].qty}` : '';
     const actions = state === 'confirming' ? '' : `<div class="res__actions">
         ${(state === 'fail' || state === 'error') && retry ? `<a class="btn-buy" href="${retry}">${esc(t('retry'))}</a>` : ''}
         <a class="btn-line" href="/plant/">${esc(t('continueShopping'))}</a>
@@ -71,10 +72,15 @@
   const amount = Number(q.get('amount'));
   if (!paymentKey || !orderId || !Number.isFinite(amount)) { setState('error', t('payError', { msg: 'missing parameters' })); return; }
   if (mine && mine.amount !== amount) { setState('error', t('amountMismatch')); return; }
-  if (mine && mine.confirmed) { setState(mine.test ? 'test' : 'done'); return; }   // 새로고침: 다시 승인하지 않음
+  /* 장바구니에서 주문한 식물 빼기 */
+  const clearCart = () => {
+    if (mine && mine.fromCart && window.PM_CART && Array.isArray(mine.items)) window.PM_CART.remove(mine.items.map((i) => i.id));
+  };
+  if (mine && mine.confirmed) { setState(mine.test ? 'test' : 'done'); return; }   // 새로고침: 다시 승인하지 않음 (장바구니도 이미 비움)
 
   const finish = (test) => {
     if (mine) S.saveOrder({ ...mine, confirmed: true, test, paymentKey });
+    clearCart();
     setState(test ? 'test' : 'done');
   };
 

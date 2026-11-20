@@ -1,4 +1,6 @@
-/* PLANT MATTER — 주문/결제 (/checkout/?id=식물id&qty=수량)
+/* PLANT MATTER — 주문/결제
+   /checkout/?id=식물id&qty=수량 → 그 식물 하나만 바로 구매
+   /checkout/?from=cart           → 장바구니(assets/js/cart.js)에 담긴 식물 전부 (품절·가격 미정은 빠짐)
    주문자 정보 · 배송지(주소 찾기: assets/js/postcode.js) · 결제 수단(토스페이먼츠 결제위젯) · 주문 금액
    로그인한 회원은 저장된 이름·휴대폰·배송지가 자동으로 채워집니다 (assets/js/auth.js). 비회원 주문도 됩니다.
    결제 설정(키, 배송비)은 assets/js/shop.js 에 있습니다. */
@@ -22,43 +24,77 @@
   const sameBox = F.same;
 
   const q = new URLSearchParams(location.search);
-  const p = S.find(q.get('id'));
+  const fromCart = q.get('from') === 'cart';
+  const C = window.PM_CART;
   testBadge.hidden = !S.isTest();
 
-  /* 살 수 없는 경우: 없는 식물 · 품절 · 가격 미정 */
-  if (!p || p.status === 'soldout' || p.price == null) {
+  /* 주문할 식물들: [{ p, qty }] */
+  const single = fromCart ? null : S.find(q.get('id'));
+  const getLines = () => {
+    if (fromCart) return C ? C.orderable().map((x) => ({ p: x.p, qty: x.qty })) : [];
+    const p = single;
+    if (!p || p.status === 'soldout' || p.price == null) return [];
+    return [{ p, qty: Math.min(S.maxQty(p), Math.max(1, parseInt(q.get('qty'), 10) || 1)) }];
+  };
+  let lines = [];
+  let subtotal = 0;
+  let shipping = 0;
+  let amount = 0;
+  let orderName = '';
+  const compute = () => {
+    lines = getLines();
+    subtotal = lines.reduce((sum, l) => sum + l.p.price * l.qty, 0);
+    shipping = S.shippingFor(subtotal);
+    amount = subtotal + shipping;
+    /* 결제창·영수증에 보이는 주문명 (토스페이먼츠: 100자까지) */
+    const first = lines[0] ? S.nameOf(lines[0].p, 'ko') : '';
+    orderName = (lines.length > 1 ? `${first} 외 ${lines.length - 1}건`
+      : `${first}${lines[0] && lines[0].qty > 1 ? ` × ${lines[0].qty}` : ''}`).slice(0, 100);
+  };
+
+  /* 살 수 없는 경우: 없는 식물 · 품절 · 가격 미정 · 장바구니가 빔 */
+  const showNone = () => {
     form.hidden = true;
     none.hidden = false;
-    const msg = !p ? t('notFound') : p.status === 'soldout' ? t('soldOutMsg') : t('priceAsk');
-    none.innerHTML = `<p>${esc(msg)}</p><a class="btn-line" href="${p ? `/product/?id=${encodeURIComponent(p.id)}` : '/plant/'}">${esc(t(p ? 'backToProduct' : 'backToList'))}</a>`;
+    const p = single;
+    let msg; let href; let label;
+    if (fromCart) { msg = t('cartNone'); href = '/plant/'; label = t('backToList'); }
+    else {
+      msg = !p ? t('notFound') : p.status === 'soldout' ? t('soldOutMsg') : t('priceAsk');
+      href = p ? `/product/?id=${encodeURIComponent(p.id)}` : '/plant/';
+      label = t(p ? 'backToProduct' : 'backToList');
+    }
+    none.innerHTML = `<p>${esc(msg)}</p><a class="btn-line" href="${href}">${esc(label)}</a>`;
+  };
+
+  compute();
+  if (!lines.length) {
+    showNone();
+    PM.onLang(() => { if (!form.hidden) return; showNone(); });
+    /* 장바구니 주문인데 다른 탭에서 다시 담은 경우 */
+    if (fromCart && C) C.onChange(() => { if (C.orderable().length) location.reload(); });
     return;
   }
-
-  const qty = Math.min(S.maxQty(p), Math.max(1, parseInt(q.get('qty'), 10) || 1));
-  const subtotal = p.price * qty;
-  const shipping = S.shippingFor(subtotal);
-  const amount = subtotal + shipping;
-  const orderName = `${S.nameOf(p, 'ko')}${qty > 1 ? ` × ${qty}` : ''}`;
 
   /* ---------- 주문 상품 · 금액 ---------- */
   const renderSummary = () => {
     const lang = PM.getLang();
     document.title = `${t('checkout')} — PLANT MATTER`;
-    itemsEl.innerHTML = `<li class="co-item">
+    itemsEl.innerHTML = lines.map(({ p, qty }) => `<li class="co-item">
       <a class="co-item__img" href="/product/?id=${encodeURIComponent(p.id)}"><img src="${esc(p.image)}" alt="" width="750" height="1000"></a>
       <span class="co-item__text">
         <span class="co-item__name">${esc(S.nameOf(p, lang))}</span>
         <span class="co-item__sci">${S.sciHtml(p)}</span>
-        <span class="co-item__meta">${esc(t('qty'))} ${qty} · ${esc(won(p.price))}</span>
+        <span class="co-item__meta">${esc(t('qty'))} ${qty} · ${esc(won(p.price * qty))}</span>
       </span>
-    </li>`;
+    </li>`).join('');
     sumEl.innerHTML = `
       <div><dt>${esc(t('subtotal'))}</dt><dd>${esc(won(subtotal))}</dd></div>
       ${S.config.shippingFee > 0 ? `<div><dt>${esc(t('shipFee'))}</dt><dd>${esc(shipping ? won(shipping) : t('free'))}</dd></div>` : ''}
       <div class="co-sum__total"><dt>${esc(t('payTotal'))}</dt><dd>${esc(won(amount))}</dd></div>`;
     payBtn.textContent = t('payBtn', { amount: won(amount) });
   };
-  PM.onLang(renderSummary);
+  PM.onLang(() => { if (form.hidden) showNone(); else renderSummary(); });
   renderSummary();
 
   /* ---------- 입력 칸 ---------- */
@@ -135,18 +171,50 @@
   /* ---------- 결제 수단 · 약관 (토스페이먼츠 결제위젯) ---------- */
   const showPayErr = (text) => { payErr.textContent = text; payErr.hidden = !text; };
   let widgets = null;
+  let ready = false;          // 결제 수단 화면을 다 그렸는지
+  let widgetAmount = null;    // 결제위젯에 마지막으로 알린 금액
+  let syncing = false;
+  /* 결제위젯 금액을 지금 주문 금액에 맞춤 (맞추는 동안은 결제 버튼을 잠깐 끔) */
+  const syncAmount = () => {
+    if (!ready || syncing || widgetAmount === amount) return;
+    const value = amount;
+    syncing = true;
+    payBtn.disabled = true;
+    widgets.setAmount({ currency: 'KRW', value })
+      .then(() => { widgetAmount = value; })
+      .catch((err) => { console.error(err); showPayErr(t('payLoadFail')); })
+      .finally(() => {
+        syncing = false;
+        if (widgetAmount === amount) payBtn.disabled = false;
+        else if (widgetAmount === value) syncAmount();   // 맞추는 사이에 또 바뀜
+      });
+  };
+  /* 장바구니 주문: 이 화면을 연 채로 장바구니를 바꾸면 주문 상품·금액도 바로 바뀜 */
+  if (fromCart && C) {
+    C.onChange(() => {
+      compute();
+      if (!lines.length) { showNone(); return; }
+      renderSummary();
+      syncAmount();
+    });
+  }
   (async () => {
     if (typeof window.TossPayments !== 'function') throw new Error('sdk');
     const toss = window.TossPayments(S.config.clientKey);
     widgets = toss.widgets({ customerKey: window.TossPayments.ANONYMOUS || '@@ANONYMOUS' });
-    await widgets.setAmount({ currency: 'KRW', value: amount });
+    const first = amount;
+    await widgets.setAmount({ currency: 'KRW', value: first });
     await Promise.all([
       widgets.renderPaymentMethods({ selector: '#pay-methods', variantKey: 'DEFAULT' }),
       widgets.renderAgreement({ selector: '#pay-agreement', variantKey: 'AGREEMENT' }),
     ]);
-    payBtn.disabled = false;
+    widgetAmount = first;
+    ready = true;
+    if (first === amount) payBtn.disabled = false;
+    else syncAmount();
   })().catch((err) => {
     widgets = null;
+    ready = false;
     console.error(err);
     showPayErr(t('payLoadFail'));
   });
@@ -154,12 +222,12 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     showPayErr('');
-    if (!check.validate() || !widgets) return;
+    if (!check.validate() || !ready || !lines.length || widgetAmount !== amount) return;
     const same = sameBox.checked;
     const buyer = { name: F.buyerName.value.trim(), phone: F.buyerPhone.value, email: F.buyerEmail.value.trim() };
     const order = {
-      orderId: S.newOrderId(), orderName, amount, subtotal, shipping,
-      items: [{ id: p.id, name: S.nameOf(p, 'ko'), price: p.price, qty }],
+      orderId: S.newOrderId(), orderName, amount, subtotal, shipping, fromCart,
+      items: lines.map(({ p, qty }) => ({ id: p.id, name: S.nameOf(p, 'ko'), price: p.price, qty })),
       buyer,
       ship: { same, name: same ? buyer.name : F.recvName.value.trim(), phone: same ? buyer.phone : F.recvPhone.value,
         zip: F.zip.value, addr: F.addr.value.trim(), addr2: F.addr2.value.trim(), memo: F.memo.value.trim() },
@@ -185,5 +253,5 @@
     }
   });
   /* 결제창에서 '뒤로'로 돌아온 경우 버튼 다시 켜기 */
-  window.addEventListener('pageshow', (e) => { if (e.persisted && widgets) payBtn.disabled = false; });
+  window.addEventListener('pageshow', (e) => { if (e.persisted && ready && widgetAmount === amount) payBtn.disabled = false; });
 })();

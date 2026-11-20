@@ -200,6 +200,17 @@ window.PM_I18N = {
     phoneVerified: '본인인증한 번호입니다.',
     errIdTaken: '이미 사용 중인 아이디입니다.',
     errIdFormat: '아이디는 2~20자로, 한글·영문·숫자와 . _ - 만 쓸 수 있습니다.',
+    /* 장바구니 (assets/js/cart.js) */
+    cartEmpty: '장바구니에 담긴 제품이 없습니다',
+    cartTotal: '합계',
+    cartOrder: '주문하기',
+    cartRemove: '{name} 삭제',
+    cartAlready: '이미 장바구니에 담겨 있습니다',
+    cartMaxed: '장바구니에는 {n}개까지 담을 수 있습니다',
+    cartWith: '장바구니 ({n}개 담김)',
+    cartOffNote: '지금은 주문할 수 없어 결제에서 빠집니다',
+    cartNone: '장바구니에 주문할 수 있는 제품이 없습니다.',
+    addToCartName: '{name} 장바구니에 담기',
     close: '닫기'
   },
   en: {
@@ -226,7 +237,7 @@ window.PM_I18N = {
     count: '{n} plants',
     countOne: '1 plant',
     empty: 'Plants in this category are coming soon.',
-    addToCart: 'Add to cart',
+    addToCart: 'ADD TO CART',
     soldOut: 'SOLD OUT',
     footLang: 'VIEW IN ENGLISH',
     langTitle: 'Language',
@@ -399,6 +410,17 @@ window.PM_I18N = {
     phoneVerified: 'Verified number.',
     errIdTaken: 'This ID is already taken.',
     errIdFormat: 'Use 2–20 characters: Korean or English letters, numbers, and . _ - only.',
+    /* Cart */
+    cartEmpty: 'Your cart is empty',
+    cartTotal: 'Total',
+    cartOrder: 'CHECKOUT',
+    cartRemove: 'Remove {name}',
+    cartAlready: 'Already in your cart',
+    cartMaxed: 'You can add up to {n} of this plant',
+    cartWith: 'Cart ({n} items)',
+    cartOffNote: 'Not available now — left out of checkout',
+    cartNone: 'There is nothing in your cart to order.',
+    addToCartName: 'Add {name} to cart',
     close: 'Close'
   },
   ja: {
@@ -598,6 +620,17 @@ window.PM_I18N = {
     phoneVerified: '本人確認済みの番号です。',
     errIdTaken: 'このIDはすでに使われています。',
     errIdFormat: 'IDは2〜20文字で、ハングル・英字・数字と . _ - のみ使えます。',
+    /* カート */
+    cartEmpty: 'カートに商品がありません',
+    cartTotal: '合計',
+    cartOrder: 'ご注文手続きへ',
+    cartRemove: '{name}を削除',
+    cartAlready: 'すでにカートに入っています',
+    cartMaxed: 'この植物は{n}点までカートに入れられます',
+    cartWith: 'カート（{n}点）',
+    cartOffNote: '現在ご注文いただけないため、お会計から除かれます',
+    cartNone: 'カートにご注文いただける商品がありません。',
+    addToCartName: '{name}をカートに入れる',
     close: '閉じる'
   }
 };

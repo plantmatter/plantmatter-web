@@ -34,6 +34,7 @@
   const card = (p, lang) => {
     const name = (p.name && (p.name[lang] || p.name.ko)) || p.id;
     const sold = p.status === 'soldout';
+    const canAdd = window.PM_CART && !sold && p.price != null;   // 가방 버튼 → 장바구니에 담기 (assets/js/cart.js)
     const [italic = '', rest = ''] = p.sci || [];
     return `<li class="card${sold ? ' is-soldout' : ''}" id="p-${esc(p.id)}">
       <a class="card__link" href="/product/?id=${encodeURIComponent(p.id)}">
@@ -46,7 +47,7 @@
           ${p.exact ? `<span class="card__note">${esc(t('exactShip'))}</span>` : ''}
         </span>
       </a>
-      <button class="card__cart" type="button" data-soon="cart" aria-label="${esc(t('addToCart'))}">${BAG}</button>
+      ${canAdd ? `<button class="card__cart" type="button" data-cart-add="${esc(p.id)}" aria-label="${esc(t('addToCartName', { name }))}">${BAG}</button>` : ''}
     </li>`;
   };
 
