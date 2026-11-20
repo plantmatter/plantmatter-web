@@ -36,13 +36,26 @@
   ];
   window.PM_CATEGORIES = CATEGORIES;
 
+  /* COLLABORATION 하위 항목 — 순서 · 이름 · 메뉴 썸네일(세로 3:4, 없으면 '') · PLANT 분류와 같은 방식
+     항목을 더하면 상단 COLLABORATION 메뉴와 /collaboration/ 페이지 탭에 함께 생깁니다 */
+  var COLLABS = [
+    { id: 'gecko-in-the-library', name: 'GECKO IN THE LIBRARY', img: '' },
+    { id: 'thichi-yuiitsumuni',   name: 'THICHI YUIITSUMUNI',   img: '' }
+  ];
+  window.PM_COLLABS = COLLABS;
+
   var plantHere = location.pathname.indexOf('/plant/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var contactHere = location.pathname.indexOf('/contact/') === 0 ? ' class="is-here" aria-current="page"' : '';
-  var megaItems = CATEGORIES.map(function (c) {
-    return '        <li><a class="mega__item" href="/plant/?c=' + c.id + '"><span class="mega__img">' +
-      (c.img ? '<img src="' + c.img + '" alt="" width="720" height="960" loading="lazy">' : '') +
-      '</span><span class="mega__name">' + c.name + '</span></a></li>';
-  }).join('\n');
+  var collabHere = location.pathname.indexOf('/collaboration/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var megaList = function (items, base) {
+    return items.map(function (c) {
+      return '        <li><a class="mega__item" href="' + base + '?c=' + c.id + '"><span class="mega__img">' +
+        (c.img ? '<img src="' + c.img + '" alt="" width="720" height="960" loading="lazy">' : '') +
+        '</span><span class="mega__name">' + c.name + '</span></a></li>';
+    }).join('\n');
+  };
+  var megaItems = megaList(CATEGORIES, '/plant/');
+  var collabItems = megaList(COLLABS, '/collaboration/');
 
   var TOP = `  <!-- ───────── 상단 바 ───────── -->
   <header class="gnb">
@@ -53,7 +66,7 @@
     <nav class="gnb__menu" aria-label="주요 메뉴" data-i18n-attr="aria-label: menu">
       <a href="/plant/" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
       <a href="#" data-soon="MATTER">MATTER</a>
-      <a href="#" data-soon="COLLABORATION">COLLABORATION</a>
+      <a href="/collaboration/" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLABORATION</a>
       <a href="/contact/"${contactHere}>CONTACT</a>
     </nav>
 
@@ -76,6 +89,16 @@
     <div class="mega__panel" aria-label="PLANT">
       <ul class="mega__list">
 ${megaItems}
+      </ul>
+    </div>
+    <div class="mega__dim" data-menu-close></div>
+  </div>
+
+  <!-- ───────── COLLABORATION 탭 아래로 내려오는 메뉴 (항목은 위 COLLABS) — PLANT 메뉴와 같은 모양 ───────── -->
+  <div class="mega" id="menu-collab" aria-hidden="true">
+    <div class="mega__panel" aria-label="COLLABORATION">
+      <ul class="mega__list">
+${collabItems}
       </ul>
     </div>
     <div class="mega__dim" data-menu-close></div>

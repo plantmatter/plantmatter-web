@@ -104,6 +104,14 @@
 
 - 아직 없는 것: 회원 탈퇴(앱 계정도 함께 지워지므로 안내와 함께 따로 만들 예정), 주문 내역(결제 승인 서버 연결 후)
 
+## COLLABORATION (/collaboration/)
+
+- PLANT 와 같은 형식: 상단 **COLLABORATION** 탭에 마우스를 올리면(모바일은 누르면) 아래로 메뉴가 열리고, 탭을 누르면 `/collaboration/` 페이지
+- 페이지: 경로 글씨 · 제목 · 분류 탭(ALL · 각 협업) · 옆으로 넘기는 애니메이션 — `assets/js/collaboration.js`
+  - ALL: 협업 카드 목록 / 각 협업(`/collaboration/?c=gecko-in-the-library`): 지금은 '소개를 준비하고 있습니다'
+- 항목(이름 · 메뉴 썸네일 3:4)은 `assets/js/layout.js` 의 `COLLABS` 에서 추가·수정 (PC·모바일 두 저장소 모두)
+  - 지금: GECKO IN THE LIBRARY, THICHI YUIITSUMUNI (사진 없음 → 회색 칸)
+
 ## CONTACT · B2B(도매) 문의 · COLLAB(협업 제안) (/contact/)
 
 - 분류 탭 **B2B** (`/contact/?c=b2b`) · **COLLAB** (`/contact/?c=collab`) — PLANT 목록의 분류 탭과 같은 모양
