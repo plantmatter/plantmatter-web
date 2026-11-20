@@ -47,6 +47,15 @@
   var plantHere = location.pathname.indexOf('/plant/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var contactHere = location.pathname.indexOf('/contact/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var collabHere = location.pathname.indexOf('/collaboration/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  /* 장바구니 아이콘: 담긴 것이 있으면 처음 그릴 때부터 초록 가방 + 숫자 (자세한 확인은 뒤에 cart.js 가 다시 함)
+     — 페이지를 옮길 때 검은 가방이 잠깐 보였다가 초록으로 바뀌는 깜빡임 방지 */
+  var cartN = 0;
+  try {
+    JSON.parse(localStorage.getItem('pm-cart') || '[]').forEach(function (l) { if (l && l.id) cartN += Math.max(1, parseInt(l.qty, 10) || 1); });
+  } catch (e) { cartN = 0; }
+  var cartCls = cartN ? ' has-items' : '';
+  var cartText = cartN > 99 ? '99+' : cartN ? String(cartN) : '';
+
   var megaList = function (items, base) {
     return items.map(function (c) {
       return '        <li><a class="mega__item" href="' + base + '?c=' + c.id + '"><span class="mega__img">' +
@@ -77,9 +86,9 @@
       <a class="icon-btn" href="/account/" aria-label="내 정보" data-i18n-attr="aria-label: account">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-7 8-7s8 2 8 7"/></svg>
       </a>
-      <button class="icon-btn icon-cart" type="button" data-cart-open aria-label="장바구니" data-i18n-attr="aria-label: cart" aria-controls="cart-drawer" aria-expanded="false">
+      <button class="icon-btn icon-cart${cartCls}" type="button" data-cart-open aria-label="장바구니" data-i18n-attr="aria-label: cart" aria-controls="cart-drawer" aria-expanded="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path class="bag__body" d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>
-        <span class="cart-badge" data-cart-count hidden></span>
+        <span class="cart-badge" data-cart-count${cartN ? '' : ' hidden'}>${cartText}</span>
       </button>
     </div>
   </header>

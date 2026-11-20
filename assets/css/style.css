@@ -563,6 +563,7 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 
 /* ---------- CONTACT (/contact/) · 도매 문의 — 연락처는 assets/js/contact.js ---------- */
 .ct { min-height: 72vh; padding: calc(var(--gnb-h) + 28px) var(--side) 140px; }   /* 위쪽 여백 · 경로 글씨 · 제목은 PLANT 목록 페이지(.list)와 같게 */
+.ct { overflow-x: clip; }   /* B2B ↔ COLLAB 을 넘길 때 옆으로 밀리는 내용이 가로 스크롤(PC 가로 스크롤바 깜빡임 · 모바일 좌우 흔들림)을 만들지 않게 — PLANT 목록(.list)과 같음 */
 .ct__head { margin-bottom: 0; }
 /* B2B · COLLAB 분류 탭 — PLANT 목록의 분류 탭(.pills)과 같은 모양 · 같은 간격 */
 .ct__tabs { margin: 28px 0 36px; }
