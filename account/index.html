@@ -11,10 +11,11 @@
       var LIVE_HOSTS = ['plantmatter.kr', 'www.plantmatter.kr'];
       var LANGS = ['ko', 'en', 'ja'];
       var q = new URLSearchParams(location.search);
-      var saved = q.get('lang');
+      /* /ja/… 주소(일본어로 공유한 링크)로 들어오면 일본어 */
+      var saved = LANGS.indexOf(q.get('lang')) > -1 ? q.get('lang') : /^\/ja(\/|$)/.test(location.pathname) ? 'ja' : null;
       try {
-        if (LANGS.indexOf(q.get('lang')) > -1) localStorage.setItem('pm-lang', q.get('lang'));
-        saved = localStorage.getItem('pm-lang');
+        if (saved) localStorage.setItem('pm-lang', saved);
+        saved = localStorage.getItem('pm-lang') || saved;
         localStorage.removeItem('pm-view');   /* 예전 'PC 버전 보기' 설정 정리 */
       } catch (e) {}
       /* 언어: 직접 고른 언어 → 브라우저 언어(한국어·일본어) → 영어 */
@@ -34,6 +35,10 @@
   <meta name="description" content="PLANT MATTER 플랜트매터 — Different Plants and Matter">
   <meta name="theme-color" content="#ffffff">
   <link rel="canonical" href="https://plantmatter.kr/account/">
+  <link rel="alternate" hreflang="ko" href="https://plantmatter.kr/account/">
+  <link rel="alternate" hreflang="en" href="https://plantmatter.kr/account/">
+  <link rel="alternate" hreflang="ja" href="https://plantmatter.kr/ja/account/">
+  <link rel="alternate" hreflang="x-default" href="https://plantmatter.kr/account/">
   <link rel="alternate" media="only screen and (max-width: 640px)" href="https://m.plantmatter.kr/account/">
 
   <meta property="og:type" content="website">
@@ -57,11 +62,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://qssrtzvipwvxcfszxomo.supabase.co" crossorigin>   <!-- 제품 목록(Supabase)을 빨리 읽도록 미리 연결 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261120zb">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261120zc">
 </head>
 <body class="page-sub page-acct">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261120zb"></script>
+  <script src="/assets/js/layout.js?v=20261120zc"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── 로그인 · 마이페이지 (assets/js/account.js · auth.js) ───────── -->
@@ -250,15 +255,15 @@
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
-  <script src="/assets/js/i18n.js?v=20261120zb" defer></script>
-  <script src="/assets/js/main.js?v=20261120zb" defer></script>
-  <script src="/assets/js/products.js?v=20261120zb" defer></script>
-  <script src="/assets/js/shop.js?v=20261120zb" defer></script>
-  <script src="/assets/js/cart.js?v=20261120zb" defer></script>
-  <script src="/assets/js/form.js?v=20261120zb" defer></script>
-  <script src="/assets/js/postcode.js?v=20261120zb" defer></script>
+  <script src="/assets/js/i18n.js?v=20261120zc" defer></script>
+  <script src="/assets/js/main.js?v=20261120zc" defer></script>
+  <script src="/assets/js/products.js?v=20261120zc" defer></script>
+  <script src="/assets/js/shop.js?v=20261120zc" defer></script>
+  <script src="/assets/js/cart.js?v=20261120zc" defer></script>
+  <script src="/assets/js/form.js?v=20261120zc" defer></script>
+  <script src="/assets/js/postcode.js?v=20261120zc" defer></script>
   <script src="/assets/vendor/supabase-2.118.0.js" defer></script>
-  <script src="/assets/js/auth.js?v=20261120zb" defer></script>
-  <script src="/assets/js/account.js?v=20261120zb" defer></script>
+  <script src="/assets/js/auth.js?v=20261120zc" defer></script>
+  <script src="/assets/js/account.js?v=20261120zc" defer></script>
 </body>
 </html>

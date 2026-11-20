@@ -1,13 +1,40 @@
 /* PLANT MATTER — 모든 페이지 공통 틀: 상단 바 · PLANT 메뉴 · 하단 · 검색 · 언어 창
    여기 한 곳만 고치면 모든 페이지에 똑같이 반영됩니다.
    각 페이지는 <body> 바로 아래에서 PM_LAYOUT.top(), 본문 다음에 PM_LAYOUT.bottom() 을 부릅니다. */
+/* 일본어 주소 — 일본어로 볼 때는 주소 앞에 /ja 를 붙임 (/ja/plant/ 처럼).
+   공유 미리보기 문구는 앱이 주소마다 페이지 안의 글을 읽어 가는 것이라, /ja/… 페이지(tools/make_ja_pages.py 로 만듦)에만
+   일본어 문구를 넣어 일본어로 보다가 공유하면 일본어 미리보기가 나오게 함. 한국어 · 영어는 /ja 없는 주소.
+   - 페이지 안에서 주소를 바꾸는 곳(분류 탭 등)은 /ja 를 몰라도 되게 여기서 자동으로 붙이고 뗌
+   - 지금 페이지가 어디인지는 location.pathname 대신 PM_PATH() (앞의 /ja 를 뗀 주소)로 확인 */
+(function () {
+  var H = window.history;
+  if (!H || !H.replaceState) { window.PM_PATH = function () { return location.pathname; }; window.PM_SYNC_URL = function () {}; return; }
+  var JA = /^\/ja(?=[\/?#]|$)/;
+  var fix = function (u) {
+    if (typeof u !== 'string' || u.charAt(0) !== '/' || u.charAt(1) === '/') return u;   // 이 사이트 안의 주소만
+    var bare = u.replace(JA, '');
+    if (bare.charAt(0) !== '/') bare = '/' + bare;
+    return document.documentElement.lang === 'ja' ? '/ja' + bare : bare;
+  };
+  var push = H.pushState, rep = H.replaceState;
+  H.pushState = function (s, t, u) { return push.call(H, s, t, u == null ? u : fix(String(u))); };
+  H.replaceState = function (s, t, u) { return rep.call(H, s, t, u == null ? u : fix(String(u))); };
+  window.PM_PATH = function () { return location.pathname.replace(JA, '') || '/'; };
+  /* 언어에 맞게 지금 주소의 /ja 를 붙이거나 뗌 (언어를 바꿀 때 main.js 도 부름) */
+  window.PM_SYNC_URL = function () {
+    var cur = location.pathname + location.search + location.hash;
+    if (fix(cur) !== cur) H.replaceState(H.state, '', cur);
+  };
+  window.PM_SYNC_URL();
+})();
+
 /* 새 버전 확인 — 사이트를 새로 올린 직후에는 브라우저가 예전에 받아 둔 페이지를 잠깐(최대 10분) 그대로 다시 쓰는 일이 있어
    (그러면 장바구니처럼 새로 생긴 기능이 그 페이지에서만 안 보임), 페이지를 열 때 /version.txt 와 이 파일의 ?v= 를 비교해
    예전 페이지면 한 번 새로고침합니다. 결제 페이지(/checkout/)와 입력을 시작한 뒤에는 새로고침하지 않습니다.
    ▸ 배포할 때 모든 페이지의 ?v= 값과 version.txt 를 같은 값으로 올려 주세요. */
 (function () {
   var me = document.currentScript && /[?&]v=([\w-]+)/.exec(document.currentScript.src);
-  if (!me || !window.fetch || location.pathname.indexOf('/checkout/') === 0) return;
+  if (!me || !window.fetch || PM_PATH().indexOf('/checkout/') === 0) return;
   var typed = false;
   document.addEventListener('input', function () { typed = true; }, true);
   var check = function () {
@@ -52,10 +79,10 @@
   ];
   window.PM_MATTERS = MATTERS;
 
-  var plantHere = location.pathname.indexOf('/plant/') === 0 ? ' class="is-here" aria-current="page"' : '';
-  var contactHere = location.pathname.indexOf('/contact/') === 0 ? ' class="is-here" aria-current="page"' : '';
-  var collabHere = location.pathname.indexOf('/collaboration/') === 0 ? ' class="is-here" aria-current="page"' : '';
-  var matterHere = location.pathname.indexOf('/matter/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var plantHere = PM_PATH().indexOf('/plant/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var contactHere = PM_PATH().indexOf('/contact/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var collabHere = PM_PATH().indexOf('/collaboration/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var matterHere = PM_PATH().indexOf('/matter/') === 0 ? ' class="is-here" aria-current="page"' : '';
   /* 장바구니 아이콘: 담긴 것이 있으면 처음 그릴 때부터 초록 가방 + 숫자 (자세한 확인은 뒤에 cart.js 가 다시 함)
      — 페이지를 옮길 때 검은 가방이 잠깐 보였다가 초록으로 바뀌는 깜빡임 방지 */
   var cartN = 0;

@@ -22,6 +22,7 @@
     lang = LANGS.includes(next) ? next : 'ko';
     root.lang = lang;
     if (save) { try { localStorage.setItem('pm-lang', lang); } catch (e) {} }
+    if (window.PM_SYNC_URL) window.PM_SYNC_URL();   // 일본어면 주소 앞에 /ja (assets/js/layout.js)
     document.title = t('title');
     document.querySelector('meta[name="description"]')?.setAttribute('content', t('description'));
     document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });

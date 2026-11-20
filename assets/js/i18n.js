@@ -543,7 +543,7 @@ window.PM_I18N = {
   },
   ja: {
     title: 'PLANT MATTER プラントマター',
-    description: 'PLANT MATTER プラントマター — Different Plants and Matter',
+    description: 'PLANT MATTER プラントマター — 他にはない希少な植物と、他にはない多彩な素材',
     home: 'PLANT MATTER ホーム',
     menu: 'メインメニュー',
     language: '言語を選択',

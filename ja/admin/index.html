@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <script>
+    /* 휴대폰으로 접속하면 모바일 사이트로 이동 (실제 도메인에서만 동작) */
+    (function () {
+      var MOBILE_URL = 'https://m.plantmatter.kr';
+      var LIVE_HOSTS = ['plantmatter.kr', 'www.plantmatter.kr'];
+      var LANGS = ['ko', 'en', 'ja'];
+      var q = new URLSearchParams(location.search);
+      /* /ja/… 주소(일본어로 공유한 링크)로 들어오면 일본어 */
+      var saved = LANGS.indexOf(q.get('lang')) > -1 ? q.get('lang') : /^\/ja(\/|$)/.test(location.pathname) ? 'ja' : null;
+      try {
+        if (saved) localStorage.setItem('pm-lang', saved);
+        saved = localStorage.getItem('pm-lang') || saved;
+        localStorage.removeItem('pm-view');   /* 예전 'PC 버전 보기' 설정 정리 */
+      } catch (e) {}
+      /* 언어: 직접 고른 언어 → 브라우저 언어(한국어·일본어) → 영어 */
+      var nav = (navigator.language || '').toLowerCase();
+      var hasSaved = LANGS.indexOf(saved) > -1;
+      document.documentElement.lang = hasSaved ? saved : nav.indexOf('ko') === 0 ? 'ko' : nav.indexOf('ja') === 0 ? 'ja' : 'en';
+      var phone = /iPhone|iPod|Android.+Mobile|Windows Phone|Mobile.+Firefox|Opera Mini/i.test(navigator.userAgent);
+      if (phone && LIVE_HOSTS.indexOf(location.hostname) > -1) {
+        q.delete('view');
+        if (hasSaved) q.set('lang', saved);
+        var qs = q.toString();
+        location.replace(MOBILE_URL + location.pathname + (qs ? '?' + qs : '') + location.hash);
+      }
+    })();
+  </script>
+  <title>ADMIN — PLANT MATTER</title>
+  <meta name="description" content="PLANT MATTER プラントマター — 他にはない希少な植物と、他にはない多彩な素材">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="canonical" href="https://plantmatter.kr/ja/admin/">
+  <link rel="alternate" hreflang="ko" href="https://plantmatter.kr/admin/">
+  <link rel="alternate" hreflang="en" href="https://plantmatter.kr/admin/">
+  <link rel="alternate" hreflang="ja" href="https://plantmatter.kr/ja/admin/">
+  <link rel="alternate" hreflang="x-default" href="https://plantmatter.kr/admin/">
+  <link rel="alternate" media="only screen and (max-width: 640px)" href="https://m.plantmatter.kr/ja/admin/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PLANT MATTER">
+  <meta property="og:title" content="ADMIN — PLANT MATTER">
+  <meta property="og:description" content="他にはない希少な植物と、他にはない多彩な素材">
+  <meta property="og:url" content="https://plantmatter.kr/ja/admin/">
+  <meta property="og:image" content="https://plantmatter.kr/assets/img/og-logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/img/favicon-48.png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://qssrtzvipwvxcfszxomo.supabase.co" crossorigin>   <!-- 제품 목록(Supabase)을 빨리 읽도록 미리 연결 -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261120zc">
+</head>
+<body class="page-sub page-adm">
+  <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
+  <script src="/assets/js/layout.js?v=20261120zc"></script>
+  <script>PM_LAYOUT.top()</script>
+
+  <!-- ───────── 관리자 페이지 — assets/js/admin.js (관리자 명단 public.app_admins 의 계정만) ───────── -->
+  <main class="list adm" id="main">
+    <div class="list__head">
+      <p class="crumb"><span>ADMIN</span><span aria-hidden="true">/</span><span data-adm-crumb>PRODUCTS</span></p>
+      <h1 class="list__title" data-adm-title>PRODUCTS</h1>
+    </div>
+    <div class="adm__state" data-adm-state><p>불러오는 중…</p></div>
+    <div data-adm-app hidden>
+      <div class="list__bar">
+        <nav class="pills" aria-label="ADMIN">
+          <a class="pill is-active" href="/admin/" data-adm-tab="products" aria-current="page">PRODUCTS</a>
+          <a class="pill" href="/admin/?t=b2b" data-adm-tab="b2b">B2B</a>
+          <a class="pill" href="/admin/?t=collab" data-adm-tab="collab">COLLAB</a>
+        </nav>
+      </div>
+      <section data-adm-panel="products">
+        <div class="adm__tools"><p class="list__count" data-adm-count></p><button class="btn-buy adm__new" type="button" data-adm-new>+ 새 제품</button></div>
+        <p class="adm__note">가격 · 재고 · 상태를 고치고 그 줄의 [저장]을 누르면 사이트에 바로 반영됩니다. 재고를 0 으로 두면 SOLD OUT, 비우면 수량을 관리하지 않습니다. 숨김은 사이트에 보이지 않습니다.</p>
+        <div data-adm-products></div>
+      </section>
+      <section data-adm-panel="b2b" hidden><div data-adm-b2b></div></section>
+      <section data-adm-panel="collab" hidden><div data-adm-collab></div></section>
+    </div>
+  </main>
+
+  <!-- 제품 편집 · 새 제품 (오른쪽에서 열리는 창) -->
+  <div class="drawer adm-editor" data-adm-editor aria-hidden="true">
+    <div class="drawer__dim" data-adm-close></div>
+    <section class="drawer__panel adm-editor__panel" role="dialog" aria-modal="true" aria-labelledby="adm-editor-title">
+      <header class="drawer__head">
+        <h2 id="adm-editor-title" data-adm-editor-title>제품 편집</h2>
+        <button class="icon-btn drawer__close" type="button" data-adm-close aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+      </header>
+      <form class="adm-editor__body" data-adm-form novalidate>
+        <div class="adm-editor__photo">
+          <span class="adm-editor__img" data-adm-img><span>사진 없음</span></span>
+          <label class="btn-line adm-editor__pick">사진 고르기<input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></label>
+          <p class="field__hint">세로 3:4 (750×1000) 로 가운데를 기준으로 맞춰 올립니다. 배경 정리 · 톤 보정은 되지 않으니 보정한 사진을 올려 주세요.</p>
+        </div>
+        <div class="field"><label for="a-id">ID (주소에 쓰임 · 영문 소문자 · 숫자 · -)</label><input id="a-id" name="id" maxlength="80" autocomplete="off" placeholder="예: ficus-punctata"></div>
+        <div class="field"><label for="a-ko">이름 (한국어)</label><input id="a-ko" name="name_ko" maxlength="120"></div>
+        <div class="field"><label for="a-en">이름 (English)</label><input id="a-en" name="name_en" maxlength="120"></div>
+        <div class="field"><label for="a-ja">이름 (日本語)</label><input id="a-ja" name="name_ja" maxlength="120"></div>
+        <div class="field"><label for="a-where">구분 (PLANT 분류 · MATTER · COLLABORATION)</label><div class="select"><select id="a-where" name="where"></select><svg class="select__chev" viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6"/></svg></div></div>
+        <div class="adm-editor__two">
+          <div class="field"><label for="a-sci-i">학명 (이탤릭 부분)</label><input id="a-sci-i" name="sci_i" maxlength="120" placeholder="예: Ficus"></div>
+          <div class="field"><label for="a-sci-r">학명 (나머지)</label><input id="a-sci-r" name="sci_r" maxlength="120" placeholder="예: sp. ‘Murung Raya’"></div>
+        </div>
+        <div class="field"><label for="a-sub">모델명 (학명 대신 둘째 줄 · 협업 제품)</label><input id="a-sub" name="sub" maxlength="80" placeholder="예: BOWL MID - 4"></div>
+        <div class="adm-editor__two">
+          <div class="field"><label for="a-price">가격 (원, 비우면 가격 문의)</label><input id="a-price" name="price" inputmode="numeric"></div>
+          <div class="field"><label for="a-stock">재고 (비우면 관리 안 함)</label><input id="a-stock" name="stock" inputmode="numeric"></div>
+        </div>
+        <div class="field"><label for="a-status">상태</label><div class="select"><select id="a-status" name="status"><option value="available">판매 중</option><option value="soldout">품절</option><option value="hidden">숨김 (사이트에 안 보임)</option></select><svg class="select__chev" viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6"/></svg></div></div>
+        <label class="check"><input type="checkbox" name="exact"><span class="check__box" aria-hidden="true"></span><span>동일 상품 배송 (사진 속 바로 그 개체)</span></label>
+        <label class="check"><input type="checkbox" name="plain"><span class="check__box" aria-hidden="true"></span><span>단색 배경 사진 (아래쪽 그라데이션 없음)</span></label>
+        <div class="field"><label for="a-desc-ko">설명 (한국어, 선택)</label><textarea id="a-desc-ko" name="desc_ko" rows="3" maxlength="2000"></textarea></div>
+        <div class="field"><label for="a-desc-en">설명 (English, 선택)</label><textarea id="a-desc-en" name="desc_en" rows="3" maxlength="2000"></textarea></div>
+        <div class="field"><label for="a-desc-ja">설명 (日本語, 선택)</label><textarea id="a-desc-ja" name="desc_ja" rows="3" maxlength="2000"></textarea></div>
+        <p class="auth__err" data-adm-form-err role="alert" hidden></p>
+        <button class="btn-buy" type="submit">저장</button>
+        <button class="adm-editor__del" type="button" data-adm-delete hidden>제품 삭제</button>
+      </form>
+    </section>
+  </div>
+
+  <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
+  <script>PM_LAYOUT.bottom()</script>
+
+  <script src="/assets/js/i18n.js?v=20261120zc" defer></script>
+  <script src="/assets/js/main.js?v=20261120zc" defer></script>
+  <script src="/assets/js/products.js?v=20261120zc" defer></script>
+  <script src="/assets/js/shop.js?v=20261120zc" defer></script>
+  <script src="/assets/js/cart.js?v=20261120zc" defer></script>
+  <script src="/assets/vendor/supabase-2.118.0.js" defer></script>
+  <script src="/assets/js/auth.js?v=20261120zc" defer></script>
+  <script src="/assets/js/admin.js?v=20261120zc" defer></script>
+</body>
+</html>

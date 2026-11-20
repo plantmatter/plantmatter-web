@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    /* 휴대폰으로 접속하면 모바일 사이트로 이동 (실제 도메인에서만 동작) */
+    (function () {
+      var MOBILE_URL = 'https://m.plantmatter.kr';
+      var LIVE_HOSTS = ['plantmatter.kr', 'www.plantmatter.kr'];
+      var LANGS = ['ko', 'en', 'ja'];
+      var q = new URLSearchParams(location.search);
+      /* /ja/… 주소(일본어로 공유한 링크)로 들어오면 일본어 */
+      var saved = LANGS.indexOf(q.get('lang')) > -1 ? q.get('lang') : /^\/ja(\/|$)/.test(location.pathname) ? 'ja' : null;
+      try {
+        if (saved) localStorage.setItem('pm-lang', saved);
+        saved = localStorage.getItem('pm-lang') || saved;
+        localStorage.removeItem('pm-view');   /* 예전 'PC 버전 보기' 설정 정리 */
+      } catch (e) {}
+      /* 언어: 직접 고른 언어 → 브라우저 언어(한국어·일본어) → 영어 */
+      var nav = (navigator.language || '').toLowerCase();
+      var hasSaved = LANGS.indexOf(saved) > -1;
+      document.documentElement.lang = hasSaved ? saved : nav.indexOf('ko') === 0 ? 'ko' : nav.indexOf('ja') === 0 ? 'ja' : 'en';
+      var phone = /iPhone|iPod|Android.+Mobile|Windows Phone|Mobile.+Firefox|Opera Mini/i.test(navigator.userAgent);
+      if (phone && LIVE_HOSTS.indexOf(location.hostname) > -1) {
+        q.delete('view');
+        if (hasSaved) q.set('lang', saved);
+        var qs = q.toString();
+        location.replace(MOBILE_URL + location.pathname + (qs ? '?' + qs : '') + location.hash);
+      }
+    })();
+  </script>
+  <title>MATTER — PLANT MATTER</title>
+  <meta name="description" content="PLANT MATTER プラントマター — 他にはない希少な植物と、他にはない多彩な素材">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="canonical" href="https://plantmatter.kr/ja/matter/">
+  <link rel="alternate" hreflang="ko" href="https://plantmatter.kr/matter/">
+  <link rel="alternate" hreflang="en" href="https://plantmatter.kr/matter/">
+  <link rel="alternate" hreflang="ja" href="https://plantmatter.kr/ja/matter/">
+  <link rel="alternate" hreflang="x-default" href="https://plantmatter.kr/matter/">
+  <link rel="alternate" media="only screen and (max-width: 640px)" href="https://m.plantmatter.kr/ja/matter/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PLANT MATTER">
+  <meta property="og:title" content="MATTER — PLANT MATTER">
+  <meta property="og:description" content="他にはない希少な植物と、他にはない多彩な素材">
+  <meta property="og:url" content="https://plantmatter.kr/ja/matter/">
+  <meta property="og:image" content="https://plantmatter.kr/assets/img/og-logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/img/favicon-48.png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://qssrtzvipwvxcfszxomo.supabase.co" crossorigin>   <!-- 제품 목록(Supabase)을 빨리 읽도록 미리 연결 -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261120zc">
+</head>
+<body class="page-sub">
+  <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
+  <script src="/assets/js/layout.js?v=20261120zc"></script>
+  <script>PM_LAYOUT.top()</script>
+
+  <!-- ───────── MATTER ─────────
+       PLANT 목록과 같은 형식. 분류 탭과 내용은 assets/js/group.js 가 layout.js 의 MATTERS 를 읽어 채웁니다 -->
+  <main class="list" id="main" data-group="matter">
+    <div class="list__head">
+      <p class="crumb"><a href="/matter/">MATTER</a><span aria-hidden="true">/</span><span data-crumb>ALL</span></p>
+      <h1 class="list__title" data-title>ALL</h1>
+    </div>
+    <div class="list__bar">
+      <nav class="pills" aria-label="MATTER" data-pills></nav>
+      <p class="list__count" data-count></p>
+    </div>
+    <ul class="grid" data-grid></ul>
+    <p class="list__empty" data-empty data-i18n="matterSoon" hidden>제품을 준비하고 있습니다.</p>
+  </main>
+
+  <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
+  <script>PM_LAYOUT.bottom()</script>
+
+  <script src="/assets/js/i18n.js?v=20261120zc" defer></script>
+  <script src="/assets/js/main.js?v=20261120zc" defer></script>
+  <script src="/assets/js/products.js?v=20261120zc" defer></script>
+  <script src="/assets/js/shop.js?v=20261120zc" defer></script>
+  <script src="/assets/js/cart.js?v=20261120zc" defer></script>
+  <script src="/assets/js/group.js?v=20261120zc" defer></script>
+</body>
+</html>
