@@ -79,7 +79,7 @@ window.PM_PRODUCTS = [
     collab: 'thichi-yuiitsumuni',
     name: { ko: 'THICHIのBUCOTSU鉢', en: 'THICHIのBUCOTSU鉢', ja: 'THICHIのBUCOTSU鉢' },
     sub: 'BOWL LONG - 4',
-    price: null,
+    price: 40000,
     status: 'available',
     plain: true,
     image: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=3'
@@ -89,7 +89,7 @@ window.PM_PRODUCTS = [
     collab: 'thichi-yuiitsumuni',
     name: { ko: 'THICHIのBUCOTSU鉢', en: 'THICHIのBUCOTSU鉢', ja: 'THICHIのBUCOTSU鉢' },
     sub: 'BOWL MID - 4',
-    price: null,
+    price: 35000,
     status: 'available',
     plain: true,
     image: '/assets/img/products/thichi-bucotsu-bowl-mid-4.jpg?v=3'
@@ -99,7 +99,7 @@ window.PM_PRODUCTS = [
     collab: 'thichi-yuiitsumuni',
     name: { ko: 'THICHIのBUCOTSU鉢', en: 'THICHIのBUCOTSU鉢', ja: 'THICHIのBUCOTSU鉢' },
     sub: 'BOWL MID - 5',
-    price: null,
+    price: 39000,
     status: 'available',
     plain: true,
     image: '/assets/img/products/thichi-bucotsu-bowl-mid-5.jpg?v=3'
