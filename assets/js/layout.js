@@ -65,7 +65,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-7 8-7s8 2 8 7"/></svg>
       </a>
       <button class="icon-btn icon-cart" type="button" data-cart-open aria-label="장바구니" data-i18n-attr="aria-label: cart" aria-controls="cart-drawer" aria-expanded="false">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="bag__body" d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>
         <span class="cart-badge" data-cart-count hidden></span>
       </button>
     </div>

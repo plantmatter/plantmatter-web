@@ -94,7 +94,10 @@
     nEl.textContent = n ? ` (${n})` : '';
     /* 상단 아이콘 숫자 */
     document.querySelectorAll('[data-cart-count]').forEach((el) => { el.textContent = n > 99 ? '99+' : String(n); el.hidden = !n; });
-    document.querySelectorAll('[data-cart-open]').forEach((el) => el.setAttribute('aria-label', n ? t('cartWith', { n }) : t('cart')));
+    document.querySelectorAll('[data-cart-open]').forEach((el) => {
+      el.setAttribute('aria-label', n ? t('cartWith', { n }) : t('cart'));
+      el.classList.toggle('has-items', n > 0);   // 담긴 것이 있으면 가방 안을 초록으로 (style.css .icon-cart.has-items)
+    });
     if (!all.length) {
       bodyEl.innerHTML = `<p class="cart__empty">${esc(t('cartEmpty'))}</p>`;
       footEl.innerHTML = '';
