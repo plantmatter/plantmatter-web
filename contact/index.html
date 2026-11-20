@@ -55,15 +55,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261120d">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261120e">
 </head>
 <body class="page-sub page-ct">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261120d"></script>
+  <script src="/assets/js/layout.js?v=20261120e"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── CONTACT · 도매 문의 ─────────
-       연락처(이메일·전화·카카오톡·인스타그램·응대 시간)는 assets/js/contact.js 맨 위에서 넣습니다 -->
+       양식 처리: assets/js/contact.js → Supabase Edge Function 'wholesale-inquiry' (supabase/functions/) → 운영자 메일 -->
   <main class="ct" id="main">
     <div class="ct__head">
       <p class="crumb"><span>CONTACT</span><span aria-hidden="true">/</span><span>WHOLESALE</span></p>
@@ -73,15 +73,94 @@
       <h2 class="ct__h" id="ct-wholesale" data-i18n="wsTitle">도매 문의</h2>
       <div class="ct__content">
         <p class="ct__lead" data-i18n="wsLead">식물 매장, 카페·쇼룸 같은 공간, 조경·인테리어 업체의 도매 및 대량 구매 문의를 받습니다.</p>
-        <dl class="ct__list" data-contact-list></dl>
-        <div class="ct__ask">
-          <p class="ct__ask-title" data-i18n="wsAskTitle">문의하실 때 함께 알려 주세요</p>
-          <ul>
-            <li data-i18n="wsAsk1">업체명 · 담당자 성함</li>
-            <li data-i18n="wsAsk2">연락받으실 번호 또는 이메일</li>
-            <li data-i18n="wsAsk3">관심 있는 식물과 수량</li>
-            <li data-i18n="wsAsk4">받으실 지역과 희망 시기</li>
-          </ul>
+        <p class="ct__lead ct__lead--sub" data-i18n="wsLead2">아래 양식을 보내 주시면 사업자 확인 후 남겨 주신 연락처로 안내드립니다.</p>
+        <dl class="ct__list" data-contact-list hidden></dl>
+
+        <form class="ws" data-ws novalidate>
+          <div class="ws__grid">
+          <div class="field">
+            <label for="w-company" data-i18n="wsCompany">업체명</label>
+            <input id="w-company" name="company" autocomplete="organization" maxlength="80" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="w-bizno" data-i18n="wsBizNo">사업자등록번호</label>
+            <input id="w-bizno" name="bizNo" data-rule="bizno" data-digits inputmode="numeric" maxlength="12" placeholder="숫자 10자리" data-i18n-attr="placeholder: wsBizNoHint" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="w-name" data-i18n="wsName">담당자 성함</label>
+            <input id="w-name" name="name" autocomplete="name" maxlength="40" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="w-type" data-i18n="wsType">업종 (선택)</label>
+            <div class="select">
+              <select id="w-type" name="bizType">
+                <option value="" data-i18n="wsTypeNone">선택해 주세요</option>
+                <option value="shop" data-i18n="wsTypeShop">식물 매장·꽃집</option>
+                <option value="space" data-i18n="wsTypeSpace">카페·쇼룸 등 공간</option>
+                <option value="landscape" data-i18n="wsTypeLandscape">조경·인테리어</option>
+                <option value="online" data-i18n="wsTypeOnline">온라인 판매</option>
+                <option value="other" data-i18n="wsTypeOther">기타</option>
+              </select>
+              <svg class="select__chev" viewBox="0 0 14 8" aria-hidden="true"><path d="M1 1l6 6 6-6"/></svg>
+            </div>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="w-email" data-i18n="fEmail">이메일</label>
+            <input id="w-email" name="email" type="email" data-rule="email" autocomplete="email" maxlength="120" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="w-phone" data-i18n="fPhone">휴대폰 번호</label>
+            <input id="w-phone" name="phone" type="tel" data-rule="phone" data-digits inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="숫자만 입력 (예: 01012345678)" data-i18n-attr="placeholder: fPhoneHint" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          </div>
+          <div class="field">
+            <label for="w-items" data-i18n="wsItems">관심 있는 식물 · 수량</label>
+            <textarea id="w-items" name="items" rows="4" maxlength="1000" placeholder="예: 피커스 푼타타 10개, 오키드 류 20개" data-i18n-attr="placeholder: wsItemsHint" required></textarea>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="w-region" data-i18n="wsRegion">받으실 지역 · 희망 시기 (선택)</label>
+            <input id="w-region" name="region" maxlength="120" placeholder="예: 서울 성수동, 다음 달 초" data-i18n-attr="placeholder: wsRegionHint">
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="w-message" data-i18n="wsMessage">문의 내용 (선택)</label>
+            <textarea id="w-message" name="message" rows="4" maxlength="2000"></textarea>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field field--file">
+            <label for="w-doc" data-i18n="wsDoc">사업자등록증</label>
+            <div class="file">
+              <input id="w-doc" name="doc" type="file" accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,.webp,application/pdf,image/jpeg,image/png,image/heic,image/heif,image/webp" data-rule="doc" required>
+              <span class="file__btn" aria-hidden="true" data-i18n="wsDocPick">파일 선택</span>
+              <span class="file__name" data-file-name aria-hidden="true"></span>
+            </div>
+            <p class="field__hint" data-i18n="wsDocHint">PDF · JPG · PNG 파일, 10MB 이하</p>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="ws__trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+          <div class="agree" data-agree-box>
+            <div class="agree__row">
+              <label class="check"><input type="checkbox" data-agree="privacy" required><span class="check__box" aria-hidden="true"></span><span data-i18n="wsAgree">[필수] 개인정보 수집·이용 동의</span></label>
+              <button class="agree__view" type="button" data-view-toggle aria-expanded="false" data-i18n="view">보기</button>
+              <p class="agree__text" data-i18n="wsPrivacyText" hidden></p>
+            </div>
+            <p class="agree__err" role="alert"></p>
+          </div>
+          <p class="auth__err" data-err role="alert" hidden></p>
+          <button class="btn-buy" type="submit" data-send data-i18n="wsSend">문의 보내기</button>
+        </form>
+
+        <div class="ws-done" data-ws-done hidden tabindex="-1">
+          <p class="ws-done__title" data-i18n="wsDoneTitle">문의가 접수되었습니다</p>
+          <p class="ws-done__text" data-i18n="wsDoneText">확인 후 남겨 주신 이메일이나 휴대폰 번호로 연락드리겠습니다.</p>
+          <button class="btn-line" type="button" data-ws-again data-i18n="wsAgain">새 문의 작성</button>
         </div>
       </div>
     </section>
@@ -90,11 +169,12 @@
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
-  <script src="/assets/js/i18n.js?v=20261120d" defer></script>
-  <script src="/assets/js/main.js?v=20261120d" defer></script>
-  <script src="/assets/js/products.js?v=20261120d" defer></script>
-  <script src="/assets/js/shop.js?v=20261120d" defer></script>
-  <script src="/assets/js/cart.js?v=20261120d" defer></script>
-  <script src="/assets/js/contact.js?v=20261120d" defer></script>
+  <script src="/assets/js/i18n.js?v=20261120e" defer></script>
+  <script src="/assets/js/main.js?v=20261120e" defer></script>
+  <script src="/assets/js/products.js?v=20261120e" defer></script>
+  <script src="/assets/js/shop.js?v=20261120e" defer></script>
+  <script src="/assets/js/cart.js?v=20261120e" defer></script>
+  <script src="/assets/js/form.js?v=20261120e" defer></script>
+  <script src="/assets/js/contact.js?v=20261120e" defer></script>
 </body>
 </html>

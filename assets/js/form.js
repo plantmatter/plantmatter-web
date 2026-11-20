@@ -2,11 +2,22 @@
    .field 안의 input 을 검사합니다.
      required          : 꼭 입력
      data-rule="…"     : userid(아이디) · phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상 + 대문자·소문자·숫자·특수문자) · code(메일 인증 코드)
+                         bizno(사업자등록번호 10자리 + 검증 숫자) · doc(사업자등록증 파일: PDF·JPG·PNG·HEIC·WEBP, 10MB 이하)
+     textarea · select 도 .field 안에 있으면 같이 검사합니다.
      data-match="이름" : 다른 칸과 같아야 함 (비밀번호 확인)
      data-digits       : 숫자만 남김
    오류 문구는 칸 아래 .field__err 에 나오고, 고치는 즉시 사라집니다. */
 (() => {
   const digits = (v) => String(v || '').replace(/\D/g, '');
+  /* 사업자등록번호 검증 숫자 (국세청 방식: 가중치 1 3 7 1 3 7 1 3 5) */
+  const bizOk = (d) => {
+    if (!/^\d{10}$/.test(d)) return false;
+    const w = [1, 3, 7, 1, 3, 7, 1, 3, 5];
+    let s = 0;
+    for (let i = 0; i < 9; i++) s += Number(d[i]) * w[i];
+    s += Math.floor((Number(d[8]) * 5) / 10);
+    return (10 - (s % 10)) % 10 === Number(d[9]);
+  };
   /* 새 비밀번호 조건 (회원가입 · 비밀번호 찾기 · 비밀번호 변경). 로그인 칸에는 적용하지 않음 */
   const PW_CHECKS = [
     ['pwRuleLen', (v) => v.length >= 8],
@@ -22,6 +33,14 @@
     password: (v) => PW_CHECKS.every(([, ok]) => ok(v)) || 'errPwRule',   // 8자 이상 + 영어 대문자 + 소문자 + 숫자 + 특수문자 (Supabase 'Lowercase, uppercase letters, digits and symbols' 와 같음)
     code: (v) => /^\d{6,10}$/.test(v) || 'errCodeFormat',   // 메일로 받은 인증 코드 (기본 6자리)
     userid: (v) => /^[가-힣A-Za-z0-9._-]{2,20}$/.test(v) || 'errIdFormat',   // 아이디: 2~20자, 한글·영문·숫자 . _ -
+    bizno: (v) => bizOk(digits(v)) || 'errBizNo',
+    doc: (v, el) => {
+      const f = el.files && el.files[0];
+      if (!f) return 'errFileRequired';
+      if (!/\.(pdf|jpe?g|png|hei[cf]|webp)$/i.test(f.name)) return 'errDocType';
+      if (f.size > 10 * 1024 * 1024) return 'errDocSize';
+      return true;
+    },
   };
 
   const bind = (form) => {
@@ -41,10 +60,10 @@
     const check = (input) => {
       const v = (input.type === 'password' || input.dataset.pwToggle) ? input.value : input.value.trim();   // 비밀번호는 보이게 해도 앞뒤 공백 그대로
       if (!input.required && !v) { setErr(input, null); return true; }
-      let key = v ? null : 'errRequired';
+      let key = v ? null : input.type === 'file' ? 'errFileRequired' : 'errRequired';
       const rule = RULES[input.dataset.rule];
       const kept = input.dataset.keep && v === input.dataset.keep;   // 예전부터 쓰던 값을 그대로 두는 것은 통과
-      if (!key && rule && !kept) { const r = rule(v); key = r === true ? null : r; }
+      if (!key && rule && !kept) { const r = rule(v, input); key = r === true ? null : r; }
       if (!key && input.dataset.match) {
         const other = form.elements[input.dataset.match];
         if (other && other.value !== input.value) key = 'errPwMatch';
@@ -52,15 +71,20 @@
       setErr(input, key);
       return !key;
     };
-    const inputs = () => [...form.querySelectorAll('.field input')].filter((el) => !el.readOnly && !el.disabled && !el.closest('[hidden]'));
+    const FIELDS = '.field input, .field textarea, .field select';
+    const inputs = () => [...form.querySelectorAll(FIELDS)].filter((el) => !el.readOnly && !el.disabled && !el.closest('[hidden]'));
     /* 틀린 칸은 고치는 즉시 다시 검사 (칸을 벗어날 때 검사하면 문구가 사라지며 화면이 움직여 버튼 클릭이 빗나감) */
     form.addEventListener('input', (e) => {
       const el = e.target;
-      if (el.matches('.field input') && el.closest('.field').classList.contains('is-invalid')) check(el);
+      if (el.matches(FIELDS) && el.closest('.field').classList.contains('is-invalid')) check(el);
       if (el.name && form.querySelector(`[data-match="${el.name}"]`)) {
         const m = form.querySelector(`[data-match="${el.name}"]`);
         if (m.closest('.field').classList.contains('is-invalid')) check(m);
       }
+    });
+    form.addEventListener('change', (e) => {
+      const el = e.target;
+      if (el.matches('.field input[type="file"], .field select') && el.closest('.field').classList.contains('is-invalid')) check(el);
     });
     const validate = () => {
       const bad = inputs().filter((el) => !check(el));
@@ -150,5 +174,5 @@
   });
   if (window.PM) window.PM.onLang(() => ruleLists.forEach((fn) => fn()));
 
-  window.PM_FORM = { bind, bindAgree, digits };
+  window.PM_FORM = { bind, bindAgree, digits, bizOk };
 })();
