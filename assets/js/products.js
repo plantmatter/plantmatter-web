@@ -79,10 +79,8 @@ window.PM_PRODUCTS = [
     sub: 'BOWL LONG - 4',
     price: null,
     status: 'available',
-    stock: 1,
-    exact: true,
     plain: true,
-    image: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=1'
+    image: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=2'
   },
   {
     id: 'thichi-bucotsu-bowl-mid-4',
@@ -91,10 +89,8 @@ window.PM_PRODUCTS = [
     sub: 'BOWL MID - 4',
     price: null,
     status: 'available',
-    stock: 1,
-    exact: true,
     plain: true,
-    image: '/assets/img/products/thichi-bucotsu-bowl-mid-4.jpg?v=1'
+    image: '/assets/img/products/thichi-bucotsu-bowl-mid-4.jpg?v=2'
   },
   {
     id: 'thichi-bucotsu-bowl-mid-5',
@@ -103,9 +99,7 @@ window.PM_PRODUCTS = [
     sub: 'BOWL MID - 5',
     price: null,
     status: 'available',
-    stock: 1,
-    exact: true,
     plain: true,
-    image: '/assets/img/products/thichi-bucotsu-bowl-mid-5.jpg?v=1'
+    image: '/assets/img/products/thichi-bucotsu-bowl-mid-5.jpg?v=2'
   }
 ];

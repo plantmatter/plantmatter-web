@@ -15,6 +15,8 @@
     (선택) --bg f4f4f2 : 순백 대신 이 색의 단색 배경 (화분·협업 제품용, 아주 밝은 회색)
                       순백으로 고른 뒤 사진 전체에 이 색을 곱함 → 배경은 정확히 이 색, 제품 색은 거의 그대로(4% 정도)
                       이렇게 만든 제품은 products.js 에 plain: true 를 넣어 사이트의 아래쪽 그라데이션도 빼 주세요
+    (선택) --pot-tone : 검은 화분의 톤(밝기·대비·색 기운)을 아래 POT_TONE 기준으로 맞춤 — 여러 사진의 블랙을 통일
+                      어둡고 색이 없는 화분 면만 고치고, 놋쇠 판 · 손 · 배경은 그대로 (가장자리는 부드럽게)
     옵션 없이 실행하면 자동으로 크기·위치를 맞춥니다 (권장). 옵션을 주면 그 값대로 직접 자릅니다.
 
 필요한 것: Python 3, Pillow, NumPy  (pip install pillow numpy)
@@ -31,6 +33,9 @@ OUT_W, OUT_H = 750, 1000
 #   → 식물(잎·줄기)이 화면에서 차지하는 면적을 무룽 라야와 같게 하고, 같은 자리에 둠
 FIT_COVER = 0.085           # 무룽 라야: 식물이 화면의 8.5%를 차지 (2026-11 한 단계 축소, 이전 10.4%)
 FIT_CX, FIT_CY = 0.50, 0.51 # 무룽 라야: 식물 중심이 가로 50%, 세로 51% 지점
+# --pot-tone 기준: 검은 화분 면의 밝기(Y) 10% · 50% · 90% 지점과 색 기운(Cb, Cr)
+#   THICHIのBUCOTSU鉢 BOWL LONG-4 · MID-4 · MID-5 세 사진의 평균 (2026-11) — 새 화분도 이 블랙에 맞춰짐
+POT_TONE = {'y10': 18.0, 'y50': 33.0, 'y90': 65.3, 'cb': -0.55, 'cr': 0.98}
 
 
 def _fill_missing(grid):
@@ -213,6 +218,28 @@ def crop_3x4(img, fx=None, zoom=1.0, fy=None):
     return img.resize((OUT_W, OUT_H), Image.LANCZOS)
 
 
+def match_pot_tone(img, tone=POT_TONE):
+    """검은 화분 면의 톤을 기준(POT_TONE)에 맞춤. 바뀌는 곳은 어둡고 색이 없는 화분 면뿐이고 나머지 픽셀은 그대로"""
+    rgb = np.asarray(img, dtype=np.float32)
+    ycc = np.asarray(img.convert('YCbCr'), dtype=np.float32)
+    Y, Cb, Cr = ycc[..., 0], ycc[..., 1] - 128, ycc[..., 2] - 128
+    chroma = np.hypot(Cb, Cr)
+    core = (Y < 95) & (chroma < 10)                 # 화분 면 (어둡고 무채색)
+    if core.mean() < 0.01:
+        return img
+    # 가중치: 화분 면이 모여 있는 곳만 1 (손가락 사이 그늘 같은 외딴 점은 0), 밝거나 색 있는 픽셀(놋쇠 · 피부)은 0
+    dens = np.asarray(Image.fromarray((core * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(6)), dtype=np.float32) / 255
+    w = np.clip((dens - 0.35) / 0.4, 0, 1) * np.clip((120 - Y) / 30, 0, 1) * np.clip((18 - chroma) / 8, 0, 1)
+    p10, p50, p90 = np.percentile(Y[core], [10, 50, 90])
+    Yn = np.interp(Y, [0, p10, p50, p90, 255], [0, tone['y10'], tone['y50'], tone['y90'], 255])
+    Cbn = Cb + (tone['cb'] - Cb[core].mean())
+    Crn = Cr + (tone['cr'] - Cr[core].mean())
+    fixed = np.stack([Yn, Cbn + 128, Crn + 128], axis=-1)
+    fixed_rgb = np.asarray(Image.fromarray(np.clip(np.round(fixed), 0, 255).astype(np.uint8), 'YCbCr').convert('RGB'), dtype=np.float32)
+    out = rgb + w[..., None] * (fixed_rgb - rgb)     # 가중치 0 인 픽셀은 원래 값 그대로
+    return Image.fromarray(np.clip(np.round(out), 0, 255).astype(np.uint8))
+
+
 def tint_background(img, hex_color):
     """순백(#fff) 배경을 단색으로: 사진 전체에 그 색을 곱함 (흰색 → 그 색, 어두운 부분은 거의 그대로, 경계 번짐 없음)"""
     h = hex_color.lstrip('#')
@@ -230,11 +257,14 @@ def main():
     ap.add_argument('--fy', type=float, default=None)
     ap.add_argument('--size', type=float, default=1.0)
     ap.add_argument('--bg', default=None, help='단색 배경 (예: f4f4f2)')
+    ap.add_argument('--pot-tone', action='store_true', help='검은 화분 톤을 POT_TONE 기준으로 통일')
     args = ap.parse_args()
     img = Image.open(args.src).convert('RGB')
     flat = flatten_background(img)
     manual = args.fx is not None or args.fy is not None or args.zoom != 1.0
     out = crop_3x4(flat, args.fx, args.zoom, args.fy) if manual else fit_3x4(flat, args.size)
+    if args.pot_tone:
+        out = match_pot_tone(out)
     if args.bg:
         out = tint_background(out, args.bg)
     out.save(args.dst, quality=84, optimize=True, progressive=True)
