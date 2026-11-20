@@ -116,12 +116,12 @@ Deno.serve(async (req) => {
   };
   const bad: string[] = [];
   if (!d.company || d.company.length > 80) bad.push('company');
-  if (!bizOk(d.bizNo)) bad.push('bizNo');
+  if (d.bizNo && !bizOk(d.bizNo)) bad.push('bizNo');   // 양식에서 뺀 칸 (값이 오면 확인만)
   if (!d.name || d.name.length > 40) bad.push('name');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email) || d.email.length > 120) bad.push('email');
   if (!/^0\d{8,10}$/.test(d.phone)) bad.push('phone');
   if (d.bizType && !TYPES[d.bizType]) bad.push('bizType');
-  if (!d.items || d.items.length > 1000) bad.push('items');
+  if (d.items.length > 1000) bad.push('items');   // 양식에서 뺀 칸 (예전 양식·직접 보낸 값만)
   if (d.region.length > 120) bad.push('region');
   if (d.message.length > 2000) bad.push('message');
   if (str(f, 'consent') !== 'yes') bad.push('consent');
@@ -160,8 +160,8 @@ Deno.serve(async (req) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
     body: JSON.stringify({
-      id, company: d.company, biz_no: d.bizNo, contact_name: d.name, email: d.email, phone: d.phone,
-      biz_type: d.bizType || null, items: d.items, region: d.region || null, message: d.message || null,
+      id, company: d.company, biz_no: d.bizNo || null, contact_name: d.name, email: d.email, phone: d.phone,
+      biz_type: d.bizType || null, items: d.items || null, region: d.region || null, message: d.message || null,
       doc_path: path, doc_name: file.name.slice(0, 200), lang: d.lang, consent_at: now.toISOString(), ip_hash: ipHash,
     }),
   });
@@ -175,13 +175,13 @@ Deno.serve(async (req) => {
   const when = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', dateStyle: 'long', timeStyle: 'short' });
   const rows: [string, string][] = [
     ['업체명', d.company],
-    ['사업자등록번호', bizFmt(d.bizNo)],
+    ...(d.bizNo ? [['사업자등록번호', bizFmt(d.bizNo)] as [string, string]] : []),
     ['담당자', d.name],
     ['이메일', d.email],
     ['휴대폰', phoneFmt(d.phone)],
-    ['업종', d.bizType ? TYPES[d.bizType] : '—'],
-    ['관심 식물 · 수량', d.items],
-    ['받으실 지역 · 시기', d.region || '—'],
+    ['업종', d.bizType ? TYPES[d.bizType] : '—'],   // 양식에서 뺀 칸(관심 식물·지역·사업자번호)은 값이 올 때만 메일에 표시
+    ...(d.region ? [['받으실 지역 · 시기', d.region] as [string, string]] : []),
+    ...(d.items ? [['관심 식물 · 수량', d.items] as [string, string]] : []),
     ['문의 내용', d.message || '—'],
     ['접수', `${when} (문의 언어: ${d.lang})`],
     ['문의 번호', id],

@@ -11,12 +11,12 @@ create table if not exists public.wholesale_inquiries (
   id            uuid primary key default gen_random_uuid(),
   created_at    timestamptz not null default now(),
   company       text not null check (char_length(company) between 1 and 80),
-  biz_no        text not null check (biz_no ~ '^[0-9]{10}$'),
+  biz_no        text check (biz_no is null or biz_no ~ '^[0-9]{10}$'),   -- 양식에서 뺌 (web06)
   contact_name  text not null check (char_length(contact_name) between 1 and 40),
   email         text not null check (char_length(email) between 3 and 120),
   phone         text not null check (phone ~ '^0[0-9]{8,10}$'),
   biz_type      text check (char_length(biz_type) <= 40),
-  items         text not null check (char_length(items) between 1 and 1000),
+  items         text check (items is null or char_length(items) <= 1000),   -- 양식에서 뺌 (web06)
   region        text check (char_length(region) <= 120),
   message       text check (char_length(message) <= 2000),
   doc_path      text,
