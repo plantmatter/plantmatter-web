@@ -5,7 +5,7 @@
 window.PM_I18N = {
   ko: {
     title: 'PLANT MATTER 플랜트매터',
-    description: 'PLANT MATTER 플랜트매터 — 세계의 야생 식물과 자생 환경을 관찰하고 기록합니다.',
+    description: 'PLANT MATTER 플랜트매터 — Different Plants and Matter',
     home: 'PLANT MATTER 홈',
     menu: '주요 메뉴',
     language: '언어 선택',
@@ -274,7 +274,7 @@ window.PM_I18N = {
   },
   en: {
     title: 'PLANT MATTER',
-    description: 'PLANT MATTER observes and records wild plants and their native habitats around the world.',
+    description: 'PLANT MATTER — Different Plants and Matter',
     home: 'PLANT MATTER home',
     menu: 'Main menu',
     language: 'Select language',
@@ -543,7 +543,7 @@ window.PM_I18N = {
   },
   ja: {
     title: 'PLANT MATTER プラントマター',
-    description: 'PLANT MATTER プラントマター — 世界の野生植物とその自生環境を観察し、記録しています。',
+    description: 'PLANT MATTER プラントマター — Different Plants and Matter',
     home: 'PLANT MATTER ホーム',
     menu: 'メインメニュー',
     language: '言語を選択',
