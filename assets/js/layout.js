@@ -40,7 +40,7 @@
      항목을 더하면 상단 COLLABORATION 메뉴와 /collaboration/ 페이지 탭에 함께 생깁니다 */
   var COLLABS = [
     { id: 'gecko-in-the-library', name: 'GECKO IN THE LIBRARY', img: '' },
-    { id: 'thichi-yuiitsumuni',   name: 'THICHI YUIITSUMUNI',   img: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=3' }
+    { id: 'thichi-yuiitsumuni',   name: 'THICHI YUIITSUMUNI',   img: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=4' }
   ];
   window.PM_COLLABS = COLLABS;
 
