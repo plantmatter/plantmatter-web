@@ -2,7 +2,7 @@
    .field 안의 input 을 검사합니다.
      required          : 꼭 입력
      data-rule="…"     : userid(아이디) · phone(휴대폰) · email · zip(우편번호 5자리) · password(8자 이상 + 대문자·소문자·숫자·특수문자) · code(메일 인증 코드)
-                         bizno(사업자등록번호 10자리 + 검증 숫자) · doc(사업자등록증 파일: PDF·JPG·PNG·HEIC·WEBP, 10MB 이하)
+                         bizno(사업자등록번호 10자리 + 검증 숫자) · doc(사업자등록증 파일: PDF·JPG·PNG·HEIC·WEBP, 10MB 이하) · url(링크)
      textarea · select 도 .field 안에 있으면 같이 검사합니다.
      data-match="이름" : 다른 칸과 같아야 함 (비밀번호 확인)
      data-digits       : 숫자만 남김
@@ -34,6 +34,7 @@
     code: (v) => /^\d{6,10}$/.test(v) || 'errCodeFormat',   // 메일로 받은 인증 코드 (기본 6자리)
     userid: (v) => /^[가-힣A-Za-z0-9._-]{2,20}$/.test(v) || 'errIdFormat',   // 아이디: 2~20자, 한글·영문·숫자 . _ -
     bizno: (v) => bizOk(digits(v)) || 'errBizNo',
+    url: (v) => /^(https?:\/\/)?[^\s/.]+(\.[^\s/.]+)+(\/\S*)?$/i.test(v) || 'errUrl',   // 링크 (https:// 는 없어도 됨)
     doc: (v, el) => {
       const f = el.files && el.files[0];
       if (!f) return 'errFileRequired';

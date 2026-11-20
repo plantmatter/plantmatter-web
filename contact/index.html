@@ -55,21 +55,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261120j">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261120k">
 </head>
 <body class="page-sub page-ct">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261120j"></script>
+  <script src="/assets/js/layout.js?v=20261120k"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── CONTACT · 도매 문의 ─────────
        양식 처리: assets/js/contact.js → Supabase Edge Function 'wholesale-inquiry' (supabase/functions/) → 운영자 메일 -->
   <main class="ct" id="main">
     <div class="ct__head">
-      <p class="crumb"><a href="/contact/">CONTACT</a><span aria-hidden="true">/</span><span>B2B</span></p>
+      <p class="crumb"><a href="/contact/">CONTACT</a><span aria-hidden="true">/</span><span data-ct-crumb>B2B</span></p>
       <h1 class="ct__title">CONTACT</h1>
     </div>
-    <section class="ct__sec" aria-labelledby="ct-wholesale">
+    <!-- 분류 탭 (PLANT 목록의 분류 탭과 같은 모양) — 주소 /contact/?c=b2b · ?c=collab -->
+    <nav class="pills ct__tabs" aria-label="CONTACT" data-ct-tabs>
+      <a class="pill is-active" href="/contact/?c=b2b" data-ct="b2b" aria-current="page">B2B</a>
+      <a class="pill" href="/contact/?c=collab" data-ct="collab">COLLAB</a>
+    </nav>
+    <section class="ct__sec" data-ct-panel="b2b" aria-labelledby="ct-wholesale">
       <h2 class="ct__h" id="ct-wholesale" data-i18n="wsTitle">도매 문의</h2>
       <div class="ct__content">
         <p class="ct__lead" data-i18n="wsLead">식물 매장, 카페·쇼룸 같은 공간, 조경·인테리어 업체의 도매 및 대량 구매 문의를 받습니다.</p>
@@ -149,17 +154,71 @@
         </div>
       </div>
     </section>
+
+    <section class="ct__sec" data-ct-panel="collab" aria-labelledby="ct-collab" hidden>
+      <h2 class="ct__h" id="ct-collab" data-i18n="collabTitle">협업 및 제휴</h2>
+      <div class="ct__content">
+        <p class="ct__lead" data-i18n="collabLead">브랜드 및 행사 협업 제안을 보내 주세요.</p>
+
+        <form class="ws" data-collab novalidate>
+          <div class="ws__grid">
+          <div class="field">
+            <label for="c-name" data-i18n="collabName">업체 또는 개인명</label>
+            <input id="c-name" name="name" autocomplete="organization" maxlength="80" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="c-email" data-i18n="fEmail">이메일</label>
+            <input id="c-email" name="email" type="email" data-rule="email" autocomplete="email" maxlength="120" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          </div>
+          <div class="field">
+            <label for="c-type" data-i18n="collabType">협업 유형</label>
+            <input id="c-type" name="collabType" maxlength="80" placeholder="예: 브랜드 협업, 팝업·행사, 전시, 촬영" data-i18n-attr="placeholder: collabTypeHint" required>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="c-message" data-i18n="collabMessage">제안 내용</label>
+            <textarea id="c-message" name="message" rows="4" maxlength="3000" required></textarea>
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="c-link" data-i18n="collabLink">관련 링크 (선택)</label>
+            <input id="c-link" name="link" type="url" data-rule="url" inputmode="url" autocomplete="url" maxlength="300" placeholder="인스타그램, 웹사이트, 제안서 주소" data-i18n-attr="placeholder: collabLinkHint">
+            <p class="field__err" aria-live="polite"></p>
+          </div>
+          <div class="ws__trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+          <div class="agree" data-agree-box>
+            <div class="agree__row">
+              <label class="check"><input type="checkbox" data-agree="privacy" required><span class="check__box" aria-hidden="true"></span><span data-i18n="wsAgree">[필수] 개인정보 수집·이용 동의</span></label>
+              <button class="agree__view" type="button" data-view-toggle aria-expanded="false" data-i18n="view">보기</button>
+              <p class="agree__text" data-i18n="collabPrivacyText" hidden></p>
+            </div>
+            <p class="agree__err" role="alert"></p>
+          </div>
+          <p class="auth__err" data-err role="alert" hidden></p>
+          <button class="btn-buy" type="submit" data-send data-i18n="wsSend">문의 보내기</button>
+        </form>
+
+        <div class="ws-done" data-collab-done hidden tabindex="-1">
+          <p class="ws-done__title" data-i18n="collabDoneTitle">제안이 접수되었습니다</p>
+          <p class="ws-done__text" data-i18n="collabDoneText">검토 후 남겨 주신 이메일로 회신드리겠습니다.</p>
+          <button class="btn-line" type="button" data-ws-again data-i18n="wsAgain">새 문의 작성</button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
-  <script src="/assets/js/i18n.js?v=20261120j" defer></script>
-  <script src="/assets/js/main.js?v=20261120j" defer></script>
-  <script src="/assets/js/products.js?v=20261120j" defer></script>
-  <script src="/assets/js/shop.js?v=20261120j" defer></script>
-  <script src="/assets/js/cart.js?v=20261120j" defer></script>
-  <script src="/assets/js/form.js?v=20261120j" defer></script>
-  <script src="/assets/js/contact.js?v=20261120j" defer></script>
+  <script src="/assets/js/i18n.js?v=20261120k" defer></script>
+  <script src="/assets/js/main.js?v=20261120k" defer></script>
+  <script src="/assets/js/products.js?v=20261120k" defer></script>
+  <script src="/assets/js/shop.js?v=20261120k" defer></script>
+  <script src="/assets/js/cart.js?v=20261120k" defer></script>
+  <script src="/assets/js/form.js?v=20261120k" defer></script>
+  <script src="/assets/js/contact.js?v=20261120k" defer></script>
 </body>
 </html>

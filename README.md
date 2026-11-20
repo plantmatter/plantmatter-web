@@ -104,7 +104,14 @@
 
 - 아직 없는 것: 회원 탈퇴(앱 계정도 함께 지워지므로 안내와 함께 따로 만들 예정), 주문 내역(결제 승인 서버 연결 후)
 
-## CONTACT · 도매(B2B) 문의 (/contact/)
+## CONTACT · B2B(도매) 문의 · COLLAB(협업 제안) (/contact/)
+
+- 분류 탭 **B2B** (`/contact/?c=b2b`) · **COLLAB** (`/contact/?c=collab`) — PLANT 목록의 분류 탭과 같은 모양
+- **COLLAB 협업 제안**: 업체 또는 개인명, 이메일, 협업 유형, 제안 내용, 관련 링크(선택), 개인정보 동의(필수)
+  → 표 `collab_proposals` 에 저장(`supabase/web07_collab_proposals.sql`) + 메일 "[협업 제안] 이름 · 유형" (답장 → 제안한 분).
+    받는 주소는 `WHOLESALE_TO`, 협업 제안만 다른 곳으로 받으려면 Secrets 에 `COLLAB_TO` 추가
+- 아래는 **B2B 도매 문의** 설명입니다.
+
 
 - 상단 **CONTACT** 탭 → 도매 문의 양식: 업체명, 담당자 성함, 이메일, 휴대폰 번호, 업종(선택), 문의 내용(선택), **사업자등록증 파일**(PDF·JPG·PNG·HEIC·WEBP, 10MB 이하), 개인정보 수집·이용 동의(필수)
 - 보내면 → Supabase Edge Function `wholesale-inquiry` (`supabase/functions/wholesale-inquiry/index.ts`)가

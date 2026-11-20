@@ -507,9 +507,11 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 
 /* ---------- 장바구니 (오른쪽에서 열리는 창 — assets/js/cart.js) ---------- */
 .icon-cart { position: relative; }
-/* 장바구니에 담긴 것이 있으면 상단 가방 안을 연한 초록(#b4c3ac)으로 채움 — cart.js 가 .has-items 를 붙임 */
+/* 장바구니에 담긴 것이 있으면 상단 가방 안과 윤곽선을 연한 초록(#b4c3ac)으로 — cart.js 가 .has-items 를 붙임 */
+.icon-cart svg { transition: stroke .3s; }
 .icon-cart .bag__body { transition: fill .3s; }
 .icon-cart.has-items .bag__body { fill: #b4c3ac; }
+.icon-cart.has-items svg { stroke: #b4c3ac; }   /* 윤곽선(가방 몸통·손잡이)도 같은 초록 */
 .cart-badge {
   position: absolute; top: 4px; right: 1px; min-width: 17px; height: 17px; padding: 0 5px;
   display: grid; place-items: center; border-radius: 9px; background: var(--text); color: #fff;
@@ -561,7 +563,11 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 
 /* ---------- CONTACT (/contact/) · 도매 문의 — 연락처는 assets/js/contact.js ---------- */
 .ct { min-height: 72vh; padding: calc(var(--gnb-h) + 28px) var(--side) 140px; }   /* 위쪽 여백 · 경로 글씨 · 제목은 PLANT 목록 페이지(.list)와 같게 */
-.ct__head { margin-bottom: 56px; }
+.ct__head { margin-bottom: 0; }
+/* B2B · COLLAB 분류 탭 — PLANT 목록의 분류 탭(.pills)과 같은 모양 · 같은 간격 */
+.ct__tabs { margin: 28px 0 36px; }
+.ct__sec.is-in { animation: ct-in .4s var(--ease) both; }
+@keyframes ct-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .ct__title { margin: 14px 0 0; font-size: 34px; font-weight: 300; line-height: 1.2; letter-spacing: .02em; }
 .ct__sec { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr); gap: 40px; max-width: 1180px; padding-top: 32px; border-top: 1px solid var(--text); }
 .ct__h { margin: 0; font-size: 18px; font-weight: 300; line-height: 1.5; letter-spacing: .02em; }

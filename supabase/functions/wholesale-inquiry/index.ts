@@ -1,12 +1,16 @@
-// PLANT MATTER — 도매 문의 받기 (Supabase Edge Function 'wholesale-inquiry')
-// CONTACT 페이지(/contact/) 양식 → 내용 확인 → 저장(wholesale_inquiries 표 · wholesale-docs 비공개 버킷) → 운영자에게 메일
+// PLANT MATTER — CONTACT 페이지 문의 받기 (Supabase Edge Function 'wholesale-inquiry')
+// /contact/ 의 두 양식을 받습니다 (보내는 값 kind 로 구분):
+//   kind=b2b (기본) : 도매(B2B) 문의 → wholesale_inquiries 표 · 사업자등록증은 wholesale-docs 비공개 버킷
+//   kind=collab     : 협업 제안      → collab_proposals 표
+// 내용 확인 → 저장 → 운영자에게 메일
 //
 // ▸ 비밀값은 코드에 넣지 않습니다. Supabase 대시보드 > Edge Functions > Secrets 에서 넣습니다.
 //     RESEND_API_KEY : Resend 의 'Sending access' API 키 (plantmatter.kr 도메인)
 //     WHOLESALE_TO   : 문의를 받을 이메일 주소 (여러 개면 쉼표로 구분)
+//     COLLAB_TO      : (선택) 협업 제안만 다른 주소로 받을 때. 없으면 WHOLESALE_TO 로
 //   SUPABASE_URL 과 서버 키는 Supabase 가 자동으로 넣어 줍니다.
 // ▸ 메일은 noreply@plantmatter.kr 에서 보내고, '답장'을 누르면 문의한 분에게 바로 갑니다. 사업자등록증은 첨부됩니다.
-// ▸ 같은 곳(IP)에서 1시간에 5건까지. 1년 지난 문의와 파일은 새 문의가 들어올 때 지웁니다.
+// ▸ 같은 곳(IP)에서 양식마다 1시간에 5건까지. 1년 지난 문의·제안과 파일은 새 문의가 들어올 때 지웁니다.
 // ▸ 배포: verify_jwt = false (누구나 보내는 양식이라 로그인 없이 부름)
 
 const ORIGINS = ['https://plantmatter.kr', 'https://www.plantmatter.kr', 'https://m.plantmatter.kr'];
@@ -84,6 +88,106 @@ const cleanup = async () => {
   }
   await api(`/rest/v1/wholesale_inquiries?id=in.(${old.map((o) => o.id).join(',')})`, { method: 'DELETE' });
 };
+const cleanupCollab = async () => {
+  const before = new Date(Date.now() - KEEP_DAYS * 864e5).toISOString();
+  await api(`/rest/v1/collab_proposals?created_at=lt.${before}`, { method: 'DELETE' });
+};
+
+/* 같은 곳(IP)에서 너무 자주 보내면 잠시 막음 */
+const rateLimited = async (table: string, ipHash: string | null) => {
+  if (!ipHash) return false;
+  const since = new Date(Date.now() - 3600e3).toISOString();
+  const r = await api(`/rest/v1/${table}?select=id&ip_hash=eq.${ipHash}&created_at=gte.${since}&limit=${PER_HOUR}`);
+  return r.ok && (await r.json()).length >= PER_HOUR;
+};
+
+/* 운영자에게 메일 (답장 → 보낸 분). 실패하면 이유 문자열, 성공하면 '' */
+const sendMail = async (o: { resend: string; to: string[]; replyTo: string; subject: string; intro: string; note: string; rows: [string, string][]; attachments?: { filename: string; content: string }[] }) => {
+  const html = `<div style="font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#171717;font-size:14px;line-height:1.7">
+<p style="margin:0 0 16px;font-size:16px">${esc(o.intro)}</p>
+<table style="border-collapse:collapse;width:100%;max-width:640px">${o.rows.map(([k, v]) =>
+    `<tr><th style="text-align:left;vertical-align:top;width:140px;padding:10px 12px 10px 0;border-top:1px solid #e8e8e8;color:#777;font-weight:400">${esc(k)}</th><td style="padding:10px 0;border-top:1px solid #e8e8e8;white-space:pre-wrap">${esc(v)}</td></tr>`).join('')}</table>
+<p style="margin:16px 0 0;color:#777;font-size:12px">${esc(o.note)}</p></div>`;
+  const text = o.rows.map(([k, v]) => `${k}: ${v}`).join('\n');
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${o.resend}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: FROM, to: o.to, reply_to: o.replyTo, subject: o.subject.slice(0, 150), html, text, ...(o.attachments ? { attachments: o.attachments } : {}) }),
+    });
+    return r.ok ? '' : `resend ${r.status}: ${(await r.text()).slice(0, 300)}`;
+  } catch (e) {
+    return `resend: ${String(e).slice(0, 300)}`;
+  }
+};
+const markMailed = (table: string, id: string, mailErr: string) =>
+  api(`/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify(mailErr ? { email_error: mailErr } : { emailed_at: new Date().toISOString() }),
+  });
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const kst = (d: Date) => d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', dateStyle: 'long', timeStyle: 'short' });
+/* 링크: 앞에 https:// 가 없으면 붙임. http(s) 주소가 아니면 '' */
+const normLink = (v: string) => {
+  if (!v) return '';
+  const u = /^https?:\/\//i.test(v) ? v : `https://${v}`;
+  try { const x = new URL(u); return /^https?:$/.test(x.protocol) && x.hostname.includes('.') ? x.toString() : ''; } catch { return ''; }
+};
+
+/* ---------- 협업 제안 (kind=collab) ---------- */
+const handleCollab = async (req: Request, f: FormData, resend: string, to: string[]) => {
+  const d = {
+    name: str(f, 'name'),
+    email: str(f, 'email'),
+    type: str(f, 'collabType'),
+    message: str(f, 'message'),
+    linkRaw: str(f, 'link'),
+    lang: ['ko', 'en', 'ja'].includes(str(f, 'lang')) ? str(f, 'lang') : 'ko',
+  };
+  const link = normLink(d.linkRaw);
+  const bad: string[] = [];
+  if (!d.name || d.name.length > 80) bad.push('name');
+  if (!EMAIL_RE.test(d.email) || d.email.length > 120) bad.push('email');
+  if (!d.type || d.type.length > 80) bad.push('collabType');
+  if (!d.message || d.message.length > 3000) bad.push('message');
+  if (d.linkRaw && (!link || link.length > 300)) bad.push('link');
+  if (str(f, 'consent') !== 'yes') bad.push('consent');
+  if (bad.length) return json(req, 400, { error: 'invalid', fields: bad });
+
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || req.headers.get('cf-connecting-ip') || '';
+  const ipHash = ip ? await sha256(`pm-collab:${ip}`) : null;
+  if (await rateLimited('collab_proposals', ipHash)) return json(req, 429, { error: 'rate' });
+  cleanupCollab().catch((e) => console.error('cleanup collab', e));
+
+  const now = new Date();
+  const id = crypto.randomUUID();
+  const ins = await api('/rest/v1/collab_proposals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({ id, name: d.name, email: d.email, collab_type: d.type, message: d.message, link: link || null, lang: d.lang, consent_at: now.toISOString(), ip_hash: ipHash }),
+  });
+  if (!ins.ok) { console.error('insert collab', ins.status, await ins.text()); return json(req, 500, { error: 'server' }); }
+
+  const mailErr = await sendMail({
+    resend, to, replyTo: d.email,
+    subject: `[협업 제안] ${d.name} · ${d.type}`,
+    intro: '새 협업 제안이 들어왔습니다.',
+    note: `이 메일에 답장하면 ${d.email} 로 갑니다. (Supabase › Table Editor › collab_proposals 에도 보관)`,
+    rows: [
+      ['업체 또는 개인명', d.name],
+      ['이메일', d.email],
+      ['협업 유형', d.type],
+      ['제안 내용', d.message],
+      ['관련 링크', link || '—'],
+      ['접수', `${kst(now)} (문의 언어: ${d.lang})`],
+      ['제안 번호', id],
+    ],
+  });
+  if (mailErr) console.error(mailErr);
+  await markMailed('collab_proposals', id, mailErr);
+  return json(req, 200, { ok: true, id });
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) });
@@ -102,6 +206,13 @@ Deno.serve(async (req) => {
   /* 사람에게는 보이지 않는 칸 — 채워져 있으면 자동 프로그램으로 보고 조용히 무시 */
   if (str(f, 'website')) return json(req, 200, { ok: true });
 
+  if (str(f, 'kind') === 'collab') {
+    const collabTo = (Deno.env.get('COLLAB_TO') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    return handleCollab(req, f, RESEND, collabTo.length ? collabTo : TO);
+  }
+
+  /* ---------- 도매(B2B) 문의 (kind=b2b, 기본) ---------- */
+
   const d = {
     company: str(f, 'company'),
     bizNo: str(f, 'bizNo').replace(/\D/g, ''),
@@ -118,7 +229,7 @@ Deno.serve(async (req) => {
   if (!d.company || d.company.length > 80) bad.push('company');
   if (d.bizNo && !bizOk(d.bizNo)) bad.push('bizNo');   // 양식에서 뺀 칸 (값이 오면 확인만)
   if (!d.name || d.name.length > 40) bad.push('name');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email) || d.email.length > 120) bad.push('email');
+  if (!EMAIL_RE.test(d.email) || d.email.length > 120) bad.push('email');
   if (!/^0\d{8,10}$/.test(d.phone)) bad.push('phone');
   if (d.bizType && !TYPES[d.bizType]) bad.push('bizType');
   if (d.items.length > 1000) bad.push('items');   // 양식에서 뺀 칸 (예전 양식·직접 보낸 값만)
@@ -132,14 +243,9 @@ Deno.serve(async (req) => {
   if (bad.length) return json(req, 400, { error: 'invalid', fields: bad });
   const file = doc as File;
 
-  /* 같은 곳에서 너무 자주 보내면 잠시 막음 */
   const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || req.headers.get('cf-connecting-ip') || '';
   const ipHash = ip ? await sha256(`pm-wholesale:${ip}`) : null;
-  if (ipHash) {
-    const since = new Date(Date.now() - 3600e3).toISOString();
-    const r = await api(`/rest/v1/wholesale_inquiries?select=id&ip_hash=eq.${ipHash}&created_at=gte.${since}&limit=${PER_HOUR}`);
-    if (r.ok && (await r.json()).length >= PER_HOUR) return json(req, 429, { error: 'rate' });
-  }
+  if (await rateLimited('wholesale_inquiries', ipHash)) return json(req, 429, { error: 'rate' });
 
   cleanup().catch((e) => console.error('cleanup', e));
 
@@ -172,48 +278,28 @@ Deno.serve(async (req) => {
   }
 
   /* 3) 운영자에게 메일 (사업자등록증 첨부, 답장 → 문의한 분) */
-  const when = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', dateStyle: 'long', timeStyle: 'short' });
-  const rows: [string, string][] = [
-    ['업체명', d.company],
-    ...(d.bizNo ? [['사업자등록번호', bizFmt(d.bizNo)] as [string, string]] : []),
-    ['담당자', d.name],
-    ['이메일', d.email],
-    ['휴대폰', phoneFmt(d.phone)],
-    ['업종', d.bizType ? TYPES[d.bizType] : '—'],   // 양식에서 뺀 칸(관심 식물·지역·사업자번호)은 값이 올 때만 메일에 표시
-    ...(d.region ? [['받으실 지역 · 시기', d.region] as [string, string]] : []),
-    ...(d.items ? [['관심 식물 · 수량', d.items] as [string, string]] : []),
-    ['문의 내용', d.message || '—'],
-    ['접수', `${when} (문의 언어: ${d.lang})`],
-    ['문의 번호', id],
-  ];
-  const html = `<div style="font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#171717;font-size:14px;line-height:1.7">
-<p style="margin:0 0 16px;font-size:16px">새 도매 문의가 들어왔습니다.</p>
-<table style="border-collapse:collapse;width:100%;max-width:640px">${rows.map(([k, v]) =>
-    `<tr><th style="text-align:left;vertical-align:top;width:140px;padding:10px 12px 10px 0;border-top:1px solid #e8e8e8;color:#777;font-weight:400">${esc(k)}</th><td style="padding:10px 0;border-top:1px solid #e8e8e8;white-space:pre-wrap">${esc(v)}</td></tr>`).join('')}</table>
-<p style="margin:16px 0 0;color:#777;font-size:12px">사업자등록증은 첨부 파일로 보냅니다 (Supabase Storage › ${BUCKET} 에도 보관). 이 메일에 답장하면 ${esc(d.email)} 로 갑니다.</p></div>`;
-  const text = rows.map(([k, v]) => `${k}: ${v}`).join('\n');
-  let mailErr = '';
-  try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${RESEND}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: FROM, to: TO, reply_to: d.email,
-        subject: `[도매 문의] ${d.company} · ${d.name}`.slice(0, 150),
-        html, text,
-        attachments: [{ filename: `사업자등록증_${d.company.replace(/[\\/:*?"<>|]/g, '').slice(0, 40)}.${ext}`, content: base64(bytes) }],
-      }),
-    });
-    if (!r.ok) mailErr = `resend ${r.status}: ${(await r.text()).slice(0, 300)}`;
-  } catch (e) {
-    mailErr = `resend: ${String(e).slice(0, 300)}`;
-  }
-  if (mailErr) console.error(mailErr);
-  await api(`/rest/v1/wholesale_inquiries?id=eq.${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-    body: JSON.stringify(mailErr ? { email_error: mailErr } : { emailed_at: new Date().toISOString() }),
+  const mailErr = await sendMail({
+    resend: RESEND, to: TO, replyTo: d.email,
+    subject: `[도매 문의] ${d.company} · ${d.name}`,
+    intro: '새 도매 문의가 들어왔습니다.',
+    note: `사업자등록증은 첨부 파일로 보냅니다 (Supabase Storage › ${BUCKET} 에도 보관). 이 메일에 답장하면 ${d.email} 로 갑니다.`,
+    rows: [
+      ['업체명', d.company],
+      ...(d.bizNo ? [['사업자등록번호', bizFmt(d.bizNo)] as [string, string]] : []),
+      ['담당자', d.name],
+      ['이메일', d.email],
+      ['휴대폰', phoneFmt(d.phone)],
+      ['업종', d.bizType ? TYPES[d.bizType] : '—'],   // 양식에서 뺀 칸(관심 식물·지역·사업자번호)은 값이 올 때만 메일에 표시
+      ...(d.region ? [['받으실 지역 · 시기', d.region] as [string, string]] : []),
+      ...(d.items ? [['관심 식물 · 수량', d.items] as [string, string]] : []),
+      ['문의 내용', d.message || '—'],
+      ['접수', `${kst(now)} (문의 언어: ${d.lang})`],
+      ['문의 번호', id],
+    ],
+    attachments: [{ filename: `사업자등록증_${d.company.replace(/[\\/:*?"<>|]/g, '').slice(0, 40)}.${ext}`, content: base64(bytes) }],
   });
+  if (mailErr) console.error(mailErr);
+  await markMailed('wholesale_inquiries', id, mailErr);
 
   /* 메일이 실패해도 문의는 저장됐으므로 접수 완료로 안내 (대시보드에서 확인 가능) */
   return json(req, 200, { ok: true, id });
