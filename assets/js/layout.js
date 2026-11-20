@@ -37,6 +37,7 @@
   window.PM_CATEGORIES = CATEGORIES;
 
   var plantHere = location.pathname.indexOf('/plant/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var contactHere = location.pathname.indexOf('/contact/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var megaItems = CATEGORIES.map(function (c) {
     return '        <li><a class="mega__item" href="/plant/?c=' + c.id + '"><span class="mega__img">' +
       (c.img ? '<img src="' + c.img + '" alt="" width="720" height="960" loading="lazy">' : '') +
@@ -53,7 +54,7 @@
       <a href="/plant/" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
       <a href="#" data-soon="MATTER">MATTER</a>
       <a href="#" data-soon="COLLABORATION">COLLABORATION</a>
-      <a href="#" data-soon="CONTACT">CONTACT</a>
+      <a href="/contact/"${contactHere}>CONTACT</a>
     </nav>
 
     <div class="gnb__util">

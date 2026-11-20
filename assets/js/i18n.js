@@ -212,6 +212,21 @@ window.PM_I18N = {
     cartOffNote: '지금은 주문할 수 없어 결제에서 빠집니다',
     cartNone: '장바구니에 주문할 수 있는 제품이 없습니다.',
     addToCartName: '{name} 장바구니에 담기',
+    /* CONTACT (assets/js/contact.js) */
+    wsTitle: '도매 문의',
+    wsLead: '식물 매장, 카페·쇼룸 같은 공간, 조경·인테리어 업체의 도매 및 대량 구매 문의를 받습니다.',
+    wsAskTitle: '문의하실 때 함께 알려 주세요',
+    wsAsk1: '업체명 · 담당자 성함',
+    wsAsk2: '연락받으실 번호 또는 이메일',
+    wsAsk3: '관심 있는 식물과 수량',
+    wsAsk4: '받으실 지역과 희망 시기',
+    ctEmail: '이메일',
+    ctPhone: '전화',
+    ctKakao: '카카오톡',
+    ctKakaoOpen: '채널로 문의하기',
+    ctInstagram: '인스타그램',
+    ctHours: '응대 시간',
+    ctNone: '연락처를 준비하고 있습니다.',
     close: '닫기'
   },
   en: {
@@ -423,6 +438,21 @@ window.PM_I18N = {
     cartOffNote: 'Not available now — left out of checkout',
     cartNone: 'There is nothing in your cart to order.',
     addToCartName: 'Add {name} to cart',
+    /* CONTACT */
+    wsTitle: 'Wholesale',
+    wsLead: 'We welcome wholesale and bulk inquiries from plant shops, cafés, showrooms and other spaces, and landscaping or interior studios.',
+    wsAskTitle: 'Please include',
+    wsAsk1: 'Business name and contact person',
+    wsAsk2: 'Phone number or e-mail for our reply',
+    wsAsk3: 'Plants and quantities you are interested in',
+    wsAsk4: 'Delivery area and preferred timing',
+    ctEmail: 'E-mail',
+    ctPhone: 'Phone',
+    ctKakao: 'KakaoTalk',
+    ctKakaoOpen: 'Message our channel',
+    ctInstagram: 'Instagram',
+    ctHours: 'Hours',
+    ctNone: 'Contact details are coming soon.',
     close: 'Close'
   },
   ja: {
@@ -634,6 +664,21 @@ window.PM_I18N = {
     cartOffNote: '現在ご注文いただけないため、お会計から除かれます',
     cartNone: 'カートにご注文いただける商品がありません。',
     addToCartName: '{name}をカートに入れる',
+    /* CONTACT */
+    wsTitle: '卸売のお問い合わせ',
+    wsLead: '植物店、カフェ・ショールームなどの空間、造園・インテリア事業者さまからの卸売・まとめ買いのお問い合わせを承っております。',
+    wsAskTitle: 'お問い合わせの際にお知らせください',
+    wsAsk1: '会社名・ご担当者さま',
+    wsAsk2: 'ご連絡先（電話番号またはメール）',
+    wsAsk3: 'ご希望の植物と数量',
+    wsAsk4: 'お届け先の地域とご希望の時期',
+    ctEmail: 'メール',
+    ctPhone: '電話',
+    ctKakao: 'カカオトーク',
+    ctKakaoOpen: 'チャンネルで問い合わせる',
+    ctInstagram: 'Instagram',
+    ctHours: '対応時間',
+    ctNone: '連絡先を準備しています。',
     close: '閉じる'
   }
 };

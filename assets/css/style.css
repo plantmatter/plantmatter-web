@@ -556,6 +556,27 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 .btn-buy--line:hover { background: var(--text); color: #fff; }
 .co-item + .co-item { margin-top: 16px; }
 
+/* ---------- CONTACT (/contact/) · 도매 문의 — 연락처는 assets/js/contact.js ---------- */
+.ct { min-height: 72vh; padding: calc(var(--gnb-h) + 36px) var(--side) 140px; }
+.ct__head { margin-bottom: 56px; }
+.ct__title { margin: 14px 0 0; font-size: 34px; font-weight: 300; line-height: 1.2; letter-spacing: .02em; }
+.ct__sec { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr); gap: 40px; max-width: 1180px; padding-top: 32px; border-top: 1px solid var(--text); }
+.ct__h { margin: 0; font-size: 18px; font-weight: 300; line-height: 1.5; letter-spacing: .02em; }
+.ct__content { max-width: 640px; }
+.ct__lead { margin: 0; font-size: 15px; line-height: 1.9; color: var(--mid); }
+.ct__list { margin: 36px 0 0; border-top: 1px solid var(--line); }
+.ct__list div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.6; }
+.ct__list dt { color: var(--muted); }
+.ct__list dd { margin: 0; overflow-wrap: anywhere; }
+.ct__list a { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.ct__list .ct__none { grid-template-columns: 1fr; }
+.ct__none dd { color: var(--muted); }
+.ct__ask { margin-top: 40px; }
+.ct__ask-title { margin: 0; font-size: 14px; }
+.ct__ask ul { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; font-size: 14px; line-height: 1.6; color: var(--mid); }
+.ct__ask li { position: relative; padding-left: 18px; }
+.ct__ask li::before { content: ""; position: absolute; left: 0; top: .8em; width: 8px; height: 1px; background: var(--muted); }
+
 @media (prefers-reduced-motion: reduce) {
   .bar.is-active .bar__fill { width: 100%; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
