@@ -1,6 +1,31 @@
 /* PLANT MATTER — 모든 페이지 공통 틀: 상단 바 · PLANT 메뉴 · 하단 · 검색 · 언어 창
    여기 한 곳만 고치면 모든 페이지에 똑같이 반영됩니다.
    각 페이지는 <body> 바로 아래에서 PM_LAYOUT.top(), 본문 다음에 PM_LAYOUT.bottom() 을 부릅니다. */
+/* 새 버전 확인 — 사이트를 새로 올린 직후에는 브라우저가 예전에 받아 둔 페이지를 잠깐(최대 10분) 그대로 다시 쓰는 일이 있어
+   (그러면 장바구니처럼 새로 생긴 기능이 그 페이지에서만 안 보임), 페이지를 열 때 /version.txt 와 이 파일의 ?v= 를 비교해
+   예전 페이지면 한 번 새로고침합니다. 결제 페이지(/checkout/)와 입력을 시작한 뒤에는 새로고침하지 않습니다.
+   ▸ 배포할 때 모든 페이지의 ?v= 값과 version.txt 를 같은 값으로 올려 주세요. */
+(function () {
+  var me = document.currentScript && /[?&]v=([\w-]+)/.exec(document.currentScript.src);
+  if (!me || !window.fetch || location.pathname.indexOf('/checkout/') === 0) return;
+  var typed = false;
+  document.addEventListener('input', function () { typed = true; }, true);
+  var check = function () {
+    fetch('/version.txt', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (v) {
+        v = String(v).trim();
+        if (!/^[\w-]{1,40}$/.test(v) || v === me[1] || typed) return;
+        var key = 'pm-reload-' + v;   // 같은 버전으로는 한 번만 (계속 새로고침되는 일 방지)
+        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (e) { return; }
+        location.reload();
+      })
+      .catch(function () {});
+  };
+  check();
+  window.addEventListener('pageshow', function (e) { if (e.persisted) check(); });   // 뒤로 가기로 돌아온 페이지도
+})();
+
 (function () {
   /* PLANT 하위 분류 — 순서 · 이름 · 메뉴 썸네일(세로 3:4, 없으면 '') */
   var CATEGORIES = [

@@ -4,6 +4,7 @@
    - [data-cart-add="식물id"] (목록 카드의 가방 버튼 · 제품 상세 '장바구니에 담기') → 담고 장바구니 열기.
      data-qty="2" 가 있으면 그 수량만큼 담음
    - 주문하기 → /checkout/?from=cart : 담긴 식물을 한 번에 결제 → 결제가 끝나면 주문한 식물은 장바구니에서 빠짐 (result.js)
+   - 수량은 +/− 또는 숫자를 직접 입력 (한 개체뿐인 '동일 상품 배송' 식물은 1개 고정)
    - 품절·가격 미정이 된 식물은 장바구니에 남아 있지만 표시만 되고 주문에서는 빠집니다.
    PC(plantmatter-web)와 모바일(plantmatter-mobile) 저장소에 같은 파일이 있으니 둘 다 고쳐 주세요.
    필요한 스크립트 순서: i18n → main → products → shop → cart */
@@ -32,9 +33,10 @@
   const load = () => { try { return clean(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { return []; } };
   let lines = load();
   const listeners = [];
-  const save = () => {
+  /* typing: 수량 칸에 숫자를 입력하는 중 → 입력 칸은 다시 그리지 않고 금액·합계만 바꿈 */
+  const save = (typing) => {
     try { localStorage.setItem(KEY, JSON.stringify(lines)); } catch (e) {}
-    changed();
+    changed(typing);
   };
 
   const items = () => lines.map((l) => { const p = S.find(l.id); return { id: l.id, qty: l.qty, p, ok: buyable(p) }; });
@@ -67,7 +69,7 @@
     const qtyHtml = !ok ? '' : max > 1
       ? `<div class="qty cart-item__qty" role="group" aria-label="${esc(t('qty'))}">
           <button class="qty__btn" type="button" data-cart-step="-1" aria-label="${esc(t('qtyDown'))}"${qty <= 1 ? ' disabled' : ''}>${MINUS}</button>
-          <output class="qty__val" aria-live="polite">${qty}</output>
+          <input class="qty__val" data-cart-qty type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" value="${qty}" aria-label="${esc(t('qty'))}">
           <button class="qty__btn" type="button" data-cart-step="1" aria-label="${esc(t('qtyUp'))}"${qty >= max ? ' disabled' : ''}>${PLUS}</button>
         </div>`
       : `<span class="cart-item__one">${esc(t('qty'))} 1</span>`;
@@ -85,7 +87,7 @@
     </li>`;
   };
 
-  const render = () => {
+  const render = (typing) => {
     const lang = PM.getLang();
     const all = items();
     const n = count();
@@ -99,7 +101,19 @@
       footEl.hidden = true;
       return;
     }
-    bodyEl.innerHTML = `<ul class="cart__list">${all.map((x) => itemHtml(x, lang)).join('')}</ul>`;
+    if (typing === true) {
+      all.forEach((x) => {
+        const li = bodyEl.querySelector(`.cart-item[data-id="${CSS.escape(x.id)}"]`);
+        if (!li || !x.ok) return;
+        li.querySelector('.cart-item__price').textContent = won(x.p.price * x.qty);
+        const down = li.querySelector('[data-cart-step="-1"]');
+        const up = li.querySelector('[data-cart-step="1"]');
+        if (down) down.disabled = x.qty <= 1;
+        if (up) up.disabled = x.qty >= S.maxQty(x.p);
+      });
+    } else {
+      bodyEl.innerHTML = `<ul class="cart__list">${all.map((x) => itemHtml(x, lang)).join('')}</ul>`;
+    }
     const ok = all.filter((x) => x.ok);
     const subtotal = ok.reduce((s, x) => s + x.p.price * x.qty, 0);
     const shipping = ok.length ? S.shippingFor(subtotal) : 0;
@@ -115,8 +129,8 @@
     footEl.hidden = false;
   };
 
-  function changed() {
-    render();
+  function changed(typing) {
+    render(typing);
     listeners.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
   }
 
@@ -204,6 +218,36 @@
     }
     /* 제품으로 이동할 때는 창을 닫음 (같은 제품 페이지 안에서 눌러도 자연스럽게) */
     if (e.target.closest('a[href^="/product/"]')) setOpen(false);
+  });
+  /* 수량 직접 입력: 숫자만 받고 입력하는 동안 금액·합계에 바로 반영,
+     칸을 벗어나거나 Enter 를 누르면 1 ~ 최대 수량으로 맞춤 */
+  drawer.addEventListener('input', (e) => {
+    const field = e.target.closest('[data-cart-qty]');
+    if (!field) return;
+    const digits = field.value.replace(/\D/g, '').slice(0, 3);
+    if (digits !== field.value) field.value = digits;
+    const line = lines.find((l) => l.id === field.closest('.cart-item').dataset.id);
+    const n = parseInt(digits, 10);
+    if (!line || !(n >= 1)) return;
+    const next = Math.min(S.maxQty(S.find(line.id)), n);
+    if (next !== line.qty) { line.qty = next; save(true); }
+  });
+  drawer.addEventListener('change', (e) => {
+    const field = e.target.closest('[data-cart-qty]');
+    if (!field) return;
+    const id = field.closest('.cart-item').dataset.id;
+    const line = lines.find((l) => l.id === id);
+    if (!line) return;
+    const max = S.maxQty(S.find(id));
+    const n = parseInt(field.value, 10);
+    if (n > max) PM.toast(t('cartMaxed', { n: max }));
+    const next = Math.min(max, Math.max(1, n || 1));
+    /* 입력하는 동안 이미 저장됐으면 칸의 숫자만 맞춤 (다시 그리지 않아야 바로 누른 '주문하기'가 그대로 눌림) */
+    if (next === line.qty) { if (field.value !== String(next)) field.value = String(next); }
+    else setQty(id, next);
+  });
+  drawer.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('[data-cart-qty]')) { e.preventDefault(); e.target.blur(); }
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) setOpen(false); });
 
