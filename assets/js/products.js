@@ -21,6 +21,7 @@
    (선택) exact  : true 이면 '동일 상품 배송' — 사진 속 바로 그 식물을 보냄 (목록·상세에 표시)
    ── 식물이 아닌 협업 제품 (화분 등) ──
    collab   : layout.js 의 COLLABS 이름 (예: 'thichi-yuiitsumuni') → COLLABORATION 페이지 그 탭에 나옴. category 는 넣지 않음 (PLANT 목록에서 빠짐)
+   matter   : layout.js 의 MATTERS 이름 (예: 'base-series' · 'origin') → MATTER 페이지 그 탭에 나옴. category 는 넣지 않음
    sub      : 이름 아래 둘째 줄 (학명 대신, 이탤릭 아님)  예) 'BOWL LONG - 4'
    plain    : true 이면 사진 아래쪽 그라데이션 없음 — 사진은 tools/prepare_product_photo.py --bg f4f4f2 (단색 아주 밝은 회색)
    팔리면 status 를 'soldout' 으로 바꿔 주세요.
@@ -139,6 +140,7 @@ window.PM_PRODUCTS = [
     var p = { id: r.id, name: r.name || {}, price: r.price, status: r.stock === 0 ? 'soldout' : r.status, image: r.image };
     if (r.category) p.category = r.category;
     if (r.collab) p.collab = r.collab;
+    if (r.matter) p.matter = r.matter;
     if (r.sci) p.sci = r.sci;
     if (r.sub) p.sub = r.sub;
     if (r.stock != null) p.stock = r.stock;

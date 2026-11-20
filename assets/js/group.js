@@ -1,14 +1,22 @@
-/* PLANT MATTER — COLLABORATION 페이지 (/collaboration/) — PLANT 목록(assets/js/plant.js)과 같은 형식
-   분류 탭(ALL · GECKO IN THE LIBRARY · THICHI YUIITSUMUNI …)을 누르면 새로고침 없이 옆으로 넘기며 바뀌고,
-   주소도 /collaboration/?c=gecko-in-the-library 처럼 바뀌어 그대로 공유·즐겨찾기할 수 있습니다.
-   항목(이름 · 메뉴 썸네일)은 assets/js/layout.js 의 COLLABS, 각 협업의 제품은 assets/js/products.js (collab: '이름') 에서 관리합니다.
+/* PLANT MATTER — 묶음 페이지 공통: COLLABORATION (/collaboration/) · MATTER (/matter/) — PLANT 목록(assets/js/plant.js)과 같은 형식
+   페이지의 <main data-group="collab | matter"> 로 어느 묶음인지 정합니다.
+   분류 탭(ALL · 각 항목)을 누르면 새로고침 없이 옆으로 넘기며 바뀌고, 주소도 /matter/?c=origin 처럼 바뀌어 그대로 공유할 수 있습니다.
+   - 항목(이름 · 메뉴 썸네일): assets/js/layout.js 의 COLLABS · MATTERS
+   - 제품: 관리자 페이지(/admin/) 에서 구분을 그 항목으로 고른 제품 (products.js 의 collab: '…' · matter: '…')
+   - ALL: COLLABORATION 은 협업 카드 목록, MATTER 는 모든 MATTER 제품 (PLANT 의 ALL 과 같음)
    PC(plantmatter-web)와 모바일(plantmatter-mobile) 저장소에 같은 파일이 있으니 둘 다 고쳐 주세요. */
 /* 제품 목록(products.js → Supabase)을 다 읽은 뒤 시작 */
 (window.PM_PRODUCTS_READY || Promise.resolve()).then(() => {
+  const GROUPS = {
+    collab: { items: () => window.PM_COLLABS || [], base: '/collaboration/', field: 'collab', allCards: true, empty: 'collabSoon' },
+    matter: { items: () => window.PM_MATTERS || [], base: '/matter/', field: 'matter', allCards: false, empty: 'matterSoon' },
+  };
   const PM = window.PM;
-  if (!PM) return;
+  const main = document.querySelector('[data-group]');
+  const G = main && GROUPS[main.dataset.group];
+  if (!PM || !G) return;
   const { t } = PM;
-  const ITEMS = window.PM_COLLABS || [];
+  const ITEMS = G.items();
 
   const pillsEl = document.querySelector('[data-pills]');
   const gridEl = document.querySelector('[data-grid]');
@@ -19,7 +27,7 @@
 
   const valid = (c) => (ITEMS.some((x) => x.id === c) ? c : 'all');
   const fromUrl = () => valid(new URLSearchParams(location.search).get('c'));
-  const urlFor = (c) => (c === 'all' ? '/collaboration/' : `/collaboration/?c=${c}`);
+  const urlFor = (c) => (c === 'all' ? G.base : `${G.base}?c=${c}`);
   let cur = fromUrl();
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -30,7 +38,7 @@
     .join('');
   const pills = [...pillsEl.querySelectorAll('.pill')];
 
-  /* ALL: 협업 카드 (PLANT 목록의 식물 카드와 같은 모양) */
+  /* COLLABORATION 의 ALL: 협업 카드 (PLANT 목록의 식물 카드와 같은 모양) */
   const card = (c) => `<li class="card">
       <a class="card__link" href="${urlFor(c.id)}">
         <span class="card__img">${c.img ? `<img src="${esc(c.img)}" alt="${esc(c.name)}" width="750" height="1000" loading="lazy">` : ''}</span>
@@ -51,18 +59,18 @@
     titleEl.textContent = label;
     crumbEl.textContent = label;
     document.title = `${label} — PLANT MATTER`;
-    if (c) {
-      /* 이 협업의 제품 (products.js 에서 collab 이 이 이름인 것) — PLANT 목록과 같은 카드 */
-      const list = (window.PM_PRODUCTS || []).filter((p) => p.collab === c.id);
-      const lang = PM.getLang();
-      countEl.textContent = list.length ? t('countItems', { n: list.length }) : '';
-      gridEl.innerHTML = window.PM_SHOP ? list.map((p) => window.PM_SHOP.cardHtml(p, lang)).join('') : '';
-      emptyEl.hidden = list.length > 0;
-    } else {
+    if (!c && G.allCards) {
       countEl.textContent = t('collabCount', { n: ITEMS.length });
       gridEl.innerHTML = ITEMS.map(card).join('');
       emptyEl.hidden = ITEMS.length > 0;
+      return;
     }
+    /* 이 항목의 제품 (ALL 이면 이 묶음의 모든 제품) — PLANT 목록과 같은 카드 */
+    const list = (window.PM_PRODUCTS || []).filter((p) => (c ? p[G.field] === c.id : ITEMS.some((x) => x.id === p[G.field])));
+    const lang = PM.getLang();
+    countEl.textContent = list.length ? t('countItems', { n: list.length }) : '';
+    gridEl.innerHTML = window.PM_SHOP ? list.map((p) => window.PM_SHOP.cardHtml(p, lang)).join('') : '';
+    emptyEl.hidden = list.length > 0;
   };
   const render = () => { renderPills(); renderContent(); };
 
@@ -101,7 +109,7 @@
 
   /* 탭 · 카드 · 메뉴의 항목 링크는 이 페이지 안에서 바로 바꿈 (COLLABORATION 탭 자체는 제외) */
   document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="/collaboration/"]');
+    const a = e.target.closest(`a[href^="${G.base}"]`);
     if (!a || a.hasAttribute('data-menu') || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     PM.closeMenu();

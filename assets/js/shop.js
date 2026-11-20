@@ -33,6 +33,13 @@
     return `<i>${esc(italic)}</i>${rest ? ' ' + esc(rest) : ''}`;
   };
   const collabOf = (p) => (p && p.collab && (window.PM_COLLABS || []).find((c) => c.id === p.collab)) || null;
+  /* 제품이 속한 묶음: COLLABORATION 또는 MATTER → { section, base, id, name } (PLANT 분류 제품이면 null) */
+  const groupOf = (p) => {
+    const k = collabOf(p);
+    if (k) return { section: 'COLLABORATION', base: '/collaboration/', id: k.id, name: k.name };
+    const m = p && p.matter && (window.PM_MATTERS || []).find((x) => x.id === p.matter);
+    return m ? { section: 'MATTER', base: '/matter/', id: m.id, name: m.name } : null;
+  };
   /* 목록 카드 (PLANT 목록 · COLLABORATION 페이지 공통): 사진 · 이름 · 둘째 줄 · 가격 · 동일 상품 배송 · 가방 버튼 */
   const BAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 8.5h15l-1.2 12h-12.6z"/><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"/></svg>';
   const cardHtml = (p, lang) => {
@@ -67,5 +74,5 @@
   const saveOrder = (o) => { try { sessionStorage.setItem(ORDER_KEY, JSON.stringify(o)); } catch (e) {} };
   const loadOrder = () => { try { return JSON.parse(sessionStorage.getItem(ORDER_KEY) || 'null'); } catch (e) { return null; } };
 
-  window.PM_SHOP = { config, esc, won, find, nameOf, category, collabOf, maxQty, shippingFor, isTest, sciHtml, cardHtml, newOrderId, saveOrder, loadOrder };
+  window.PM_SHOP = { config, esc, won, find, nameOf, category, collabOf, groupOf, maxQty, shippingFor, isTest, sciHtml, cardHtml, newOrderId, saveOrder, loadOrder };
 })();

@@ -126,10 +126,17 @@
   - 권한은 서버(RLS)가 확인: 누구나 읽기(숨김 제외), 고치기 · 문의 보기는 관리자만
 - 아직 없음: 결제 완료 시 재고 자동 차감 · 주문 관리 → 실결제(토스 가맹 + 결제 승인 서버) 붙일 때 함께
 
+## MATTER (/matter/)
+
+- COLLABORATION 과 같은 형식: 상단 **MATTER** 탭의 아래로 열리는 메뉴(BASE Series · ORIGIN) + `/matter/` 페이지(ALL · 각 항목 탭, 옆으로 넘기는 애니메이션)
+- 항목은 `assets/js/layout.js` 의 `MATTERS`, 제품은 관리자 페이지에서 **구분 → MATTER › BASE Series / ORIGIN** 으로 등록 (표의 `matter` 칸)
+- ALL 은 모든 MATTER 제품 (PLANT 의 ALL 과 같음). 제품이 없으면 '제품을 준비하고 있습니다'
+- COLLABORATION · MATTER 페이지는 같은 스크립트 `assets/js/group.js` 를 씀 (`<main data-group="collab | matter">`)
+
 ## COLLABORATION (/collaboration/)
 
 - PLANT 와 같은 형식: 상단 **COLLABORATION** 탭에 마우스를 올리면(모바일은 누르면) 아래로 메뉴가 열리고, 탭을 누르면 `/collaboration/` 페이지
-- 페이지: 경로 글씨 · 제목 · 분류 탭(ALL · 각 협업) · 옆으로 넘기는 애니메이션 — `assets/js/collaboration.js`
+- 페이지: 경로 글씨 · 제목 · 분류 탭(ALL · 각 협업) · 옆으로 넘기는 애니메이션 — `assets/js/group.js`
   - ALL: 협업 카드 목록 / 각 협업(`/collaboration/?c=gecko-in-the-library`): 지금은 '소개를 준비하고 있습니다'
 - 항목(이름 · 메뉴 썸네일 3:4)은 `assets/js/layout.js` 의 `COLLABS` 에서 추가·수정 (PC·모바일 두 저장소 모두)
   - 지금: GECKO IN THE LIBRARY (사진 없음 → 회색 칸), THICHI YUIITSUMUNI (메뉴 사진 = BOWL LONG - 4)

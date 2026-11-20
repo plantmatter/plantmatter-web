@@ -44,9 +44,18 @@
   ];
   window.PM_COLLABS = COLLABS;
 
+  /* MATTER 하위 항목 — 순서 · 이름 · 메뉴 썸네일(세로 3:4, 없으면 '') · PLANT 분류와 같은 방식
+     제품은 관리자 페이지에서 구분을 이 항목으로 고르면 /matter/ 페이지 그 탭에 나옵니다 */
+  var MATTERS = [
+    { id: 'base-series', name: 'BASE Series', img: '' },
+    { id: 'origin',      name: 'ORIGIN',      img: '' }
+  ];
+  window.PM_MATTERS = MATTERS;
+
   var plantHere = location.pathname.indexOf('/plant/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var contactHere = location.pathname.indexOf('/contact/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var collabHere = location.pathname.indexOf('/collaboration/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var matterHere = location.pathname.indexOf('/matter/') === 0 ? ' class="is-here" aria-current="page"' : '';
   /* 장바구니 아이콘: 담긴 것이 있으면 처음 그릴 때부터 초록 가방 + 숫자 (자세한 확인은 뒤에 cart.js 가 다시 함)
      — 페이지를 옮길 때 검은 가방이 잠깐 보였다가 초록으로 바뀌는 깜빡임 방지 */
   var cartN = 0;
@@ -66,6 +75,7 @@
   };
   var megaItems = megaList(CATEGORIES, '/plant/');
   var collabItems = megaList(COLLABS, '/collaboration/', true);
+  var matterItems = megaList(MATTERS, '/matter/');
 
   var TOP = `  <!-- ───────── 상단 바 ───────── -->
   <header class="gnb">
@@ -75,7 +85,7 @@
 
     <nav class="gnb__menu" aria-label="주요 메뉴" data-i18n-attr="aria-label: menu">
       <a href="/plant/" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
-      <a href="#" data-soon="MATTER">MATTER</a>
+      <a href="/matter/" data-menu="matter"${matterHere} aria-controls="menu-matter" aria-expanded="false">MATTER</a>
       <a href="/collaboration/" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLABORATION</a>
       <a href="/contact/"${contactHere}>CONTACT</a>
     </nav>
@@ -99,6 +109,16 @@
     <div class="mega__panel" aria-label="PLANT">
       <ul class="mega__list">
 ${megaItems}
+      </ul>
+    </div>
+    <div class="mega__dim" data-menu-close></div>
+  </div>
+
+  <!-- ───────── MATTER 탭 아래로 내려오는 메뉴 (항목은 위 MATTERS) — PLANT 메뉴와 같은 모양 ───────── -->
+  <div class="mega" id="menu-matter" aria-hidden="true">
+    <div class="mega__panel" aria-label="MATTER">
+      <ul class="mega__list">
+${matterItems}
       </ul>
     </div>
     <div class="mega__dim" data-menu-close></div>

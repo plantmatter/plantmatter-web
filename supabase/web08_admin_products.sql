@@ -88,3 +88,6 @@ create policy wholesale_docs_admin_read on storage.objects for select to authent
 drop policy if exists wholesale_docs_admin_delete on storage.objects;
 create policy wholesale_docs_admin_delete on storage.objects for delete to authenticated
   using (bucket_id = 'wholesale-docs' and public.is_app_admin());
+
+-- (추가) MATTER 묶음 (BASE Series · ORIGIN …) — layout.js 의 MATTERS 이름
+alter table public.shop_products add column if not exists matter text check (matter is null or matter ~ '^[a-z0-9-]{1,60}$');

@@ -24,11 +24,14 @@
   const phoneFmt = (p) => (p && p.length === 11 ? `${p.slice(0, 3)}-${p.slice(3, 7)}-${p.slice(7)}` : p || '');
   const cats = () => window.PM_CATEGORIES || [];
   const collabs = () => window.PM_COLLABS || [];
+  const matters = () => window.PM_MATTERS || [];
   const where = (p) => {
     const c = cats().find((x) => x.id === p.category);
     if (c) return `PLANT · ${c.name}`;
     const k = collabs().find((x) => x.id === p.collab);
-    return k ? `COLLABORATION · ${k.name}` : '—';
+    if (k) return `COLLABORATION · ${k.name}`;
+    const m = matters().find((x) => x.id === p.matter);
+    return m ? `MATTER · ${m.name}` : '—';
   };
   const secondLine = (p) => (p.sub ? esc(p.sub) : p.sci ? `<i>${esc(p.sci[0] || '')}</i>${p.sci[1] ? ' ' + esc(p.sci[1]) : ''}` : '');
 
@@ -153,6 +156,7 @@
 
   /* 구분 칸: PLANT 분류 · COLLABORATION 목록 (layout.js) */
   F.where.innerHTML = `<optgroup label="PLANT">${cats().map((c) => `<option value="category:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`
+    + `<optgroup label="MATTER">${matters().map((c) => `<option value="matter:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`
     + `<optgroup label="COLLABORATION">${collabs().map((c) => `<option value="collab:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`;
 
   const setEditor = (open) => {
@@ -180,7 +184,7 @@
       F.name_ko.value = (p.name && p.name.ko) || '';
       F.name_en.value = (p.name && p.name.en) || '';
       F.name_ja.value = (p.name && p.name.ja) || '';
-      F.where.value = p.category ? `category:${p.category}` : p.collab ? `collab:${p.collab}` : F.where.options[0].value;
+      F.where.value = p.category ? `category:${p.category}` : p.collab ? `collab:${p.collab}` : p.matter ? `matter:${p.matter}` : F.where.options[0].value;
       F.sci_i.value = (p.sci && p.sci[0]) || '';
       F.sci_r.value = (p.sci && p.sci[1]) || '';
       F.sub.value = p.sub || '';
@@ -257,6 +261,7 @@
       id,
       category: kind === 'category' ? place : null,
       collab: kind === 'collab' ? place : null,
+      matter: kind === 'matter' ? place : null,
       name: nm,
       sci: F.sci_i.value.trim() || F.sci_r.value.trim() ? [F.sci_i.value.trim(), F.sci_r.value.trim()] : null,
       sub: F.sub.value.trim() || null,
