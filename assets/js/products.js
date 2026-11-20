@@ -6,6 +6,8 @@
    name     : 화면에 보이는 이름 (한국어 / English / 日本語)
    sci      : 학명 [이탤릭으로 쓸 부분, 나머지]   예) ['Ficus', 'sp. ‘Murung Raya’']
    price    : 원 단위 숫자 (예: 32000). 아직 정하지 않았으면 null → '가격 문의'로 표시
+              ▸ 가격 기준: 네이버 스마트스토어 https://smartstore.naver.com/plant_matter 의 판매가 그대로
+                (운영자가 따로 정정을 요청한 제품만 그 금액으로). 스토어에 없는 제품은 null
    status   : 'available'(판매 중) | 'soldout'(품절)
    image    : 세로 3:4 사진 — PC 저장소의 tools/prepare_product_photo.py 로 만든 파일
               (흰 배경을 같은 순백으로 고르고, 식물 크기를 '무룽 라야' 사진과 같은 비율로 맞춤.
@@ -80,7 +82,7 @@ window.PM_PRODUCTS = [
     price: null,
     status: 'available',
     plain: true,
-    image: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=2'
+    image: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=3'
   },
   {
     id: 'thichi-bucotsu-bowl-mid-4',
@@ -90,7 +92,7 @@ window.PM_PRODUCTS = [
     price: null,
     status: 'available',
     plain: true,
-    image: '/assets/img/products/thichi-bucotsu-bowl-mid-4.jpg?v=2'
+    image: '/assets/img/products/thichi-bucotsu-bowl-mid-4.jpg?v=3'
   },
   {
     id: 'thichi-bucotsu-bowl-mid-5',
@@ -100,6 +102,6 @@ window.PM_PRODUCTS = [
     price: null,
     status: 'available',
     plain: true,
-    image: '/assets/img/products/thichi-bucotsu-bowl-mid-5.jpg?v=2'
+    image: '/assets/img/products/thichi-bucotsu-bowl-mid-5.jpg?v=3'
   }
 ];

@@ -46,6 +46,9 @@
 
 ### 식물 등록하기
 
+> **가격 기준:** 제품을 올릴 때는 네이버 스마트스토어 **https://smartstore.naver.com/plant_matter** 의 판매가를 그대로 씁니다.
+> 운영자가 따로 금액 정정을 요청한 경우에만 그 금액으로 바꿉니다. 스토어에 아직 없는 제품은 `price: null` ('가격 문의').
+
 1. 사진을 도구로 정리합니다 — 흰 배경의 밝기·색감을 모든 사진이 같은 순백이 되도록 맞추고, **식물 크기와 위치를 '피커스 sp. 무룽 라야' 사진과 같은 비율로** 맞춰(흰 여백을 늘리거나 줄임) 세로 3:4(750×1000)로 저장합니다.
    ```bash
    python3 tools/prepare_product_photo.py 원본사진.jpg assets/img/products/new-plant.jpg
@@ -113,8 +116,8 @@
   - 지금: GECKO IN THE LIBRARY (사진 없음 → 회색 칸), THICHI YUIITSUMUNI (메뉴 사진 = BOWL LONG - 4)
 - 각 협업의 제품: `products.js` 에 `collab: 'thichi-yuiitsumuni'` 로 추가 → 그 탭에 PLANT 와 같은 카드로 나옴 (PLANT 목록에는 안 나옴)
   - 둘째 줄은 학명 대신 `sub` (예: 'BOWL LONG - 4'), 상세의 정보에는 '모델' · '협업'
-  - 사진: 단색 아주 밝은 회색 배경 · 그라데이션 없음 → `python3 tools/prepare_product_photo.py 원본.jpg assets/img/products/이름.jpg --zoom 1.0 --fy 0.5 --pot-tone --bg f4f4f2` 후 `plain: true`
-    (`--zoom 1.0` = 확대 없이 원본 가로 전체를 쓰고 3:4 에 맞게 위아래 빈 배경만 조금 자름 · `--pot-tone` = 검은 화분 톤을 THICHI 3점 평균 블랙(POT_TONE)에 맞춤, 놋쇠 판·손·배경은 그대로)
+  - 사진: 단색 아주 밝은 회색 배경 · 그라데이션 없음 → `python3 tools/prepare_product_photo.py 원본.jpg assets/img/products/이름.jpg --zoom 1.0 --fy 0.5 --match-tone --bg f4f4f2` 후 `plain: true`
+    (`--zoom 1.0` = 확대 없이 원본 가로 전체를 쓰고 3:4 에 맞게 위아래 빈 배경만 조금 자름 · `--match-tone` = 검은 화분 · 금색 태그 · 손(피부) 톤을 THICHI 3점 평균(POT_TONE · BRASS_TONE · SKIN_TONE)에 맞춤, 배경은 그대로)
 
 ## CONTACT · B2B(도매) 문의 · COLLAB(협업 제안) (/contact/)
 
