@@ -559,6 +559,9 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 /* ---------- CONTACT (/contact/) · 도매 문의 — 연락처는 assets/js/contact.js ---------- */
 .ct { min-height: 72vh; padding: calc(var(--gnb-h) + 36px) var(--side) 140px; }
 .ct__head { margin-bottom: 56px; }
+/* CONTACT / B2B 경로 글씨: 위 PLANT 탭 글자 시작점에 맞춤 (워드마크 200px + 탭 왼쪽 여백 80px, 좁은 창은 56px) */
+.ct__head .crumb { padding-left: calc(200px + 80px); }
+@media (max-width: 1180px) { .ct__head .crumb { padding-left: calc(200px + 56px); } }
 .ct__title { margin: 14px 0 0; font-size: 34px; font-weight: 300; line-height: 1.2; letter-spacing: .02em; }
 .ct__sec { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr); gap: 40px; max-width: 1180px; padding-top: 32px; border-top: 1px solid var(--text); }
 .ct__h { margin: 0; font-size: 18px; font-weight: 300; line-height: 1.5; letter-spacing: .02em; }
