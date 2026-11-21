@@ -229,6 +229,7 @@
       bars[k].classList.add('is-active');
       bars[k].setAttribute('aria-current', 'true');
       [...track.children].forEach((s, j) => { if (j < count) s.setAttribute('aria-hidden', String(j !== k)); });
+      document.body.classList.toggle('is-hero-dark', track.children[k].dataset.tone === 'dark');   /* 어두운 사진이면 위쪽 메뉴를 흰색으로 (style.css) */
     };
     const goTo = (target) => {
       if (busy || target === index) return;
