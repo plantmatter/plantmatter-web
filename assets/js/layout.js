@@ -132,10 +132,10 @@ window.PM_FIT_TITLE = function (el, labels) {
     </a>
 
     <nav class="gnb__menu" aria-label="주요 메뉴" data-i18n-attr="aria-label: menu">
-      <a href="/plant/" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
-      <a href="/matter/" data-menu="matter"${matterHere} aria-controls="menu-matter" aria-expanded="false">MATTER</a>
-      <a href="/collaboration/" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLABORATION</a>
-      <a href="/contact/"${contactHere}>CONTACT</a>
+      <a href="/plant/" data-label="PLANT" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
+      <a href="/matter/" data-label="MATTER" data-menu="matter"${matterHere} aria-controls="menu-matter" aria-expanded="false">MATTER</a>
+      <a href="/collaboration/" data-label="COLLABORATION" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLABORATION</a>
+      <a href="/contact/" data-label="CONTACT"${contactHere}>CONTACT</a>
     </nav>
 
     <div class="gnb__util">
