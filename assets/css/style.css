@@ -49,7 +49,7 @@ button, input, select { font: inherit; color: inherit; }
 .gnb__menu a {
   position: relative; padding: 8px 0; line-height: 1;
   /* PC·모바일 같은 크기, 자간은 워드마크와 같은 비율 */
-  font-size: 14px; font-weight: 300; letter-spacing: .185em;
+  font-size: 14px; font-weight: 400; letter-spacing: .185em;
 }
 .gnb__menu a::after {
   content: ""; position: absolute; left: 0; right: .185em; bottom: 0; height: 1px;
