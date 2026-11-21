@@ -126,12 +126,19 @@
   - 권한은 서버(RLS)가 확인: 누구나 읽기(숨김 제외), 고치기 · 문의 보기는 관리자만
 - 아직 없음: 결제 완료 시 재고 자동 차감 · 주문 관리 → 실결제(토스 가맹 + 결제 승인 서버) 붙일 때 함께
 
+## PRODUCT (/products/)
+
+- 상단 탭 순서: PLANT · **PRODUCT** · MATTER · COLLABORATION · CONTACT
+- PLANT 와 같은 형식: 상단 **PRODUCT** 탭의 아래로 열리는 메뉴(BASE Series · ORIGIN) + `/products/` 페이지(ALL · 각 항목 탭, 옆으로 넘기는 애니메이션)
+  (제품 상세는 `/product/?id=…` 라서 목록 페이지 주소는 복수형 `/products/`)
+- 항목은 `assets/js/layout.js` 의 `PRODUCT_LINES`, 제품은 관리자 페이지에서 **구분 → PRODUCT › BASE Series / ORIGIN** 으로 등록 (표의 `line` 칸 — `supabase/web09_product_lines.sql`)
+- ALL 은 모든 PRODUCT 제품. 제품이 없으면 '제품을 준비하고 있습니다'
+
 ## MATTER (/matter/)
 
-- COLLABORATION 과 같은 형식: 상단 **MATTER** 탭의 아래로 열리는 메뉴(BASE Series · ORIGIN) + `/matter/` 페이지(ALL · 각 항목 탭, 옆으로 넘기는 애니메이션)
-- 항목은 `assets/js/layout.js` 의 `MATTERS`, 제품은 관리자 페이지에서 **구분 → MATTER › BASE Series / ORIGIN** 으로 등록 (표의 `matter` 칸)
-- ALL 은 모든 MATTER 제품 (PLANT 의 ALL 과 같음). 제품이 없으면 '제품을 준비하고 있습니다'
-- COLLABORATION · MATTER 페이지는 같은 스크립트 `assets/js/group.js` 를 씀 (`<main data-group="collab | matter">`)
+- 지금은 하위 항목 없음 (BASE Series · ORIGIN 은 PRODUCT 로 옮김). 상단 MATTER 탭은 내려오는 메뉴 없이 `/matter/` 로 바로 이동하고, 페이지는 제목 MATTER · '준비하고 있습니다'
+- `assets/js/layout.js` 의 `MATTERS` 에 항목을 넣으면 내려오는 메뉴와 페이지 탭이 다시 생김 (제품은 관리자 페이지 구분 → MATTER, 표의 `matter` 칸)
+- PRODUCT · MATTER · COLLABORATION 페이지는 같은 스크립트 `assets/js/group.js` 를 씀 (`<main data-group="product | matter | collab">`)
 
 ## COLLABORATION (/collaboration/)
 

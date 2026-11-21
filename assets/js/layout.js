@@ -97,18 +97,26 @@ window.PM_TITLE_FOLLOW = function (headEl, barEl) {
   ];
   window.PM_COLLABS = COLLABS;
 
-  /* MATTER 하위 항목 — 순서 · 이름 · 메뉴 썸네일(세로 3:4, 없으면 '') · PLANT 분류와 같은 방식
-     제품은 관리자 페이지에서 구분을 이 항목으로 고르면 /matter/ 페이지 그 탭에 나옵니다 */
-  var MATTERS = [
+  /* PRODUCT 하위 항목 — 순서 · 이름 · 메뉴 썸네일(세로 3:4, 없으면 '') · PLANT 분류와 같은 방식
+     제품은 관리자 페이지에서 구분을 이 항목으로 고르면 /products/ 페이지 그 탭에 나옵니다 (DB shop_products.line) */
+  var PRODUCT_LINES = [
     { id: 'base-series', name: 'BASE Series', img: '' },
     { id: 'origin',      name: 'ORIGIN',      img: '' }
   ];
+  window.PM_PRODUCT_LINES = PRODUCT_LINES;
+
+  /* MATTER 하위 항목 — 지금은 없음. 항목을 넣으면 상단 MATTER 탭에 내려오는 메뉴가 생기고
+     /matter/ 페이지에 탭이 생김 (제품은 관리자 페이지에서 구분 → MATTER, DB shop_products.matter) */
+  var MATTERS = [];
   window.PM_MATTERS = MATTERS;
 
   var plantHere = PM_PATH().indexOf('/plant/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var contactHere = PM_PATH().indexOf('/contact/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var collabHere = PM_PATH().indexOf('/collaboration/') === 0 ? ' class="is-here" aria-current="page"' : '';
   var matterHere = PM_PATH().indexOf('/matter/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  var productHere = PM_PATH().indexOf('/products/') === 0 ? ' class="is-here" aria-current="page"' : '';
+  /* MATTER 항목이 없으면 MATTER 탭은 내려오는 메뉴 없이 /matter/ 로 바로 이동 */
+  var matterMenu = MATTERS.length ? ' data-menu="matter" aria-controls="menu-matter" aria-expanded="false"' : '';
   /* 장바구니 아이콘: 담긴 것이 있으면 처음 그릴 때부터 초록 가방 + 숫자 (자세한 확인은 뒤에 cart.js 가 다시 함)
      — 페이지를 옮길 때 검은 가방이 잠깐 보였다가 초록으로 바뀌는 깜빡임 방지 */
   var cartN = 0;
@@ -129,6 +137,7 @@ window.PM_TITLE_FOLLOW = function (headEl, barEl) {
   var megaItems = megaList(CATEGORIES, '/plant/');
   var collabItems = megaList(COLLABS, '/collaboration/', true);
   var matterItems = megaList(MATTERS, '/matter/');
+  var productItems = megaList(PRODUCT_LINES, '/products/');
 
   var TOP = `  <!-- ───────── 상단 바 ───────── -->
   <header class="gnb">
@@ -138,7 +147,8 @@ window.PM_TITLE_FOLLOW = function (headEl, barEl) {
 
     <nav class="gnb__menu" aria-label="주요 메뉴" data-i18n-attr="aria-label: menu">
       <a href="/plant/" data-label="PLANT" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
-      <a href="/matter/" data-label="MATTER" data-menu="matter"${matterHere} aria-controls="menu-matter" aria-expanded="false">MATTER</a>
+      <a href="/products/" data-label="PRODUCT" data-menu="product"${productHere} aria-controls="menu-product" aria-expanded="false">PRODUCT</a>
+      <a href="/matter/" data-label="MATTER"${matterMenu}${matterHere}>MATTER</a>
       <a href="/collaboration/" data-label="COLLABORATION" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLABORATION</a>
       <a href="/contact/" data-label="CONTACT"${contactHere}>CONTACT</a>
     </nav>
@@ -167,7 +177,17 @@ ${megaItems}
     <div class="mega__dim" data-menu-close></div>
   </div>
 
-  <!-- ───────── MATTER 탭 아래로 내려오는 메뉴 (항목은 위 MATTERS) — PLANT 메뉴와 같은 모양 ───────── -->
+  <!-- ───────── PRODUCT 탭 아래로 내려오는 메뉴 (항목은 위 PRODUCT_LINES) — PLANT 메뉴와 같은 모양 ───────── -->
+  <div class="mega" id="menu-product" aria-hidden="true">
+    <div class="mega__panel" aria-label="PRODUCT">
+      <ul class="mega__list">
+${productItems}
+      </ul>
+    </div>
+    <div class="mega__dim" data-menu-close></div>
+  </div>
+
+${MATTERS.length ? `  <!-- ───────── MATTER 탭 아래로 내려오는 메뉴 (항목은 위 MATTERS) — PLANT 메뉴와 같은 모양 ───────── -->
   <div class="mega" id="menu-matter" aria-hidden="true">
     <div class="mega__panel" aria-label="MATTER">
       <ul class="mega__list">
@@ -176,7 +196,7 @@ ${matterItems}
     </div>
     <div class="mega__dim" data-menu-close></div>
   </div>
-
+` : ''}
   <!-- ───────── COLLABORATION 탭 아래로 내려오는 메뉴 (항목은 위 COLLABS) — PLANT 메뉴와 같은 모양 ───────── -->
   <div class="mega" id="menu-collab" aria-hidden="true">
     <div class="mega__panel" aria-label="COLLABORATION">

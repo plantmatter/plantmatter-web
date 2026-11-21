@@ -1,15 +1,17 @@
-/* PLANT MATTER — 묶음 페이지 공통: COLLABORATION (/collaboration/) · MATTER (/matter/) — PLANT 목록(assets/js/plant.js)과 같은 형식
-   페이지의 <main data-group="collab | matter"> 로 어느 묶음인지 정합니다.
-   분류 탭(ALL · 각 항목)을 누르면 새로고침 없이 옆으로 넘기며 바뀌고, 주소도 /matter/?c=origin 처럼 바뀌어 그대로 공유할 수 있습니다.
-   - 항목(이름 · 메뉴 썸네일): assets/js/layout.js 의 COLLABS · MATTERS
-   - 제품: 관리자 페이지(/admin/) 에서 구분을 그 항목으로 고른 제품 (products.js 의 collab: '…' · matter: '…')
-   - ALL: COLLABORATION 은 협업 카드 목록, MATTER 는 모든 MATTER 제품 (PLANT 의 ALL 과 같음)
+/* PLANT MATTER — 묶음 페이지 공통: PRODUCT (/products/) · MATTER (/matter/) · COLLABORATION (/collaboration/) — PLANT 목록(assets/js/plant.js)과 같은 형식
+   페이지의 <main data-group="product | matter | collab"> 로 어느 묶음인지 정합니다.
+   분류 탭(ALL · 각 항목)을 누르면 새로고침 없이 옆으로 넘기며 바뀌고, 주소도 /products/?c=origin 처럼 바뀌어 그대로 공유할 수 있습니다.
+   - 항목(이름 · 메뉴 썸네일): assets/js/layout.js 의 PRODUCT_LINES · MATTERS · COLLABS
+   - 제품: 관리자 페이지(/admin/) 에서 구분을 그 항목으로 고른 제품 (products.js 의 line: '…' · matter: '…' · collab: '…')
+   - ALL: COLLABORATION 은 협업 카드 목록, PRODUCT · MATTER 는 그 묶음의 모든 제품 (PLANT 의 ALL 과 같음)
+   - 항목이 하나도 없으면(지금 MATTER) 분류 탭을 숨기고 제목은 묶음 이름
    PC(plantmatter-web)와 모바일(plantmatter-mobile) 저장소에 같은 파일이 있으니 둘 다 고쳐 주세요. */
 /* 제품 목록(products.js → Supabase)을 다 읽은 뒤 시작 */
 (window.PM_PRODUCTS_READY || Promise.resolve()).then(() => {
   const GROUPS = {
-    collab: { items: () => window.PM_COLLABS || [], base: '/collaboration/', field: 'collab', allCards: true, empty: 'collabSoon' },
-    matter: { items: () => window.PM_MATTERS || [], base: '/matter/', field: 'matter', allCards: false, empty: 'matterSoon' },
+    product: { name: 'PRODUCT', items: () => window.PM_PRODUCT_LINES || [], base: '/products/', field: 'line', allCards: false, empty: 'productSoon' },
+    matter: { name: 'MATTER', items: () => window.PM_MATTERS || [], base: '/matter/', field: 'matter', allCards: false, empty: 'matterSoon' },
+    collab: { name: 'COLLABORATION', items: () => window.PM_COLLABS || [], base: '/collaboration/', field: 'collab', allCards: true, empty: 'collabSoon' },
   };
   const PM = window.PM;
   const main = document.querySelector('[data-group]');
@@ -36,6 +38,7 @@
     .map((c) => `<a class="pill" href="${urlFor(c.id)}" data-cat="${esc(c.id)}">${esc(c.name)}</a>`)
     .join('');
   const pills = [...pillsEl.querySelectorAll('.pill')];
+  pillsEl.hidden = !ITEMS.length;   // 항목이 없으면 ALL 하나뿐이라 탭을 숨김
   if (window.PM_TITLE_FOLLOW) window.PM_TITLE_FOLLOW(titleEl.closest('.list__head'), document.querySelector('.list__bar'));   // 제목 길이에 맞춰 탭이 따라 움직임 (layout.js)
 
   /* COLLABORATION 의 ALL: 협업 카드 (PLANT 목록의 식물 카드와 같은 모양) */
@@ -55,7 +58,7 @@
   };
   const renderContent = () => {
     const c = ITEMS.find((x) => x.id === cur);
-    const label = c ? c.name : 'ALL';
+    const label = c ? c.name : ITEMS.length ? 'ALL' : G.name;
     titleEl.textContent = label;
     document.title = `${label} — PLANT MATTER`;
     if (!c && G.allCards) {

@@ -24,12 +24,15 @@
   const phoneFmt = (p) => (p && p.length === 11 ? `${p.slice(0, 3)}-${p.slice(3, 7)}-${p.slice(7)}` : p || '');
   const cats = () => window.PM_CATEGORIES || [];
   const collabs = () => window.PM_COLLABS || [];
+  const lines = () => window.PM_PRODUCT_LINES || [];
   const matters = () => window.PM_MATTERS || [];
   const where = (p) => {
     const c = cats().find((x) => x.id === p.category);
     if (c) return `PLANT · ${c.name}`;
     const k = collabs().find((x) => x.id === p.collab);
     if (k) return `COLLABORATION · ${k.name}`;
+    const l = lines().find((x) => x.id === p.line);
+    if (l) return `PRODUCT · ${l.name}`;
     const m = matters().find((x) => x.id === p.matter);
     return m ? `MATTER · ${m.name}` : '—';
   };
@@ -152,9 +155,10 @@
   let editing = null;      // 고치는 제품 (새 제품이면 null)
   let pendingImage = null; // 새로 고른 사진 (750×1000 JPEG Blob)
 
-  /* 구분 칸: PLANT 분류 · COLLABORATION 목록 (layout.js) */
+  /* 구분 칸: PLANT 분류 · PRODUCT · (MATTER) · COLLABORATION 목록 (layout.js) */
   F.where.innerHTML = `<optgroup label="PLANT">${cats().map((c) => `<option value="category:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`
-    + `<optgroup label="MATTER">${matters().map((c) => `<option value="matter:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`
+    + `<optgroup label="PRODUCT">${lines().map((c) => `<option value="line:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`
+    + (matters().length ? `<optgroup label="MATTER">${matters().map((c) => `<option value="matter:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>` : '')
     + `<optgroup label="COLLABORATION">${collabs().map((c) => `<option value="collab:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`;
 
   const setEditor = (open) => {
@@ -182,7 +186,7 @@
       F.name_ko.value = (p.name && p.name.ko) || '';
       F.name_en.value = (p.name && p.name.en) || '';
       F.name_ja.value = (p.name && p.name.ja) || '';
-      F.where.value = p.category ? `category:${p.category}` : p.collab ? `collab:${p.collab}` : p.matter ? `matter:${p.matter}` : F.where.options[0].value;
+      F.where.value = p.category ? `category:${p.category}` : p.collab ? `collab:${p.collab}` : p.line ? `line:${p.line}` : p.matter ? `matter:${p.matter}` : F.where.options[0].value;
       F.sci_i.value = (p.sci && p.sci[0]) || '';
       F.sci_r.value = (p.sci && p.sci[1]) || '';
       F.sub.value = p.sub || '';
@@ -259,6 +263,7 @@
       id,
       category: kind === 'category' ? place : null,
       collab: kind === 'collab' ? place : null,
+      line: kind === 'line' ? place : null,
       matter: kind === 'matter' ? place : null,
       name: nm,
       sci: F.sci_i.value.trim() || F.sci_r.value.trim() ? [F.sci_i.value.trim(), F.sci_r.value.trim()] : null,

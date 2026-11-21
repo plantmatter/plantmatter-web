@@ -49,7 +49,7 @@
     }
     const name = S.nameOf(p, lang);
     const cat = S.category(p.category);
-    const col = S.groupOf(p);   // COLLABORATION · MATTER 제품
+    const col = S.groupOf(p);   // COLLABORATION · PRODUCT · MATTER 제품
     const sold = p.status === 'soldout';
     const canBuy = !sold && p.price != null;
     const images = (p.images && p.images.length ? p.images : [p.image]).filter(Boolean);
@@ -92,7 +92,7 @@
             <dl class="acc__body">
               <dt>${esc(t(p.sub ? 'modelLabel' : 'sciLabel'))}</dt><dd>${S.sciHtml(p)}</dd>
               ${cat ? `<dt>${esc(t('catLabel'))}</dt><dd><a href="/plant/?c=${esc(cat.id)}">${esc(cat.name)}</a></dd>` : ''}
-              ${col ? `<dt>${esc(col.section === 'MATTER' ? 'MATTER' : t('collabLabel'))}</dt><dd><a href="${col.base}?c=${esc(col.id)}">${esc(col.name)}</a></dd>` : ''}
+              ${col ? `<dt>${esc(col.section === 'COLLABORATION' ? t('collabLabel') : col.section)}</dt><dd><a href="${col.base}?c=${esc(col.id)}">${esc(col.name)}</a></dd>` : ''}
             </dl>
           </details>
         </div>

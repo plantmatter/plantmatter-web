@@ -33,10 +33,12 @@
     return `<i>${esc(italic)}</i>${rest ? ' ' + esc(rest) : ''}`;
   };
   const collabOf = (p) => (p && p.collab && (window.PM_COLLABS || []).find((c) => c.id === p.collab)) || null;
-  /* 제품이 속한 묶음: COLLABORATION 또는 MATTER → { section, base, id, name } (PLANT 분류 제품이면 null) */
+  /* 제품이 속한 묶음: COLLABORATION · PRODUCT · MATTER → { section, base, id, name } (PLANT 분류 제품이면 null) */
   const groupOf = (p) => {
     const k = collabOf(p);
     if (k) return { section: 'COLLABORATION', base: '/collaboration/', id: k.id, name: k.name };
+    const l = p && p.line && (window.PM_PRODUCT_LINES || []).find((x) => x.id === p.line);
+    if (l) return { section: 'PRODUCT', base: '/products/', id: l.id, name: l.name };
     const m = p && p.matter && (window.PM_MATTERS || []).find((x) => x.id === p.matter);
     return m ? { section: 'MATTER', base: '/matter/', id: m.id, name: m.name } : null;
   };
