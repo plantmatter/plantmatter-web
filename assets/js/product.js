@@ -92,7 +92,7 @@
             <dl class="acc__body">
               <dt>${esc(t(p.sub ? 'modelLabel' : 'sciLabel'))}</dt><dd>${S.sciHtml(p)}</dd>
               ${cat ? `<dt>${esc(t('catLabel'))}</dt><dd><a href="/plant/?c=${esc(cat.id)}">${esc(cat.name)}</a></dd>` : ''}
-              ${col ? `<dt>${esc(col.section === 'COLLABORATION' ? t('collabLabel') : col.section)}</dt><dd><a href="${col.base}?c=${esc(col.id)}">${esc(col.name)}</a></dd>` : ''}
+              ${col ? `<dt>${esc(col.section === 'COLLAB' ? t('collabLabel') : col.section)}</dt><dd><a href="${col.base}?c=${esc(col.id)}">${esc(col.name)}</a></dd>` : ''}
             </dl>
           </details>
         </div>

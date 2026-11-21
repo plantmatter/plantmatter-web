@@ -90,7 +90,7 @@ window.PM_TITLE_FOLLOW = function (headEl, barEl) {
   window.PM_CATEGORIES = CATEGORIES;
 
   /* COLLABORATION 하위 항목 — 순서 · 이름 · 메뉴 썸네일(세로 3:4, 없으면 '') · PLANT 분류와 같은 방식
-     항목을 더하면 상단 COLLABORATION 메뉴와 /collaboration/ 페이지 탭에 함께 생깁니다 */
+     항목을 더하면 상단 COLLAB 탭 메뉴와 /collaboration/ 페이지 탭에 함께 생깁니다 */
   var COLLABS = [
     { id: 'gecko-in-the-library', name: 'GECKO IN THE LIBRARY', img: '' },
     { id: 'thichi-yuiitsumuni',   name: 'THICHI YUIITSUMUNI',   img: '/assets/img/products/thichi-bucotsu-bowl-long-4.jpg?v=5' }
@@ -149,7 +149,7 @@ window.PM_TITLE_FOLLOW = function (headEl, barEl) {
       <a href="/plant/" data-label="PLANT" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
       <a href="/products/" data-label="PRODUCT" data-menu="product"${productHere} aria-controls="menu-product" aria-expanded="false">PRODUCT</a>
       <a href="/matter/" data-label="MATTER"${matterMenu}${matterHere}>MATTER</a>
-      <a href="/collaboration/" data-label="COLLABORATION" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLABORATION</a>
+      <a href="/collaboration/" data-label="COLLAB" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLAB</a>
       <a href="/contact/" data-label="CONTACT"${contactHere}>CONTACT</a>
     </nav>
 
@@ -199,7 +199,7 @@ ${matterItems}
 ` : ''}
   <!-- ───────── COLLABORATION 탭 아래로 내려오는 메뉴 (항목은 위 COLLABS) — PLANT 메뉴와 같은 모양 ───────── -->
   <div class="mega" id="menu-collab" aria-hidden="true">
-    <div class="mega__panel" aria-label="COLLABORATION">
+    <div class="mega__panel" aria-label="COLLAB">
       <ul class="mega__list">
 ${collabItems}
       </ul>

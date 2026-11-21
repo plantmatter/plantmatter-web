@@ -30,7 +30,7 @@
     const c = cats().find((x) => x.id === p.category);
     if (c) return `PLANT · ${c.name}`;
     const k = collabs().find((x) => x.id === p.collab);
-    if (k) return `COLLABORATION · ${k.name}`;
+    if (k) return `COLLAB · ${k.name}`;
     const l = lines().find((x) => x.id === p.line);
     if (l) return `PRODUCT · ${l.name}`;
     const m = matters().find((x) => x.id === p.matter);
@@ -159,7 +159,7 @@
   F.where.innerHTML = `<optgroup label="PLANT">${cats().map((c) => `<option value="category:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`
     + `<optgroup label="PRODUCT">${lines().map((c) => `<option value="line:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`
     + (matters().length ? `<optgroup label="MATTER">${matters().map((c) => `<option value="matter:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>` : '')
-    + `<optgroup label="COLLABORATION">${collabs().map((c) => `<option value="collab:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`;
+    + `<optgroup label="COLLAB">${collabs().map((c) => `<option value="collab:${esc(c.id)}">${esc(c.name)}</option>`).join('')}</optgroup>`;
 
   const setEditor = (open) => {
     editor.classList.toggle('is-open', open);

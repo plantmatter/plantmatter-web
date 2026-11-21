@@ -11,7 +11,7 @@
   const GROUPS = {
     product: { name: 'PRODUCT', items: () => window.PM_PRODUCT_LINES || [], base: '/products/', field: 'line', allCards: false, empty: 'productSoon' },
     matter: { name: 'MATTER', items: () => window.PM_MATTERS || [], base: '/matter/', field: 'matter', allCards: false, empty: 'matterSoon' },
-    collab: { name: 'COLLABORATION', items: () => window.PM_COLLABS || [], base: '/collaboration/', field: 'collab', allCards: true, empty: 'collabSoon' },
+    collab: { name: 'COLLAB', items: () => window.PM_COLLABS || [], base: '/collaboration/', field: 'collab', allCards: true, empty: 'collabSoon' },
   };
   const PM = window.PM;
   const main = document.querySelector('[data-group]');

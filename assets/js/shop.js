@@ -36,7 +36,7 @@
   /* 제품이 속한 묶음: COLLABORATION · PRODUCT · MATTER → { section, base, id, name } (PLANT 분류 제품이면 null) */
   const groupOf = (p) => {
     const k = collabOf(p);
-    if (k) return { section: 'COLLABORATION', base: '/collaboration/', id: k.id, name: k.name };
+    if (k) return { section: 'COLLAB', base: '/collaboration/', id: k.id, name: k.name };
     const l = p && p.line && (window.PM_PRODUCT_LINES || []).find((x) => x.id === p.line);
     if (l) return { section: 'PRODUCT', base: '/products/', id: l.id, name: l.name };
     const m = p && p.matter && (window.PM_MATTERS || []).find((x) => x.id === p.matter);

@@ -128,7 +128,7 @@
 
 ## PRODUCT (/products/)
 
-- 상단 탭 순서: PLANT · **PRODUCT** · MATTER · COLLABORATION · CONTACT
+- 상단 탭 순서: PLANT · **PRODUCT** · MATTER · COLLAB · CONTACT (COLLAB 페이지 주소는 그대로 `/collaboration/`)
 - PLANT 와 같은 형식: 상단 **PRODUCT** 탭의 아래로 열리는 메뉴(BASE Series · ORIGIN) + `/products/` 페이지(ALL · 각 항목 탭, 옆으로 넘기는 애니메이션)
   (제품 상세는 `/product/?id=…` 라서 목록 페이지 주소는 복수형 `/products/`)
 - 항목은 `assets/js/layout.js` 의 `PRODUCT_LINES`, 제품은 관리자 페이지에서 **구분 → PRODUCT › BASE Series / ORIGIN** 으로 등록 (표의 `line` 칸 — `supabase/web09_product_lines.sql`)
