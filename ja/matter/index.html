@@ -61,23 +61,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://qssrtzvipwvxcfszxomo.supabase.co" crossorigin>   <!-- 제품 목록(Supabase)을 빨리 읽도록 미리 연결 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,600;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261121f">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261121h">
 </head>
 <body class="page-sub">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261121f"></script>
+  <script src="/assets/js/layout.js?v=20261121h"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── MATTER ─────────
        PLANT 목록과 같은 형식. 분류 탭과 내용은 assets/js/group.js 가 layout.js 의 MATTERS 를 읽어 채웁니다 -->
   <main class="list" id="main" data-group="matter">
-    <div class="list__head">
-      <p class="crumb"><a href="/matter/">MATTER</a><span aria-hidden="true">/</span><span data-crumb>ALL</span></p>
-      <h1 class="list__title" data-title>ALL</h1>
-    </div>
-    <div class="list__bar">
-      <nav class="pills" aria-label="MATTER" data-pills></nav>
-      <p class="list__count" data-count></p>
+    <!-- 제목 + 분류 탭 (PC: 한 줄 · 모바일: 위아래) -->
+    <div class="list__top">
+      <div class="list__head">
+        <h1 class="list__title" data-title>ALL</h1>
+      </div>
+      <div class="list__bar">
+        <nav class="pills" aria-label="MATTER" data-pills></nav>
+        <p class="list__count" data-count></p>
+      </div>
     </div>
     <ul class="grid" data-grid></ul>
     <p class="list__empty" data-empty data-i18n="matterSoon" hidden>제품을 준비하고 있습니다.</p>
@@ -86,11 +88,11 @@
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
-  <script src="/assets/js/i18n.js?v=20261121f" defer></script>
-  <script src="/assets/js/main.js?v=20261121f" defer></script>
-  <script src="/assets/js/products.js?v=20261121f" defer></script>
-  <script src="/assets/js/shop.js?v=20261121f" defer></script>
-  <script src="/assets/js/cart.js?v=20261121f" defer></script>
-  <script src="/assets/js/group.js?v=20261121f" defer></script>
+  <script src="/assets/js/i18n.js?v=20261121h" defer></script>
+  <script src="/assets/js/main.js?v=20261121h" defer></script>
+  <script src="/assets/js/products.js?v=20261121h" defer></script>
+  <script src="/assets/js/shop.js?v=20261121h" defer></script>
+  <script src="/assets/js/cart.js?v=20261121h" defer></script>
+  <script src="/assets/js/group.js?v=20261121h" defer></script>
 </body>
 </html>

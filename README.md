@@ -136,7 +136,7 @@
 ## COLLABORATION (/collaboration/)
 
 - PLANT 와 같은 형식: 상단 **COLLABORATION** 탭에 마우스를 올리면(모바일은 누르면) 아래로 메뉴가 열리고, 탭을 누르면 `/collaboration/` 페이지
-- 페이지: 경로 글씨 · 제목 · 분류 탭(ALL · 각 협업) · 옆으로 넘기는 애니메이션 — `assets/js/group.js`
+- 페이지: 제목 · 분류 탭(ALL · 각 협업) · 옆으로 넘기는 애니메이션 — `assets/js/group.js`
   - ALL: 협업 카드 목록 / 각 협업(`/collaboration/?c=gecko-in-the-library`): 지금은 '소개를 준비하고 있습니다'
 - 항목(이름 · 메뉴 썸네일 3:4)은 `assets/js/layout.js` 의 `COLLABS` 에서 추가·수정 (PC·모바일 두 저장소 모두)
   - 지금: GECKO IN THE LIBRARY (사진 없음 → 회색 칸), THICHI YUIITSUMUNI (메뉴 사진 = BOWL LONG - 4)

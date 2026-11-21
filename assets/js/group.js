@@ -21,7 +21,6 @@
   const pillsEl = document.querySelector('[data-pills]');
   const gridEl = document.querySelector('[data-grid]');
   const titleEl = document.querySelector('[data-title]');
-  const crumbEl = document.querySelector('[data-crumb]');
   const countEl = document.querySelector('[data-count]');
   const emptyEl = document.querySelector('[data-empty]');
 
@@ -37,6 +36,7 @@
     .map((c) => `<a class="pill" href="${urlFor(c.id)}" data-cat="${esc(c.id)}">${esc(c.name)}</a>`)
     .join('');
   const pills = [...pillsEl.querySelectorAll('.pill')];
+  if (window.PM_FIT_TITLE) window.PM_FIT_TITLE(titleEl, ['ALL', ...ITEMS.map((c) => c.name)]);   // 제목 칸 너비 고정 (layout.js)
 
   /* COLLABORATION 의 ALL: 협업 카드 (PLANT 목록의 식물 카드와 같은 모양) */
   const card = (c) => `<li class="card">
@@ -57,7 +57,6 @@
     const c = ITEMS.find((x) => x.id === cur);
     const label = c ? c.name : 'ALL';
     titleEl.textContent = label;
-    crumbEl.textContent = label;
     document.title = `${label} — PLANT MATTER`;
     if (!c && G.allCards) {
       countEl.textContent = t('collabCount', { n: ITEMS.length });

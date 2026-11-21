@@ -15,7 +15,7 @@
     instagram: '',   // 계정 이름, 예: 'plantmatter'
     hours: { ko: '', en: '', ja: '' },   // 응대 시간, 예: { ko: '평일 10:00 – 18:00', en: 'Weekdays 10:00 – 18:00', ja: '平日 10:00 – 18:00' }
   };
-  const TABS = { b2b: 'B2B', collab: 'COLLAB' };   // 주소 ?c= 값 → 탭 · 제목 · 경로 글씨 (이 순서 = 탭 순서, 넘기는 방향)
+  const TABS = { b2b: 'B2B', collab: 'COLLAB' };   // 주소 ?c= 값 → 탭 · 제목 (이 순서 = 탭 순서, 넘기는 방향)
 
   const PM = window.PM;
   if (!PM || !window.PM_FORM) return;
@@ -23,18 +23,18 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
   /* ---------- 분류 탭 — PLANT 목록(assets/js/plant.js)과 같은 방식 ----------
-     누르면 탭 표시는 바로, 제목·경로 글씨·내용은 옆으로 넘기는 애니메이션과 함께 바뀜.
+     누르면 탭 표시는 바로, 제목·내용은 옆으로 넘기는 애니메이션과 함께 바뀜.
      주소(/contact/?c=collab)도 바뀌어 그대로 공유 · 뒤로 가기 가능 */
   const ORDER = Object.keys(TABS);
   const tabs = [...document.querySelectorAll('[data-ct]')];
   const panels = [...document.querySelectorAll('[data-ct-panel]')];
-  const crumb = document.querySelector('[data-ct-crumb]');
   const titleEl = document.querySelector('[data-ct-title]');
   const headEl = document.querySelector('.ct__head');
   const valid = (c) => (TABS[c] ? c : 'b2b');
   const fromUrl = () => valid(new URLSearchParams(location.search).get('c'));
   const urlFor = (c) => (c === 'b2b' ? '/contact/' : `/contact/?c=${c}`);
   const panelOf = (c) => panels.find((p) => p.dataset.ctPanel === c);
+  if (window.PM_FIT_TITLE) window.PM_FIT_TITLE(titleEl, Object.values(TABS));   // 제목 칸 너비 고정 (layout.js)
   let cur = fromUrl();
 
   const renderTabs = () => {
@@ -47,7 +47,6 @@
   const renderContent = () => {
     const label = TABS[cur];
     titleEl.textContent = label;
-    crumb.textContent = label;
     document.title = `${label} — PLANT MATTER`;
     panels.forEach((p) => { p.hidden = p.dataset.ctPanel !== cur; });
   };

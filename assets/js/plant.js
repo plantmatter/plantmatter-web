@@ -13,7 +13,6 @@
   const pillsEl = document.querySelector('[data-pills]');
   const gridEl = document.querySelector('[data-grid]');
   const titleEl = document.querySelector('[data-title]');
-  const crumbEl = document.querySelector('[data-crumb]');
   const countEl = document.querySelector('[data-count]');
   const emptyEl = document.querySelector('[data-empty]');
 
@@ -29,6 +28,7 @@
     .map((c) => `<a class="pill" href="${urlFor(c.id)}" data-cat="${c.id}">${esc(c.name)}</a>`)
     .join('');
   const pills = [...pillsEl.querySelectorAll('.pill')];
+  if (window.PM_FIT_TITLE) window.PM_FIT_TITLE(titleEl, ['ALL', ...CATS.map((c) => c.name)]);   // 제목 칸 너비 고정 (layout.js)
 
   /* 상품 칸은 assets/js/shop.js 의 cardHtml (COLLABORATION 페이지와 같은 모양) */
   const card = (p, lang) => window.PM_SHOP.cardHtml(p, lang);
@@ -46,7 +46,6 @@
     const c = CATS.find((x) => x.id === cat);
     const label = c ? c.name : 'ALL';
     titleEl.textContent = label;
-    crumbEl.textContent = label;
     document.title = `${label} — PLANT MATTER`;
     const list = PRODUCTS.filter((p) => (cat === 'all' ? CATS.some((c) => c.id === p.category) : p.category === cat));   // 식물만 (협업 화분 등은 COLLABORATION 페이지에)
     countEl.textContent = list.length === 1 ? t('countOne') : t('count', { n: list.length });

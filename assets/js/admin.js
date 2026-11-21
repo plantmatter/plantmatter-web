@@ -38,7 +38,6 @@
   const stateEl = $('[data-adm-state]');
   const app = $('[data-adm-app]');
   const titleEl = $('[data-adm-title]');
-  const crumbEl = $('[data-adm-crumb]');
   let db = null;
   let products = [];
 
@@ -56,7 +55,6 @@
     });
     document.querySelectorAll('[data-adm-panel]').forEach((p) => { p.hidden = p.dataset.admPanel !== tab; });
     titleEl.textContent = TABS[tab];
-    crumbEl.textContent = TABS[tab];
     document.title = `ADMIN · ${TABS[tab]} — PLANT MATTER`;
     if (tab === 'b2b') loadB2B();
     if (tab === 'collab') loadCollab();

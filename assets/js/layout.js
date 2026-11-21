@@ -28,6 +28,27 @@
   window.PM_SYNC_URL();
 })();
 
+/* 제목 칸 너비 — PC 에서는 제목 바로 오른쪽에 분류 탭이 오는데, 탭을 누를 때마다 제목 길이(ALL ↔ Tropical Plant)가 달라져
+   탭이 옆으로 밀리지 않도록 제목 칸을 그 페이지에서 가장 긴 제목 너비로 고정 (CSS 변수 --title-w, style.css 의 .list__top · .ct__top)
+   PM_FIT_TITLE(제목 요소, [나올 수 있는 제목들]) — plant.js · group.js · contact.js 가 부름 */
+window.PM_FIT_TITLE = function (el, labels) {
+  if (!el || !el.parentNode || !labels || !labels.length) return;
+  var box = el.parentNode;
+  var fit = function () {
+    var probe = document.createElement(el.tagName);
+    probe.className = el.className;
+    probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;width:auto;min-width:0;max-width:none;margin:0';
+    box.appendChild(probe);
+    var w = 0;
+    labels.forEach(function (t) { probe.textContent = t; w = Math.max(w, probe.getBoundingClientRect().width); });
+    box.removeChild(probe);
+    if (w) box.style.setProperty('--title-w', Math.ceil(w) + 'px');
+  };
+  fit();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);   // 글꼴을 다 받은 뒤 한 번 더
+};
+
 /* 새 버전 확인 — 사이트를 새로 올린 직후에는 브라우저가 예전에 받아 둔 페이지를 잠깐(최대 10분) 그대로 다시 쓰는 일이 있어
    (그러면 장바구니처럼 새로 생긴 기능이 그 페이지에서만 안 보임), 페이지를 열 때 /version.txt 와 이 파일의 ?v= 를 비교해
    예전 페이지면 한 번 새로고침합니다. 결제 페이지(/checkout/)와 입력을 시작한 뒤에는 새로고침하지 않습니다.
