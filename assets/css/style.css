@@ -126,7 +126,8 @@ button, input, select { font: inherit; color: inherit; }
 /* 사진 위 '제품 보기' (+ 넣으면 제품 이름 .slide__title) (index.html 의 figcaption) — 아래 막대 바로 위 가운데. 어두운 사진은 흰 글씨 */
 .slide { position: relative; }
 .slide__cap { position: absolute; left: 50%; bottom: 96px; z-index: 1; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 14px; width: max-content; max-width: calc(100% - 2 * var(--side)); color: var(--text); text-align: center; }
-.slide[data-tone="dark"] .slide__cap { color: #fff; }
+.slide[data-tone="dark"] .slide__cap { color: #fff; text-shadow: 0 0 10px rgba(0, 0, 0, .35); }   /* 밝은 부분(황동 등) 위에서도 읽히게 살짝 그림자 */
+.slide__cap--right { left: auto; right: var(--side); transform: none; align-items: flex-end; text-align: right; }   /* 사진 속 로고가 아래 가운데·왼쪽에 있을 때 */
 .slide__title { margin: 0; font-size: 30px; font-weight: 500; line-height: 1.2; letter-spacing: .02em; }
 .slide__link { font-size: 14px; font-weight: 400; letter-spacing: .04em; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
 .slide__link:hover { opacity: .7; }
