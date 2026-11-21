@@ -123,7 +123,7 @@ button, input, select { font: inherit; color: inherit; }
 .bar.is-active .bar__fill { animation: bar-fill var(--interval, 8s) linear forwards; }
 @keyframes bar-fill { to { width: 100%; } }
 .hero.is-paused .bar.is-active .bar__fill { animation-play-state: paused; }
-/* 사진 위 제품 이름 + '제품 보기' (index.html 의 figcaption) — 아래 막대 바로 위 가운데. 어두운 사진은 흰 글씨 */
+/* 사진 위 '제품 보기' (+ 넣으면 제품 이름 .slide__title) (index.html 의 figcaption) — 아래 막대 바로 위 가운데. 어두운 사진은 흰 글씨 */
 .slide { position: relative; }
 .slide__cap { position: absolute; left: 50%; bottom: 96px; z-index: 1; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 14px; width: max-content; max-width: calc(100% - 2 * var(--side)); color: var(--text); text-align: center; }
 .slide[data-tone="dark"] .slide__cap { color: #fff; }
