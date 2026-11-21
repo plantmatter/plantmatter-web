@@ -228,7 +228,10 @@
       void bars[k].offsetWidth;               /* 막대 채우기 처음부터 다시 */
       bars[k].classList.add('is-active');
       bars[k].setAttribute('aria-current', 'true');
-      [...track.children].forEach((s, j) => { if (j < count) s.setAttribute('aria-hidden', String(j !== k)); });
+      [...track.children].forEach((s, j) => {
+        if (j < count) s.setAttribute('aria-hidden', String(j !== k));
+        s.querySelectorAll('a').forEach((l) => { l.tabIndex = j === k ? 0 : -1; });   /* 안 보이는 사진의 '제품 보기'는 Tab 으로 가지 않게 */
+      });
       document.body.classList.toggle('is-hero-dark', track.children[k].dataset.tone === 'dark');   /* 어두운 사진이면 위쪽 메뉴를 흰색으로 (style.css) */
     };
     const goTo = (target) => {
