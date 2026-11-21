@@ -507,14 +507,12 @@ input.qty__val:focus { outline: none; border-color: var(--text); }
 
 /* ---------- 장바구니 (오른쪽에서 열리는 창 — assets/js/cart.js) ---------- */
 .icon-cart { position: relative; }
-/* 장바구니에 담긴 것이 있으면 상단 가방 안과 윤곽선을 연한 초록(#b4c3ac)으로 — cart.js 가 .has-items 를 붙임 */
-.icon-cart svg { transition: stroke .3s; }
+/* 장바구니에 담긴 것이 있으면 상단 가방을 검은색으로 채우고, 개수 표시는 초록(#9eb394) 바탕에 검은 숫자 — cart.js 가 .has-items 를 붙임 */
 .icon-cart .bag__body { transition: fill .3s; }
-.icon-cart.has-items .bag__body { fill: #b4c3ac; }
-.icon-cart.has-items svg { stroke: #b4c3ac; }   /* 윤곽선(가방 몸통·손잡이)도 같은 초록 */
+.icon-cart.has-items .bag__body { fill: var(--text); }
 .cart-badge {
   position: absolute; top: 4px; right: 1px; min-width: 17px; height: 17px; padding: 0 5px;
-  display: grid; place-items: center; border-radius: 9px; background: var(--text); color: #fff;
+  display: grid; place-items: center; border-radius: 9px; background: #9eb394; color: var(--text);
   font-size: 10px; font-weight: 300; line-height: 1; letter-spacing: 0; pointer-events: none;
 }
 .cart__panel { padding: 0; }
