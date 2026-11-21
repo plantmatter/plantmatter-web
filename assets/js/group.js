@@ -36,7 +36,7 @@
     .map((c) => `<a class="pill" href="${urlFor(c.id)}" data-cat="${esc(c.id)}">${esc(c.name)}</a>`)
     .join('');
   const pills = [...pillsEl.querySelectorAll('.pill')];
-  if (window.PM_FIT_TITLE) window.PM_FIT_TITLE(titleEl, ['ALL', ...ITEMS.map((c) => c.name)]);   // 제목 칸 너비 고정 (layout.js)
+  if (window.PM_TITLE_FOLLOW) window.PM_TITLE_FOLLOW(titleEl.closest('.list__head'), document.querySelector('.list__bar'));   // 제목 길이에 맞춰 탭이 따라 움직임 (layout.js)
 
   /* COLLABORATION 의 ALL: 협업 카드 (PLANT 목록의 식물 카드와 같은 모양) */
   const card = (c) => `<li class="card">

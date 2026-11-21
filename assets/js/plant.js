@@ -28,7 +28,7 @@
     .map((c) => `<a class="pill" href="${urlFor(c.id)}" data-cat="${c.id}">${esc(c.name)}</a>`)
     .join('');
   const pills = [...pillsEl.querySelectorAll('.pill')];
-  if (window.PM_FIT_TITLE) window.PM_FIT_TITLE(titleEl, ['ALL', ...CATS.map((c) => c.name)]);   // 제목 칸 너비 고정 (layout.js)
+  if (window.PM_TITLE_FOLLOW) window.PM_TITLE_FOLLOW(titleEl.closest('.list__head'), document.querySelector('.list__bar'));   // 제목 길이에 맞춰 탭이 따라 움직임 (layout.js)
 
   /* 상품 칸은 assets/js/shop.js 의 cardHtml (COLLABORATION 페이지와 같은 모양) */
   const card = (p, lang) => window.PM_SHOP.cardHtml(p, lang);

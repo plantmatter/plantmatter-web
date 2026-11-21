@@ -34,7 +34,7 @@
   const fromUrl = () => valid(new URLSearchParams(location.search).get('c'));
   const urlFor = (c) => (c === 'b2b' ? '/contact/' : `/contact/?c=${c}`);
   const panelOf = (c) => panels.find((p) => p.dataset.ctPanel === c);
-  if (window.PM_FIT_TITLE) window.PM_FIT_TITLE(titleEl, Object.values(TABS));   // 제목 칸 너비 고정 (layout.js)
+  if (window.PM_TITLE_FOLLOW) window.PM_TITLE_FOLLOW(headEl, document.querySelector('.ct__tabs'));   // 제목 길이에 맞춰 탭이 따라 움직임 (layout.js)
   let cur = fromUrl();
 
   const renderTabs = () => {

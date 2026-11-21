@@ -28,25 +28,30 @@
   window.PM_SYNC_URL();
 })();
 
-/* 제목 칸 너비 — PC 에서는 제목 바로 오른쪽에 분류 탭이 오는데, 탭을 누를 때마다 제목 길이(ALL ↔ Tropical Plant)가 달라져
-   탭이 옆으로 밀리지 않도록 제목 칸을 그 페이지에서 가장 긴 제목 너비로 고정 (CSS 변수 --title-w, style.css 의 .list__top · .ct__top)
-   PM_FIT_TITLE(제목 요소, [나올 수 있는 제목들]) — plant.js · group.js · contact.js 가 부름 */
-window.PM_FIT_TITLE = function (el, labels) {
-  if (!el || !el.parentNode || !labels || !labels.length) return;
-  var box = el.parentNode;
-  var fit = function () {
-    var probe = document.createElement(el.tagName);
-    probe.className = el.className;
-    probe.setAttribute('aria-hidden', 'true');
-    probe.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;width:auto;min-width:0;max-width:none;margin:0';
-    box.appendChild(probe);
-    var w = 0;
-    labels.forEach(function (t) { probe.textContent = t; w = Math.max(w, probe.getBoundingClientRect().width); });
-    box.removeChild(probe);
-    if (w) box.style.setProperty('--title-w', Math.ceil(w) + 'px');
-  };
-  fit();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);   // 글꼴을 다 받은 뒤 한 번 더
+/* PC: 분류 탭은 제목 바로 오른쪽 — 제목이 바뀌어 길이가 달라지면(ALL ↔ Tropical Plant) 탭이 새 자리로 부드럽게 미끄러짐
+   (제목 옆으로 넘어오는 애니메이션과 같은 시간 · 곡선). 모바일은 탭이 제목 아래라 움직일 일이 없음
+   PM_TITLE_FOLLOW(제목 칸, 탭 묶음) — plant.js · group.js · contact.js 가 부름 */
+window.PM_TITLE_FOLLOW = function (headEl, barEl) {
+  if (!headEl || !barEl || !window.ResizeObserver || !barEl.animate) return;
+  var reduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  var spot = function () { return { x: barEl.offsetLeft, y: barEl.offsetTop }; };   // 움직이는 중인 모양(transform)과 상관없는 실제 자리
+  var last = null, anim = null;
+  new ResizeObserver(function () {
+    var now = spot();
+    if (last && (now.x !== last.x || now.y !== last.y) && !reduce.matches) {
+      var dx = last.x - now.x, dy = last.y - now.y;
+      if (anim) {   // 아직 미끄러지는 중이면 지금 보이는 자리에서 이어서
+        var m = new DOMMatrixReadOnly(getComputedStyle(barEl).transform);
+        dx += m.m41; dy += m.m42;
+        anim.cancel();
+      }
+      anim = barEl.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'none' }],
+        { duration: 560, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+      anim.onfinish = function () { anim = null; };
+    }
+    last = now;
+  }).observe(headEl);
+  window.addEventListener('resize', function () { last = spot(); });   // 창 크기로 바뀐 자리는 그냥 기억만
 };
 
 /* 새 버전 확인 — 사이트를 새로 올린 직후에는 브라우저가 예전에 받아 둔 페이지를 잠깐(최대 10분) 그대로 다시 쓰는 일이 있어
