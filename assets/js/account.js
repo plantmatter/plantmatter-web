@@ -43,13 +43,6 @@
     return n && /^\/(?!\/)/.test(n) ? n : null;   // 이 사이트 안의 주소만
   };
   const val = (form, name) => (form.elements[name] ? form.elements[name].value.trim() : '');
-  /* '주민등록번호' 칸: 본인인증으로 받은 생년월일·성별로 900101-1****** 모양만 만듦 (실제 주민등록번호는 받지도 저장하지도 않음) */
-  const maskRrn = (birth, gender, foreigner) => {
-    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(birth || ''));
-    if (!m || (gender !== 'M' && gender !== 'F')) return '';
-    const base = Number(m[1]) >= 2000 ? (foreigner ? 7 : 3) : (foreigner ? 5 : 1);
-    return `${m[1].slice(2)}${m[2]}${m[3]}-${base + (gender === 'F' ? 1 : 0)}******`;
-  };
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   /* '코드 다시 받기': 너무 자주 보내지 않도록 60초 동안 잠금 */
   const resendButton = (btn, send) => btn.addEventListener('click', async () => {
@@ -198,7 +191,7 @@
         ? `<li class="addr-item addr-item--default" data-id="default">
           <div class="addr-item__text">
             <span class="addr-item__label">${esc(t('addrDefault'))}</span>
-            ${c.real_name || c.phone ? `<span>${esc([c.real_name, c.phone].filter(Boolean).join(' · '))}</span>` : ''}
+            ${c.phone ? `<span>${esc(c.phone)}</span>` : ''}
             <span>(${esc(c.zip)}) ${esc(c.addr)} ${esc(c.addr2 || '')}</span>
           </div>
           <div class="addr-item__act"><button class="link-btn" type="button" data-addr-edit>${esc(t('addrEdit'))}</button></div>
@@ -310,7 +303,7 @@
     PM.onLang(renderBook);
 
     const setHello = () => {
-      const n = customer && (customer.real_name || customer.name);   // 본인인증 실명이 있으면 실명, 없으면 아이디
+      const n = customer && customer.name;   // 아이디 (이름·주민등록번호는 받지 않음)
       helloEl.textContent = n ? t('hello', { name: n }) : t('helloNoName');
     };
     PM.onLang(setHello);
@@ -335,8 +328,6 @@
       firstBox.hidden = Boolean(customer);
       if (!customer) setOpen(infoForm, true);   // 웹을 처음 쓰는 회원: 정보·동의 입력이 필요하니 펼쳐 둠
       const verified = Boolean(customer && customer.identity_verified_at);
-      F.realname.value = (customer && customer.real_name) || '';
-      F.rrn.value = customer ? maskRrn(customer.birth_date, customer.gender, customer.foreigner) : '';
       F.phone.readOnly = verified;   // 본인인증한 번호는 고정 (서버에서도 고정)
       root.querySelector('[data-phone-hint]').textContent = verified ? t('phoneVerified') : '';
       nameInput.dataset.keep = (customer && customer.name) || '';
