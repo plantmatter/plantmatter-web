@@ -75,17 +75,34 @@
   - 제품 상세·장바구니 수량은 숫자를 직접 입력할 수도 있음 (최대 `shop.js`의 `maxQty`, 지금 9개). 한 개체뿐인 식물(`stock: 1`)은 1개까지만 담기고 입력 칸 없음. 품절·가격 미정이 되면 장바구니에 표시만 되고 주문에서 빠짐
   - 지금은 그 기기·브라우저에만 저장됨 (`localStorage` 'pm-cart'). 회원 기기 간 동기화는 아직 없음
 - 결제 결과: `/checkout/success/`, `/checkout/fail/`
-- 설정은 `assets/js/shop.js` 맨 위 (`clientKey`, `confirmUrl`, `shippingFee`, `freeShippingOver`, `maxQty`)
+- 설정은 `assets/js/shop.js` 맨 위 (`clientKey`, `payUrl`, `shippingFee`, `freeShippingOver`, `maxQty`)
+
+### 주문 · 결제 승인 (서버: Supabase Edge Function `shop-payment`)
+
+1. **주문하기**를 누르면 서버가 DB(`shop_products`)의 지금 가격 · 재고로 금액을 다시 계산하고 주문번호(`PM날짜…`)를 발급 → 주문을 `pending` 으로 저장
+   (화면의 금액과 다르면 '가격이나 재고가 바뀌었습니다' 안내. 재고보다 많으면 주문 불가)
+2. 그 주문번호 · 금액으로 토스 결제창이 열림
+3. 결제창이 끝나면 `/checkout/success/` 가 서버에 승인 요청 → 서버가 **재고를 잡고**(모자라면 승인하지 않아 결제되지 않음) 토스에 승인 → 주문 `paid`
+   - 가상계좌는 `waiting`(입금 대기) + 입금 계좌 · 기한 안내. 입금되면 토스 웹훅으로 `paid` (아래 4번 설정 필요)
+   - 승인에 실패하면 잡았던 재고를 되돌리고 주문은 `failed`
+4. 운영자에게 주문 알림 메일 (`ORDER_TO`, 없으면 `WHOLESALE_TO` = plantmatter.biz@gmail.com) · 관리자 페이지 **ORDERS** 탭에서 확인, 보낸 뒤 [발송 완료로 표시]
+- 표 · 재고 함수: `supabase/web10_orders.sql` (주문은 서버만 저장, 회원은 자기 주문만, 관리자는 모두 보기)
+- 함수 코드: `supabase/functions/shop-payment/index.ts` (배송비를 바꾸면 이 파일의 `SHIPPING` 도 같게)
+- **테스트 키(`test_…`)로 받은 주문은 `test` 표시가 붙고 재고는 확인만 하고 줄이지 않습니다** — 테스트하는 동안 실제 재고가 줄지 않음
+- 환불 · 결제 취소는 토스페이먼츠 상점관리자에서 (취소해도 사이트 재고는 자동으로 돌아오지 않으니 관리자 페이지에서 재고를 고쳐 주세요. 웹훅을 등록하면 자동)
 
 ### 지금은 테스트 결제 모드
 
-`shop.js`의 키가 토스페이먼츠 개발 문서의 공용 테스트 키(`test_gck_docs_…`)라서 결제 화면은 실제와 같지만 **돈이 나가지 않고 주문도 접수되지 않습니다.** 페이지에 '테스트 결제 모드' 표시가 나옵니다.
+`shop.js`의 키와 서버의 `TOSS_SECRET_KEY` 가 토스페이먼츠 개발 문서의 공용 테스트 키(`test_gck_docs_…` / `test_gsk_docs_…`)라서 결제 화면 · 승인은 실제와 같지만 **돈이 나가지 않습니다.** 주문은 '테스트' 표시로 저장되고 알림 메일 제목에 [테스트]가 붙습니다.
 
 ### 실제 판매를 시작하려면
 
 1. 사업자등록 · 통신판매업 신고
-2. 토스페이먼츠 가맹 계약(심사) → 상점관리자 > 개발 정보의 **결제위젯 연동 키** 중 클라이언트 키(`live_gck_…`)를 `shop.js`의 `clientKey`에 넣기
-3. **결제 승인 서버** 만들기 → 주소를 `confirmUrl`에 넣기. 결제창이 끝나면 이 서버가 시크릿 키로 토스페이먼츠 승인 API를 호출하고(10분 안에), 금액이 상품 가격과 맞는지 확인하고, 주문(주문자·배송지)을 저장합니다. 시크릿 키(`live_gsk_…`)는 **서버에만** 두고 사이트에는 절대 넣지 않습니다.
+2. 토스페이먼츠 가맹 계약(심사) → 상점관리자 > 개발 정보 > **결제위젯 연동 키**
+   - 클라이언트 키(`live_gck_…`) → `assets/js/shop.js` 의 `clientKey` (PC · 모바일 둘 다)
+   - 시크릿 키(`live_gsk_…`) → Supabase 대시보드 > Edge Functions > Secrets 의 **`TOSS_SECRET_KEY`** 값을 바꿈 (사이트에는 절대 넣지 않음)
+   - 두 키는 반드시 같은 짝(같은 상점의 결제위젯 키)이어야 함
+3. 상점관리자 > 개발 정보 > **웹훅**에 `https://qssrtzvipwvxcfszxomo.supabase.co/functions/v1/shop-payment?hook=toss` 등록 (가상계좌 입금 · 결제 취소 반영)
 4. 하단에 사업자 정보(상호, 대표자, 사업자등록번호, 통신판매업 신고번호, 주소, 연락처)와 이용약관 · 개인정보처리방침 · 배송/교환/환불 안내 추가 (전자상거래법, 토스페이먼츠 심사에 필요)
 
 ## 로그인 · 회원 (/account/)

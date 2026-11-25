@@ -14,7 +14,7 @@
   const OUT_W = 750;
   const OUT_H = 1000;
   const STATUS = { available: '판매 중', soldout: '품절', hidden: '숨김' };
-  const TABS = { products: 'PRODUCTS', b2b: 'B2B', collab: 'COLLAB' };
+  const TABS = { products: 'PRODUCTS', orders: 'ORDERS', b2b: 'B2B', collab: 'COLLAB' };
   const B2B_TYPES = { shop: '식물 매장·꽃집', space: '카페·쇼룸 등 공간', landscape: '조경·인테리어', online: '온라인 판매', other: '기타' };
 
   const $ = (sel, el = document) => el.querySelector(sel);
@@ -59,6 +59,7 @@
     document.querySelectorAll('[data-adm-panel]').forEach((p) => { p.hidden = p.dataset.admPanel !== tab; });
     titleEl.textContent = TABS[tab];
     document.title = `ADMIN · ${TABS[tab]} — PLANT MATTER`;
+    if (tab === 'orders') loadOrders();
     if (tab === 'b2b') loadB2B();
     if (tab === 'collab') loadCollab();
   };
@@ -314,6 +315,51 @@
     PM.toast('삭제했습니다');
     setEditor(false);
     loadProducts();
+  });
+
+  /* ---------- 주문 (shop_orders — 결제 서버 'shop-payment' 가 저장) ---------- */
+  const ordersEl = $('[data-adm-orders]');
+  const ORDER_STATUS = { paid: '결제 완료', waiting: '입금 대기', shipped: '발송 완료', canceled: '취소' };
+  const loadOrders = async () => {
+    ordersEl.innerHTML = '<p class="adm__empty">불러오는 중…</p>';
+    const { data, error } = await db.from('shop_orders').select('*').in('status', Object.keys(ORDER_STATUS)).order('created_at', { ascending: false }).limit(200);
+    if (error) { ordersEl.innerHTML = `<p class="adm__err">불러오지 못했습니다. ${esc(errText(error))}</p>`; return; }
+    ordersEl.innerHTML = data.length ? `<ul class="adm-cards">${data.map((o) => {
+      const b = o.buyer || {};
+      const s = o.ship || {};
+      const va = o.pay_info && o.pay_info.virtualAccount;
+      return `<li class="adm-card" data-id="${esc(o.id)}">
+        <p class="adm-card__top"><span>${esc(when(o.created_at))}</span>
+          <span class="adm-status adm-status--${esc(o.status)}">${esc(ORDER_STATUS[o.status] || o.status)}</span>
+          ${o.test ? '<span class="adm-status adm-status--test">테스트</span>' : ''}
+          ${o.email_error ? '<span class="adm-card__warn">메일 발송 실패</span>' : ''}</p>
+        <p class="adm-card__title">${esc(o.order_name)} · ${esc(won(o.amount))}</p>
+        <dl class="adm-card__dl">
+          <div><dt>주문번호</dt><dd>${esc(o.id)}</dd></div>
+          <div><dt>상품</dt><dd class="adm-card__msg">${(o.items || []).map((i) => `${esc(i.name)} × ${esc(i.qty)}  ${esc(won(i.price * i.qty))}`).join('\n')}${o.shipping ? `\n배송비 ${esc(won(o.shipping))}` : ''}</dd></div>
+          <div><dt>결제 수단</dt><dd>${esc(o.method || '—')}${o.receipt_url && /^https:\/\//.test(o.receipt_url) ? ` · <a href="${esc(o.receipt_url)}" target="_blank" rel="noopener">영수증</a>` : ''}</dd></div>
+          ${va ? `<div><dt>입금 계좌</dt><dd>${esc(va.bank)} ${esc(va.accountNumber)}${va.dueDate ? ` (기한 ${esc(when(va.dueDate))})` : ''}</dd></div>` : ''}
+          <div><dt>주문자</dt><dd>${esc(b.name || '')} · <a href="tel:${esc(b.phone || '')}">${esc(phoneFmt(b.phone))}</a><br><a href="mailto:${esc(b.email || '')}">${esc(b.email || '')}</a>${o.user_id ? ' · 회원' : ' · 비회원'}</dd></div>
+          <div><dt>받는 분</dt><dd>${esc(s.name || '')} · <a href="tel:${esc(s.phone || '')}">${esc(phoneFmt(s.phone))}</a></dd></div>
+          <div><dt>주소</dt><dd>(${esc(s.zip || '')}) ${esc(s.addr || '')} ${esc(s.addr2 || '')}</dd></div>
+          ${s.memo ? `<div><dt>배송 메모</dt><dd class="adm-card__msg">${esc(s.memo)}</dd></div>` : ''}
+        </dl>
+        <div class="adm-card__btns">
+          ${o.status === 'paid' ? '<button class="btn-line" type="button" data-ship="shipped">발송 완료로 표시</button>' : ''}
+          ${o.status === 'shipped' ? '<button class="btn-line" type="button" data-ship="paid">발송 전으로 되돌리기</button>' : ''}
+        </div>
+      </li>`;
+    }).join('')}</ul>` : '<p class="adm__empty">아직 주문이 없습니다.</p>';
+  };
+  ordersEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-ship]');
+    const li = e.target.closest('.adm-card');
+    if (!btn || !li) return;
+    btn.disabled = true;
+    const { error } = await db.from('shop_orders').update({ status: btn.dataset.ship, updated_at: new Date().toISOString() }).eq('id', li.dataset.id);
+    if (error) { btn.disabled = false; PM.toast(`바꾸지 못했습니다: ${errText(error)}`); return; }
+    PM.toast(btn.dataset.ship === 'shipped' ? '발송 완료로 표시했습니다.' : '발송 전으로 되돌렸습니다.');
+    loadOrders();
   });
 
   /* ---------- B2B 도매 문의 ---------- */

@@ -62,11 +62,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://qssrtzvipwvxcfszxomo.supabase.co" crossorigin>   <!-- 제품 목록(Supabase)을 빨리 읽도록 미리 연결 -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,700;0,800;1,300;1,700&family=Noto+Sans+KR:wght@300;700&family=Noto+Sans+JP:wght@300;700&display=swap">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261125a">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261125b">
 </head>
 <body class="page-sub page-adm">
   <!-- 상단 바 · PLANT 메뉴 (공통: assets/js/layout.js) -->
-  <script src="/assets/js/layout.js?v=20261125a"></script>
+  <script src="/assets/js/layout.js?v=20261125b"></script>
   <script>PM_LAYOUT.top()</script>
 
   <!-- ───────── 관리자 페이지 — assets/js/admin.js (관리자 명단 public.app_admins 의 계정만) ───────── -->
@@ -79,6 +79,7 @@
       <div class="list__bar">
         <nav class="pills" aria-label="ADMIN">
           <a class="pill is-active" href="/admin/" data-adm-tab="products" aria-current="page">PRODUCTS</a>
+          <a class="pill" href="/admin/?t=orders" data-adm-tab="orders">ORDERS</a>
           <a class="pill" href="/admin/?t=b2b" data-adm-tab="b2b">B2B</a>
           <a class="pill" href="/admin/?t=collab" data-adm-tab="collab">COLLAB</a>
         </nav>
@@ -87,6 +88,10 @@
         <div class="adm__tools"><p class="list__count" data-adm-count></p><button class="btn-buy adm__new" type="button" data-adm-new>+ 새 제품</button></div>
         <p class="adm__note">가격 · 재고 · 상태를 고치고 그 줄의 [저장]을 누르면 사이트에 바로 반영됩니다. 재고를 0 으로 두면 SOLD OUT, 비우면 수량을 관리하지 않습니다. 숨김은 사이트에 보이지 않습니다.</p>
         <div data-adm-products></div>
+      </section>
+      <section data-adm-panel="orders" hidden>
+        <p class="adm__note">결제가 끝난 주문입니다 (결제창에서 그만둔 주문은 보이지 않음). 보낸 뒤 [발송 완료]를 눌러 표시해 두세요. 환불 · 결제 취소는 토스페이먼츠 상점관리자에서 합니다.</p>
+        <div data-adm-orders></div>
       </section>
       <section data-adm-panel="b2b" hidden><div data-adm-b2b></div></section>
       <section data-adm-panel="collab" hidden><div data-adm-collab></div></section>
@@ -137,13 +142,13 @@
   <!-- 하단 · 검색 · 언어 창 (공통: assets/js/layout.js) -->
   <script>PM_LAYOUT.bottom()</script>
 
-  <script src="/assets/js/i18n.js?v=20261125a" defer></script>
-  <script src="/assets/js/main.js?v=20261125a" defer></script>
-  <script src="/assets/js/products.js?v=20261125a" defer></script>
-  <script src="/assets/js/shop.js?v=20261125a" defer></script>
-  <script src="/assets/js/cart.js?v=20261125a" defer></script>
+  <script src="/assets/js/i18n.js?v=20261125b" defer></script>
+  <script src="/assets/js/main.js?v=20261125b" defer></script>
+  <script src="/assets/js/products.js?v=20261125b" defer></script>
+  <script src="/assets/js/shop.js?v=20261125b" defer></script>
+  <script src="/assets/js/cart.js?v=20261125b" defer></script>
   <script src="/assets/vendor/supabase-2.118.0.js" defer></script>
-  <script src="/assets/js/auth.js?v=20261125a" defer></script>
-  <script src="/assets/js/admin.js?v=20261125a" defer></script>
+  <script src="/assets/js/auth.js?v=20261125b" defer></script>
+  <script src="/assets/js/admin.js?v=20261125b" defer></script>
 </body>
 </html>

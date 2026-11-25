@@ -227,7 +227,7 @@
     const same = sameBox.checked;
     const buyer = { name: F.buyerName.value.trim(), phone: F.buyerPhone.value, email: F.buyerEmail.value.trim() };
     const order = {
-      orderId: S.newOrderId(), orderName, amount, subtotal, shipping, fromCart,
+      orderId: '', orderName, amount, subtotal, shipping, fromCart,
       items: lines.map(({ p, qty }) => ({ id: p.id, name: S.nameOf(p, 'ko'), price: p.price, qty })),
       buyer,
       ship: { same, name: same ? buyer.name : F.recvName.value.trim(), phone: same ? buyer.phone : F.recvPhone.value,
@@ -235,12 +235,39 @@
       member: (A && A.user() && A.user().id) || null,
       lang: PM.getLang(), createdAt: new Date().toISOString(),
     };
-    S.saveOrder(order);
     payBtn.disabled = true;
+    /* 1) 서버에 주문 만들기 — 금액은 서버가 DB 가격으로 다시 계산하고 주문번호를 정함 */
+    let made;
+    try {
+      const token = A && A.accessToken ? await A.accessToken() : null;
+      made = await S.payCall({ action: 'create', items: order.items.map(({ id, qty }) => ({ id, qty })), buyer, ship: order.ship, lang: order.lang }, token);
+    } catch (err) {
+      console.error(err);
+      payBtn.disabled = false;
+      showPayErr(t('payError', { msg: '' }));
+      return;
+    }
+    if (!made.ok) {
+      payBtn.disabled = false;
+      const d = made.data || {};
+      if (d.error === 'soldout') {
+        const p = S.find(d.id);
+        showPayErr(t('paySoldout', { name: p ? S.nameOf(p, PM.getLang()) : '' }));
+      } else if (d.error === 'invalid') {
+        (d.fields || []).forEach((n) => { if (F[n] && check.setErr) check.setErr(F[n], 'errRequired'); });
+        showPayErr(t('payInvalid'));
+      } else showPayErr(d.error === 'rate' ? t('payRate') : t('payError', { msg: '' }));
+      return;
+    }
+    if (made.data.amount !== amount) { payBtn.disabled = false; showPayErr(t('payPriceChanged')); return; }   // 화면의 가격이 예전 것
+    order.orderId = made.data.orderId;
+    order.orderName = made.data.orderName;
+    S.saveOrder(order);
+    /* 2) 토스 결제창 */
     try {
       await widgets.requestPayment({
         orderId: order.orderId,
-        orderName,
+        orderName: order.orderName,
         successUrl: `${location.origin}/checkout/success/`,
         failUrl: `${location.origin}/checkout/fail/`,
         customerName: buyer.name,

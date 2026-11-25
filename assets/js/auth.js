@@ -69,6 +69,11 @@
     },
     user: () => user,
     onChange: (fn) => listeners.push(fn),
+    /* 로그인 토큰 (주문을 회원 주문으로 저장할 때 결제 서버에 함께 보냄) */
+    async accessToken() {
+      if (!client) return null;
+      try { const { data } = await client.auth.getSession(); return (data.session && data.session.access_token) || null; } catch (e) { return null; }
+    },
 
     async signIn(email, password) {
       const { data, error } = await need().auth.signInWithPassword({ email, password });

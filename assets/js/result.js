@@ -1,7 +1,7 @@
 /* PLANT MATTER — 결제 결과 (/checkout/success/ · /checkout/fail/)
    토스페이먼츠 결제창이 끝나면 이 페이지로 돌아옵니다.
-   - 성공: ?paymentKey=…&orderId=…&amount=… → 금액을 확인하고, 결제 승인 서버(shop.js 의 confirmUrl)에 승인을 요청
-           (승인 서버가 없고 테스트 키이면 '테스트 결제 완료' 안내만 보여 줌)
+   - 성공: ?paymentKey=…&orderId=…&amount=… → 결제 서버(shop.js 의 payUrl, Edge Function 'shop-payment')에 승인 요청
+           서버가 재고를 확인하고 토스에 승인 → 주문 완료 (가상계좌는 '입금 대기' + 입금 계좌 안내)
    - 실패/취소: ?code=…&message=…&orderId=…
    장바구니에서 한 주문이면 결제가 끝난 뒤 주문한 식물을 장바구니에서 뺍니다 (assets/js/cart.js). */
 (() => {
@@ -18,18 +18,28 @@
   const orderId = q.get('orderId') || '';
   const mine = order && order.orderId === orderId ? order : null;
 
-  /* state: confirming | done | test | error | fail */
+  /* state: confirming | done | waiting | test | error | fail */
   let state = 'fail';
   let detail = '';
+  let server = mine && mine.server ? mine.server : null;   // 서버가 돌려준 주문 요약
 
+  const kdate = (iso) => { try { return new Date(iso).toLocaleString(PM.getLang() === 'ko' ? 'ko-KR' : PM.getLang() === 'ja' ? 'ja-JP' : 'en-US', { timeZone: 'Asia/Seoul', dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return iso; } };
   const info = () => {
     const rows = [];
     if (orderId) rows.push([t('orderNo'), esc(orderId)]);
-    if (mine) {
-      rows.push([t('orderItems'), esc(mine.orderName)]);
-      rows.push([t('paidAmount'), esc(won(mine.amount))]);
-      const s = mine.ship || {};
-      if (state !== 'fail' && s.addr) rows.push([t('shipTo'), `${esc(s.name)} · ${esc(s.phone)}<br>(${esc(s.zip)}) ${esc(s.addr)} ${esc(s.addr2 || '')}`]);
+    const o = server || mine;
+    if (o) {
+      rows.push([t('orderItems'), esc(o.orderName)]);
+      rows.push([t('paidAmount'), esc(won(o.amount))]);
+      if (server && server.method) rows.push([t('payMethod'), esc(server.method)]);
+      const va = server && server.virtualAccount;
+      if (state === 'waiting' && va) {
+        rows.push([t('vaAccount'), `${esc(va.bank)} ${esc(va.accountNumber)}${va.holder ? `<br>${esc(va.holder)}` : ''}`]);
+        if (va.dueDate) rows.push([t('vaDue'), esc(kdate(va.dueDate))]);
+      }
+      const s = (server && server.ship) || (mine && mine.ship) || {};
+      if (state !== 'fail' && state !== 'error' && s.addr) rows.push([t('shipTo'), `${esc(s.name)} · ${esc(s.phone)}<br>(${esc(s.zip)}) ${esc(s.addr)} ${esc(s.addr2 || '')}`]);
+      if (server && server.receiptUrl && /^https:\/\//.test(server.receiptUrl)) rows.push(['', `<a class="res__receipt" href="${esc(server.receiptUrl)}" target="_blank" rel="noopener">${esc(t('receiptView'))}</a>`]);
     } else if (q.get('amount')) {
       rows.push([t('paidAmount'), esc(won(Number(q.get('amount'))))]);
     }
@@ -37,10 +47,11 @@
   };
 
   const render = () => {
-    const title = { confirming: t('confirming'), done: t('doneTitle'), test: t('testDoneTitle'), error: t('failTitle'), fail: t('failTitle') }[state];
+    const title = { confirming: t('confirming'), done: t('doneTitle'), waiting: t('waitingTitle'), test: t('testDoneTitle'), error: t('failTitle'), fail: t('failTitle') }[state];
     document.title = `${title} — PLANT MATTER`;
     let text = '';
-    if (state === 'test') text = t('testDoneText');
+    if (state === 'test' || ((state === 'done' || state === 'waiting') && server && server.test)) text = t('testDoneText');
+    if (state === 'waiting') text = [t('waitingText'), text].filter(Boolean).join(' ');
     if (state === 'error' || state === 'fail') text = detail;
     const retry = !mine ? '' : mine.fromCart ? '/checkout/?from=cart'
       : mine.items && mine.items[0] ? `/checkout/?id=${encodeURIComponent(mine.items[0].id)}&qty=${mine.items[0].qty}` : '';
@@ -49,7 +60,7 @@
         <a class="btn-line" href="/plant/">${esc(t('continueShopping'))}</a>
       </div>`;
     root.innerHTML = `
-      <p class="res__eyebrow">${state === 'done' || state === 'test' ? 'THANK YOU' : 'ORDER'}</p>
+      <p class="res__eyebrow">${state === 'done' || state === 'test' || state === 'waiting' ? 'THANK YOU' : 'ORDER'}</p>
       <h1 class="res__title">${esc(title)}</h1>
       ${text ? `<p class="res__text">${esc(text)}</p>` : ''}
       ${S.isTest() && state !== 'test' ? `<p class="co__test">${esc(t('testMode'))}</p>` : ''}
@@ -76,30 +87,26 @@
   const clearCart = () => {
     if (mine && mine.fromCart && window.PM_CART && Array.isArray(mine.items)) window.PM_CART.remove(mine.items.map((i) => i.id));
   };
-  if (mine && mine.confirmed) { setState(mine.test ? 'test' : 'done'); return; }   // 새로고침: 다시 승인하지 않음 (장바구니도 이미 비움)
+  if (mine && mine.confirmed && server) { setState(server.status === 'waiting' ? 'waiting' : 'done'); return; }   // 새로고침: 다시 승인하지 않음 (장바구니도 이미 비움)
 
-  const finish = (test) => {
-    if (mine) S.saveOrder({ ...mine, confirmed: true, test, paymentKey });
+  const finish = (data) => {
+    server = data;
+    if (mine) S.saveOrder({ ...mine, confirmed: true, server: data, paymentKey });
     clearCart();
-    setState(test ? 'test' : 'done');
+    setState(data.status === 'waiting' ? 'waiting' : 'done');
   };
 
-  if (!S.config.confirmUrl) {
-    if (S.isTest()) finish(true);
-    else setState('error', t('noServer'));
-    return;
-  }
+  if (!S.config.payUrl) { setState('error', t('noServer')); return; }
 
   setState('confirming');
-  fetch(S.config.confirmUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paymentKey, orderId, amount, order: mine }),
-  })
-    .then(async (res) => {
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
-      finish(false);
+  S.payCall({ action: 'confirm', paymentKey, orderId, amount })
+    .then(({ ok, data }) => {
+      if (ok) { finish(data); return; }
+      const d = data || {};
+      if (d.error === 'soldout') setState('error', t('soldoutNoCharge'));
+      else if (d.error === 'amount') setState('error', t('amountMismatch'));
+      else if (d.error === 'state') setState('error', t('orderState'));
+      else setState('error', t('confirmFail', { msg: d.message || d.code || d.error || '' }));
     })
     .catch((err) => setState('error', t('confirmFail', { msg: err.message })));
 })();
