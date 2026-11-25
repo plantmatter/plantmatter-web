@@ -329,10 +329,10 @@
       const s = o.ship || {};
       const va = o.pay_info && o.pay_info.virtualAccount;
       return `<li class="adm-card" data-id="${esc(o.id)}">
-        <p class="adm-card__top"><span>${esc(when(o.created_at))}</span>
+        <p class="adm-card__top"><span>${esc(when(o.created_at))}</span><span class="adm-card__tags">
           <span class="adm-status adm-status--${esc(o.status)}">${esc(ORDER_STATUS[o.status] || o.status)}</span>
           ${o.test ? '<span class="adm-status adm-status--test">테스트</span>' : ''}
-          ${o.email_error ? '<span class="adm-card__warn">메일 발송 실패</span>' : ''}</p>
+          ${o.email_error ? '<span class="adm-card__warn">메일 발송 실패</span>' : ''}</span></p>
         <p class="adm-card__title">${esc(o.order_name)} · ${esc(won(o.amount))}</p>
         <dl class="adm-card__dl">
           <div><dt>주문번호</dt><dd>${esc(o.id)}</dd></div>
