@@ -149,8 +149,8 @@ window.PM_TITLE_FOLLOW = function (headEl, barEl) {
       <a href="/plant/" data-label="PLANT" data-menu="plant"${plantHere} aria-controls="menu-plant" aria-expanded="false">PLANT</a>
       <a href="/products/" data-label="PRODUCT" data-menu="product"${productHere} aria-controls="menu-product" aria-expanded="false">PRODUCT</a>
       <a href="/collaboration/" data-label="COLLAB" data-menu="collab"${collabHere} aria-controls="menu-collab" aria-expanded="false">COLLAB</a>
-      <a href="/contact/" data-label="CONTACT"${contactHere}>CONTACT</a>
       <a href="/matter/" data-label="MATTER"${matterMenu}${matterHere}>MATTER</a>
+      <a href="/contact/" data-label="CONTACT"${contactHere}>CONTACT</a>
     </nav>
 
     <div class="gnb__util">
