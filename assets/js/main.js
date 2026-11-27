@@ -213,6 +213,22 @@
     clone.setAttribute('aria-hidden', 'true');
     clone.querySelector('img')?.removeAttribute('fetchpriority');
     track.appendChild(clone);
+    /* 영상 칸: 보이는 동안만 처음부터 재생 (소리 없음, 반복). 다른 칸으로 가면 멈춤.
+       '동작 줄이기' 설정을 켠 기기는 첫 장면(poster)만 보여 줌 */
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const videoAt = (i) => (track.children[i] ? track.children[i].querySelector('video') : null);
+    const syncVideos = (i, restart = true) => {
+      [...track.children].forEach((s, j) => {
+        const v = s.querySelector('video');
+        if (!v) return;
+        if (j === i && !still.matches && !document.hidden) {
+          v.muted = true;
+          if (restart) { try { v.currentTime = 0; } catch (e) { /* 아직 못 읽음 */ } }
+          const pr = v.play();
+          if (pr && pr.catch) pr.catch(() => {});
+        } else v.pause();
+      });
+    };
     hero.style.setProperty('--interval', `${SLIDE_INTERVAL}ms`);
 
     let index = 0;
@@ -243,13 +259,20 @@
       index = target;
       setPos(index, true);
       activate(index % count);
+      syncVideos(index);
     };
     const next = () => goTo(index + 1);
     const prev = () => goTo(index - 1);
     track.addEventListener('transitionend', (e) => {
       if (e.target !== track) return;
       busy = false;
-      if (index === count) { index = 0; setPos(0, false); }   /* 복사본에 도착하면 진짜 첫 장으로 조용히 교체 */
+      if (index === count) {   /* 복사본에 도착하면 진짜 첫 장으로 조용히 교체 (영상이면 이어서 재생) */
+        const cv = videoAt(count);
+        const rv = videoAt(0);
+        index = 0;
+        setPos(0, false);
+        if (cv && rv) { try { rv.currentTime = cv.currentTime; } catch (e) { /* 무시 */ } syncVideos(0, false); }
+      }
     });
 
     bars.forEach((b, k) => {
@@ -276,9 +299,10 @@
     }, { passive: true });
 
     /* 다른 탭을 보고 있을 때는 멈춤 */
-    document.addEventListener('visibilitychange', () => hero.classList.toggle('is-paused', document.hidden));
+    document.addEventListener('visibilitychange', () => { hero.classList.toggle('is-paused', document.hidden); syncVideos(index, false); });
 
     setPos(0, false);
     activate(0);
+    syncVideos(0);
   }
 })();

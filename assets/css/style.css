@@ -111,6 +111,7 @@ button, input, select { font: inherit; color: inherit; }
 .slide { flex: 0 0 100%; height: 100%; margin: 0; }
 .slide picture, .slide img { display: block; width: 100%; height: 100%; }
 .slide img { object-fit: cover; object-position: var(--fx, 50%) 50%; }
+.slide video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--fx, 50%) 50%; }   /* 영상 칸 (사진과 같게 꽉 채움) */
 @keyframes hero-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* 아래쪽 가는 막대: 지금 사진이 머무는 시간만큼 채워짐 · 누르면 그 사진으로
